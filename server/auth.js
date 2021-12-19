@@ -6,9 +6,7 @@ const codeGenerator = require('./codeGenerator.js');
 const mailOptions = require('./mailOptions');
 const express = require('express');
 const cookieParser = require('cookie-parser');
-
 const session = require('express-session');
-
 const router = express.Router();
 router.use(cookieParser());
 router.use(session({
@@ -17,7 +15,6 @@ router.use(session({
     saveUninitialized: true,
     cookie: { maxAge: parseInt(process.env.COOKIE_MAXAGE) }
 }));
-
 const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
     service: process.env.EMAIL_SERVICE,
@@ -26,7 +23,6 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASSWD
     }
 });
-
 
 const sqlite3 = require('sqlite3').verbose();
 const con = new sqlite3.Database('./db/test.db', (err) => {
@@ -44,25 +40,21 @@ con.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, login TEXT NOT
 });
 
 
-
 //rejestracja req = {login : string, password : string, email : string}
 router.post('/signup', (req, res) => {
     //sprawdzenie, czy mail nie jest już w uzyciu
     con.get(`SELECT "x" FROM users WHERE email = "${req.body.email}";`, (err, row) => {
         if(err){
-            res.sendStatus(500);
-            return;
+            return res.sendStatus(500);
         }
         if(row){
             //email jest juz w uzyciu
-            res.status(409).json({msg: 'email already in use'});
-            return;
+            return res.status(409).json({msg: 'email already in use'});
         }
         //email jest wolny, zaszyfruj haslo
         bcrypt.hash(req.body.password, 10, (err, hash) => {
             if(err){
-                res.sendStatus(500);
-                return;
+                return res.sendStatus(500);
             }
 
             //wygeneruj kod aktywacyjny
@@ -75,16 +67,14 @@ router.post('/signup', (req, res) => {
             con.run(`INSERT INTO users (login, password, email, activation_code, is_activated) VALUES 
                     ("${req.body.login}", "${hash}", "${req.body.email}", "${code}", 0);`, (err, result) => {
                 if(err){
-                    res.sendStatus(500);
-                    return;
+                    return res.sendStatus(500);
                 }
 
                 //wyslij maila z kodem aktywacyjnym
                 transporter.sendMail(mailOpt, (err, info) => {
                     if (err) {
                         //blad przy wysylaniu maila
-                        res.sendStatus(500);
-                        return
+                        return res.sendStatus(500);
                     }
                     res.status(201).json({msg: 'account created'});
                 });
@@ -100,18 +90,15 @@ router.patch('/activate', (req, res) => {
     //pobierz informacje o koncie z bazy
     con.get(`SELECT activation_code, is_activated FROM users WHERE email = "${req.body.email}";`, (err, row) => {
         if(err){
-            res.sendStatus(500);
-            return;
+            return res.sendStatus(500);
         }
         if(!row){
             //konto nie istnieje
-            res.status(404).json({msg: 'account not found'});
-            return;
+            return res.status(404).json({msg: 'account not found'});
         }
         if(row.is_activated != 0){
             //konto zostalo juz aktywowane
-            res.status(409).json({msg: 'account already active'});
-            return;
+            return res.status(409).json({msg: 'account already active'});
         }
         if(req.body.code != row.activation_code){
             //kod aktywacyjny sie nie zgadza, wygeneruj nowy kod
@@ -119,8 +106,7 @@ router.patch('/activate', (req, res) => {
             //zaktualizuj kod w bazie danych
             con.run(`UPDATE users SET activation_code = "${code}" WHERE email = "${req.body.email}";`, (err, resp) => {
                 if(err){
-                    res.sendStatus(500);
-                    return;
+                    return res.sendStatus(500);
                 }
                 //informacje potrzebne do wyslania maila
                 let mailOpt = mailOptions(process.env.EMAIL_ADDR, req.body.email, 'kod aktywacyjny', `twój kod aktywacyjny dla twojego konta to ${code}.`);
@@ -128,12 +114,10 @@ router.patch('/activate', (req, res) => {
                 transporter.sendMail(mailOpt, (err, info) => {
                     if(err){
                         console.log(err);
-                        res.sendStatus(500);
-                        return;
+                        return res.sendStatus(500);
                     }
                     //wyslij informacje o niepoprawnym kodzie aktywacyjnym
-                    res.status(406).json({msg: 'invalid code'});
-                    return;
+                    return res.status(406).json({msg: 'invalid code'});
                 });
             });
         }
@@ -142,8 +126,7 @@ router.patch('/activate', (req, res) => {
             con.run(`UPDATE users SET is_activated = 1 WHERE email = "${req.body.email}";`, (err, resp) => {
                 if(err){
                     console.log(err);
-                    res.sendStatus(500);
-                    return;
+                    return res.sendStatus(500);
                 }
                 res.status(200).json({msg: 'account activated'});
             });
@@ -156,28 +139,23 @@ router.get('/login', (req, res) => {
     //pobranie informacji o koncie z bazy danych
     con.get(`SELECT login, password, is_activated FROM users WHERE email = "${req.body.email}";`, (err, row) => {
         if(err){
-            res.sendStatus(500);
-            return;
+            return res.sendStatus(500);
         }
         if(!row){
             //konto nie istnieje
-            res.status(404).json({msg: 'account not found'});
-            return;
+            return res.status(404).json({msg: 'account not found'});
         }
         if(row.is_activated != 1){
             //konto nie zostalo aktywowane
-            res.status(403).json({msg: 'account not active'});
-            return;
+            return res.status(403).json({msg: 'account not active'});
         }
         bcrypt.compare(req.body.password, row.password, (err, match) => {
             if(err){
-                res.sendStatus(500);
-                return;
+                return res.sendStatus(500);
             }
             if(!match){
                 //niepoprawne haslo
-                res.status(200).json({msg: 'invalid password'});
-                return;
+                return res.status(200).json({msg: 'invalid password'});
             }
             // haslo sie zgadza
             req.session.login = row.login;
