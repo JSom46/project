@@ -5,16 +5,12 @@ const bcrypt = require('bcrypt');
 const codeGenerator = require('./codeGenerator.js');
 const mailOptions = require('./mailOptions');
 const express = require('express');
-const cookieParser = require('cookie-parser');
-const session = require('express-session');
+const googleAuthURL = require('./googleAuth.js').getGoogleAuthURL;
+const getGoogleUser = require('./googleAuth.js').getGoogleUser;
+const passwordValidator = require('./passwordValidator.js');
+
 const router = express.Router();
-router.use(cookieParser());
-router.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-    cookie: { maxAge: parseInt(process.env.COOKIE_MAXAGE) }
-}));
+
 const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
     service: process.env.EMAIL_SERVICE,
@@ -25,16 +21,16 @@ const transporter = nodemailer.createTransport({
 });
 
 const sqlite3 = require('sqlite3').verbose();
-const con = new sqlite3.Database('./db/test.db', (err) => {
+const con = new sqlite3.Database('./db/serverdb.db', (err) => {
     if(err){
 		console.log('db connecting error!');
 		throw err;
 	}
 	console.log('connected succesfully to database!');
 });
-con.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL, email TEXT UNIQUE NOT NULL, activation_code TEXT, is_activated INTEGER);', (err, res) => {
+con.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL, email TEXT UNIQUE NOT NULL, activation_code TEXT, is_activated INTEGER, is_native INTEGER);', (err, res) => {
     if(err){
-        console.log(err.name + "|" + err.message);
+        console.log(err.name + " | " + err.message);
         throw err;
     }
 });
@@ -43,15 +39,20 @@ con.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, login TEXT NOT
 //rejestracja req = {login : string, password : string, email : string}
 router.post('/signup', (req, res) => {
     //sprawdzenie, czy mail nie jest już w uzyciu
-    con.get(`SELECT "x" FROM users WHERE email = "${req.body.email}";`, (err, row) => {
+    con.get(`SELECT "x" FROM users WHERE email = ?;`, req.body.email, (err, row) => {
         if(err){
             return res.sendStatus(500);
         }
         if(row){
             //email jest juz w uzyciu
-            return res.status(409).json({msg: 'email already in use'});
+            return res.status(400).json({msg: 'email already in use'});
         }
-        //email jest wolny, zaszyfruj haslo
+        //email jest wolny, sprawdz zlozonosc hasla
+        const passwdValidation = passwordValidator(req.body.password);
+        if(!passwdValidation.isValid){
+            return res.status(400).json({msg: 'password too weak', err: passwdValidation.errors});
+        }
+        //haslo jest dostatecznie silne, zaszyfruj je
         bcrypt.hash(req.body.password, 10, (err, hash) => {
             if(err){
                 return res.sendStatus(500);
@@ -64,8 +65,8 @@ router.post('/signup', (req, res) => {
             let mailOpt = mailOptions(process.env.EMAIL_ADDR, req.body.email, 'kod aktywacyjny', `twój kod aktywacyjny dla konta ${req.body.login} to ${code}.`);
 
             //dodaj usera do bazy
-            con.run(`INSERT INTO users (login, password, email, activation_code, is_activated) VALUES 
-                    ("${req.body.login}", "${hash}", "${req.body.email}", "${code}", 0);`, (err, result) => {
+            con.run(`INSERT INTO users (login, password, email, activation_code, is_activated, is_native) 
+            VALUES (?, ?, ?, ?, 0, 1);`, req.body.login, hash, req.body.email, code, (err, result) => {
                 if(err){
                     return res.sendStatus(500);
                 }
@@ -88,23 +89,23 @@ router.post('/signup', (req, res) => {
 //aktywacja konta req = {email : string, code : string}
 router.patch('/activate', (req, res) => {
     //pobierz informacje o koncie z bazy
-    con.get(`SELECT activation_code, is_activated FROM users WHERE email = "${req.body.email}";`, (err, row) => {
+    con.get(`SELECT activation_code, is_activated, is_native FROM users WHERE email = ?;`, req.body.email, (err, row) => {
         if(err){
             return res.sendStatus(500);
         }
         if(!row){
             //konto nie istnieje
-            return res.status(404).json({msg: 'account not found'});
+            return res.status(400).json({msg: 'account not found'});
         }
         if(row.is_activated != 0){
             //konto zostalo juz aktywowane
-            return res.status(409).json({msg: 'account already active'});
+            return res.status(400).json({msg: 'account already active'});
         }
         if(req.body.code != row.activation_code){
             //kod aktywacyjny sie nie zgadza, wygeneruj nowy kod
             let code = codeGenerator(5);
             //zaktualizuj kod w bazie danych
-            con.run(`UPDATE users SET activation_code = "${code}" WHERE email = "${req.body.email}";`, (err, resp) => {
+            con.run(`UPDATE users SET activation_code = ? WHERE email = ?;`, code, req.body.email, (err, resp) => {
                 if(err){
                     return res.sendStatus(500);
                 }
@@ -117,13 +118,13 @@ router.patch('/activate', (req, res) => {
                         return res.sendStatus(500);
                     }
                     //wyslij informacje o niepoprawnym kodzie aktywacyjnym
-                    return res.status(406).json({msg: 'invalid code'});
+                    return res.status(400).json({msg: 'invalid code'});
                 });
             });
         }
         else{
             //kod sie zgadza, aktyywuj konto
-            con.run(`UPDATE users SET is_activated = 1 WHERE email = "${req.body.email}";`, (err, resp) => {
+            con.run(`UPDATE users SET is_activated = 1 WHERE email = ?`, req.body.email, (err, resp) => {
                 if(err){
                     console.log(err);
                     return res.sendStatus(500);
@@ -137,17 +138,21 @@ router.patch('/activate', (req, res) => {
 //logowanie req = {email : string, password : string}
 router.get('/login', (req, res) => {
     //pobranie informacji o koncie z bazy danych
-    con.get(`SELECT login, password, is_activated FROM users WHERE email = "${req.body.email}";`, (err, row) => {
+    con.get(`SELECT login, password, is_activated, is_native FROM users WHERE email = ?;`, req.body.email, (err, row) => {
         if(err){
             return res.sendStatus(500);
         }
         if(!row){
             //konto nie istnieje
-            return res.status(404).json({msg: 'account not found'});
+            return res.status(401).json({msg: 'account not found'});
         }
         if(row.is_activated != 1){
             //konto nie zostalo aktywowane
-            return res.status(403).json({msg: 'account not active'});
+            return res.status(401).json({msg: 'account not active'});
+        }
+        if(row.is_native != 1){
+            //konto wymagania zewnetrznego uwierzytelnienia
+            return res.status(400).json({msg: 'account require external authentication'})
         }
         bcrypt.compare(req.body.password, row.password, (err, match) => {
             if(err){
@@ -155,7 +160,7 @@ router.get('/login', (req, res) => {
             }
             if(!match){
                 //niepoprawne haslo
-                return res.status(200).json({msg: 'invalid password'});
+                return res.status(401).json({msg: 'invalid password'});
             }
             // haslo sie zgadza
             req.session.login = row.login;
@@ -165,19 +170,53 @@ router.get('/login', (req, res) => {
 
 });
 
+//zwraca link do autoryzacji przy pomocy google req = {}
+router.get('/google/url', (req, res) => {
+    return res.status(200).json({url: googleAuthURL()});
+});
+
+//pomyślna autoryzacja przy pomocy google przekieruje tutaj, tworzy konto(jesli to pierwsze logowanie przy pomocy danego konta) i tworzy sesje
+router.get('/google', async (req, res) => {
+    const code = req.query.code;
+    //pobranie informacji o uzytkowniku
+    const user = await getGoogleUser({code});
+    //sprawdzenie czy konto juz istnieje
+    con.get(`SELECT * FROM users WHERE email = ?;`, user.email, (err, row) => {
+        if(err){
+            return res.sendStatus(500);
+        }
+        //konto nie istnieje - utworzenie nowego konta przy pomocy pobranych danych
+        if(!row){
+            con.run(`INSERT INTO users(login, password, email, is_activated, is_native) VALUES (? ? ?, 1, 0);`, user.name, user.id, user.email, 1, 0, (err, result) => {
+                if(err){
+                    return res.sendStatus(500);
+                }
+                req.session.login = user.name;
+                return res.status(200).json({msg: 'ok', login: user.name});
+            });
+        }
+        else{
+            req.session.login = user.name;
+            return res.status(200).json({msg: 'ok', login: user.name});
+        }
+    });
+});
+
+//zwraca login, jesli user jest zalogowany i informacje ze nie jest zalogowany w przeciwnym wypadku
 router.get('/loggedin', (req, res) => {
     if(req.session.login){
         return res.status(200).json({login: req.session.login});
     }
-    return res.status(404).json({msg: 'not logged in'});
+    return res.status(403).json({msg: 'not logged in'});
 });
 
+//niszczy sesje jest user byl zalogowany i informacje ze nie jest zalogowany w przeciwnym wypadku
 router.get('/logout', (req, res) => {
     if(req.session.login){
         req.session.destroy();
         return res.status(200).json({msg: 'logged out'});
     }
-    return res.status(404).json({msg: 'not logged in'});
+    return res.status(403).json({msg: 'not logged in'});
 });
 
 module.exports = router;
