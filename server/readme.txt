@@ -1,6 +1,6 @@
 server obsługuje nastepujące requesty:
 
-post /auth/signup - zakładanie nowego konta
+<b>post /auth/signup - zakładanie nowego konta</b>
 	request.body = {login : string, password : string, email : string}
 		login - nazwa użytkownika
 		password - hasło
@@ -10,7 +10,7 @@ post /auth/signup - zakładanie nowego konta
 		- email zajety
 		- haslo za slabe - haslo musi miec miedzy 8 a 50 znakow, zawierac co najmniej 1 mala i wielka litere, 2 cyfry i nie zawierac spacji
 
-patch /auth/activate - aktywowanie nieaktywnego konta
+<b>patch /auth/activate - aktywowanie nieaktywnego konta</b>
 	request.body = {email : string, code : string}
 		email - email aktywowanego konta
 		code - kod aktywacyjny
@@ -20,7 +20,7 @@ patch /auth/activate - aktywowanie nieaktywnego konta
 		- konto juz jest aktywne
 		- niepoprawny kod aktywacyjny - dodatkowo zostanie wygenerowany i wyslany nowy kod - stary bedzie juz nieaktualny
 		
-get /auth/login - logowanie
+<b>get /auth/login - logowanie przy pomocy konta natywnego</b>
 	request.body = {email : string, password : string}
 		email - email konta
 		haslo - haslo konta
@@ -31,21 +31,21 @@ get /auth/login - logowanie
 		- niepoprawne haslo
 		- konto wymaga autentykacji przy pomocy zewnetrznego providera
 		
-get /auth/google/url
+<b>get /auth/google/url - logowanie przy pomocy konta google</b>
 	request.body = {}
 	- zwraca kod 200 i obiekt json z atrybutem url ktory zawiera przekierowanie do strony 
 		logowania przy pomocy google - po zalogowaniu nastepuje automatyczne przekierowanie do /auth/google
 	
-get /auth/google
+<b>get /auth/google</b>
 	- w przypadku pomyslnego zalogowania tworzona jest sesja i zwracany jest kod 200 i obiekt json z atrybutem login 
 		zawierajacym nazwe uzytkownika, jesli email uzutkownika nie widnial w bazie danych, tworzone jest nowe konto
 
-/auth/logout - wylogowanie
+<b>get /auth/logout - wylogowanie</b>
 	request.body = {}
 		200 - wylogowano, sesja została zakończona
 		403 - klient nie był zalogowany
 
-/auth/loggedin - test, czy jest się zalogowanym
+<b>get /auth/loggedin - test, czy jest się zalogowanym</b>
 	request.body = {}
 	- jesli klient jest zalogowany, zwracany jest status 200 i obiekt json z atrybutem login zawierajacym nazwe uzytkonika
 	- jesli klient nie jest zalogowany, zwracany jest kod 403
