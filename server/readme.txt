@@ -1,44 +1,51 @@
 server obsługuje nastepujące requesty:
 
-/auth/signup - zakładanie nowego konta
+post /auth/signup - zakładanie nowego konta
 	request.body = {login : string, password : string, email : string}
 		login - nazwa użytkownika
 		password - hasło
 		email - email
-	status:
-		409 - email zajęty, konto nie zostało utworzone
-		201 - konto zostało pomyslnie utworzone
-		500 - błąd serwera, spróbuj ponownie później
+	- w przypadku pomyslnego utworzenia konta zostanie zwrocony kod 201, a na podany email zostanie wyslany kod aktywacyjny
+	- w jednym z ponizszych przypadkow zostanie zwrocony kod 400 i obiekt json z atrybutem msg zawierajacym informacje o bledzie:
+		- email zajety
+		- haslo za slabe - haslo musi miec miedzy 8 a 50 znakow, zawierac co najmniej 1 mala i wielka litere, 2 cyfry i nie zawierac spacji
 
-/auth/activate - aktywowanie nieaktywnego konta
+patch /auth/activate - aktywowanie nieaktywnego konta
 	request.body = {email : string, code : string}
 		email - email aktywowanego konta
 		code - kod aktywacyjny
-	status:
-		404 - nie znaleziono konta powiązanego z podanym emailem
-		200 - konto zostało aktywowane
-		406 - nieprawidlowy kod, nowy kod zostanie wygenerowany i wyslany na maila
-		409 - konto jest już aktywne
+	- w przypadku pomyslnej aktywacji zwrocony zostanie kod 200
+	- w jednym z ponizszych przypadkow zostanie zwrocony kod 400 i obiekt json z atrybutem msg zawierajacym informacje o bledzie:
+		- podany email nie wystepuje w bazie danych (konto nie istnieje)
+		- konto juz jest aktywne
+		- niepoprawny kod aktywacyjny - dodatkowo zostanie wygenerowany i wyslany nowy kod - stary bedzie juz nieaktualny
 		
-/auth/login - logowanie
+get /auth/login - logowanie
 	request.body = {email : string, password : string}
 		email - email konta
 		haslo - haslo konta
-	status:
-		404 - nie znaleziono konta powiązanego z podanym emailem
-		403 - nieprawidłowe hasło
-		200 - poprawnie zalogowano i utworzono sesję
+	- w przypadku pomyslnego zalogowania tworzona jest sesja i zwracany jest kod 200 i obiekt json z atrybutem login zawierajacym nazwe uzytkownika
+	- w jednym z ponizszych przypadkow zostanie zwrocony kod 400 i obiekt json z atrybutem msg zawierajacym informacje o bledzie:
+		- podany email nie wystepuje w bazie danych (konto nie istnieje)
+		- konto nie zostalo aktywowane
+		- niepoprawne haslo
+		- konto wymaga autentykacji przy pomocy zewnetrznego providera
+		
+get /auth/google/url
+	request.body = {}
+	- zwraca kod 200 i obiekt json z atrybutem url ktory zawiera przekierowanie do strony 
+		logowania przy pomocy google - po zalogowaniu nastepuje automatyczne przekierowanie do /auth/google
+	
+get /auth/google
+	- w przypadku pomyslnego zalogowania tworzona jest sesja i zwracany jest kod 200 i obiekt json z atrybutem login 
+		zawierajacym nazwe uzytkownika, jesli email uzutkownika nie widnial w bazie danych, tworzone jest nowe konto
 
 /auth/logout - wylogowanie
 	request.body = {}
-	status:
 		200 - wylogowano, sesja została zakończona
-		404 - klient nie był zalogowany
+		403 - klient nie był zalogowany
 
 /auth/loggedin - test, czy jest się zalogowanym
 	request.body = {}
-	status:
-		200 - zalogowany 
-			res.body = {login : string}
-				login - nazwa zalogowanego użytkownika
-		404 - niezalogowany
+	- jesli klient jest zalogowany, zwracany jest status 200 i obiekt json z atrybutem login zawierajacym nazwe uzytkonika
+	- jesli klient nie jest zalogowany, zwracany jest kod 403
