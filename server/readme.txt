@@ -1,4 +1,4 @@
-server obsługuje nastepujące requesty:
+﻿server obsługuje nastepujące requesty:
 
 post /auth/signup - zakładanie nowego konta
 	request.body = {login : string, password : string, email : string}
@@ -31,14 +31,23 @@ get /auth/login - logowanie przy pomocy konta natywnego
 		- niepoprawne haslo
 		- konto wymaga autentykacji przy pomocy zewnetrznego providera
 		
-get /auth/google/url - logowanie przy pomocy konta google
+get /auth/google/url - link do logowania przy pomocy konta google
 	request.body = {}
-	- zwraca kod 200 i obiekt json z atrybutem url ktory zawiera przekierowanie do strony 
+	- zwraca kod 200 i obiekt json z atrybutem url ktory przekierowuje do strony 
 		logowania przy pomocy google - po zalogowaniu nastepuje automatyczne przekierowanie do /auth/google
 	
 get /auth/google
 	- w przypadku pomyslnego zalogowania tworzona jest sesja i zwracany jest kod 200 i obiekt json z atrybutem login 
-		zawierajacym nazwe uzytkownika, jesli email uzutkownika nie widnial w bazie danych, tworzone jest nowe konto
+		zawierajacym nazwe uzytkownika, jesli email uzytkownika nie widnial w bazie danych, tworzone jest nowe konto
+
+get /auth/facebook/url - link do logowania przy pomocy konta facebook
+	request.body = {}
+	- zwraca kod 200 i obiekt json z atrybutem url ktory przekierowuje do strony
+		logowania przy pomocy facebooka - po zalogowaniu nastepuje automatyczne przekierowanie do /auth/facebook
+
+get /auth/facebook
+	- w przypadku pomyslnego zalogowania tworzona jest sesja i zwracany jest kod 200 i obiekt json z atrybutem login 
+		zawierajacym nazwe uzytkownika, jesli email uzytkownika nie widnial w bazie danych, tworzone jest nowe konto
 
 get /auth/logout - wylogowanie
 	request.body = {}

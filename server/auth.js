@@ -7,6 +7,7 @@ const mailOptions = require('./mailOptions');
 const express = require('express');
 const googleAuthURL = require('./googleAuth.js').getGoogleAuthURL;
 const getGoogleUser = require('./googleAuth.js').getGoogleUser;
+const getFacebookUser = require('./facebookAuth.js').getFacebookUser;
 const passwordValidator = require('./passwordValidator.js');
 
 const router = express.Router();
@@ -144,11 +145,11 @@ router.get('/login', (req, res) => {
         }
         if(!row){
             //konto nie istnieje
-            return res.status(401).json({msg: 'account not found'});
+            return res.status(400).json({msg: 'account not found'});
         }
         if(row.is_activated != 1){
             //konto nie zostalo aktywowane
-            return res.status(401).json({msg: 'account not active'});
+            return res.status(400).json({msg: 'account not active'});
         }
         if(row.is_native != 1){
             //konto wymagania zewnetrznego uwierzytelnienia
@@ -160,7 +161,7 @@ router.get('/login', (req, res) => {
             }
             if(!match){
                 //niepoprawne haslo
-                return res.status(401).json({msg: 'invalid password'});
+                return res.status(400).json({msg: 'invalid password'});
             }
             // haslo sie zgadza
             req.session.login = row.login;
@@ -187,7 +188,7 @@ router.get('/google', async (req, res) => {
         }
         //konto nie istnieje - utworzenie nowego konta przy pomocy pobranych danych
         if(!row){
-            con.run(`INSERT INTO users(login, password, email, is_activated, is_native) VALUES (? ? ?, 1, 0);`, user.name, user.id, user.email, 1, 0, (err, result) => {
+            con.run(`INSERT INTO users(login, password, email, is_activated, is_native) VALUES (? ? ?, 1, 0);`, user.name, user.id, user.email, (err, result) => {
                 if(err){
                     return res.sendStatus(500);
                 }
@@ -195,6 +196,39 @@ router.get('/google', async (req, res) => {
                 return res.status(200).json({msg: 'ok', login: user.name});
             });
         }
+        //konto istnieje - utworzenie sesji
+        else{
+            req.session.login = user.name;
+            return res.status(200).json({msg: 'ok', login: user.name});
+        }
+    });
+});
+
+//zwraca link do autoryzacji przy pomocy facebooka req = {}
+router.get('/facebook/url', (req, res) => {
+    return res.status(200).json({url: `https://www.facebook.com/dialog/oauth?client_id=${process.env.FB_CLIENT_ID}&redirect_uri=http://localhost:2400/auth/facebook&scope=email,public_profile`});           
+});
+
+//pomyślna autoryzacja przy pomocy facebooka przekieruje tutaj, tworzy konto(jesli to pierwsze logowanie przy pomocy danego konta) i tworzy sesje
+router.get('/facebook', async (req, res) => {
+    const code = req.query.code;
+    const user = await getFacebookUser(code);
+    //sprawdzenie, czy konto istnieje
+    con.get('SELECT * FROM users WHERE email = ?;', user.email, (err, row) => {
+        if(err){
+            return res.sendStatus(500);
+        }
+        //konto nie istnieje - utworzenie nowego konta przy pomocy pobranych danych
+        if(!row){
+            con.run('INSERT INTO users(login, password, email, is_activated, is_native) VALUES(?, ?, ?, 1, 0);', user.name, user.id, user.email, (err, result) => {
+                if(err){
+                    return res.sendStatus(500);
+                }
+                req.session.login = user.name;
+                return res.status(200).json({msg: 'ok', login: user.name});
+            });
+        }
+        //konto istnieje - utworzenie sesji
         else{
             req.session.login = user.name;
             return res.status(200).json({msg: 'ok', login: user.name});

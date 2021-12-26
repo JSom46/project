@@ -22,7 +22,7 @@ app.use(cors({
 	origin: process.env.SERVER_ROOT_URI,
 	credentials: true,
   }));
-app.use('/api/auth', authRoute);
+app.use('/auth', authRoute);
 
 app.listen(2400, () => {
 	console.log("Server started: 2400");
