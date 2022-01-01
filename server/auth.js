@@ -5,8 +5,10 @@ const bcrypt = require('bcrypt');
 const codeGenerator = require('./codeGenerator.js');
 const mailOptions = require('./mailOptions');
 const express = require('express');
+
 const googleAuthURL = require('./googleAuth.js').getGoogleAuthURL;
 const getGoogleUser = require('./googleAuth.js').getGoogleUser;
+const getFacebookAuthURL = require('./facebookAuth.js').getFacebookAuthURL
 const getFacebookUser = require('./facebookAuth.js').getFacebookUser;
 const passwordValidator = require('./passwordValidator.js');
 
@@ -37,8 +39,10 @@ con.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, login TEXT NOT
 });
 
 
+
 //rejestracja req = {login : string, password : string, email : string}
 router.post('/signup', (req, res) => {
+	console.log(req.body);
     //sprawdzenie, czy mail nie jest już w uzyciu
     con.get(`SELECT "x" FROM users WHERE email = ?;`, req.body.email, (err, row) => {
         if(err){
@@ -88,7 +92,7 @@ router.post('/signup', (req, res) => {
 
 
 //aktywacja konta req = {email : string, code : string}
-router.patch('/activate', (req, res) => {
+router.post('/activate', (req, res) => {
     //pobierz informacje o koncie z bazy
     con.get(`SELECT activation_code, is_activated, is_native FROM users WHERE email = ?;`, req.body.email, (err, row) => {
         if(err){
@@ -136,8 +140,10 @@ router.patch('/activate', (req, res) => {
     });
 });
 
+
+
 //logowanie req = {email : string, password : string}
-router.get('/login', (req, res) => {
+router.post('/login', (req, res) => {
     //pobranie informacji o koncie z bazy danych
     con.get(`SELECT login, password, is_activated, is_native FROM users WHERE email = ?;`, req.body.email, (err, row) => {
         if(err){
@@ -171,10 +177,14 @@ router.get('/login', (req, res) => {
 
 });
 
+
+
 //zwraca link do autoryzacji przy pomocy google req = {}
 router.get('/google/url', (req, res) => {
     return res.status(200).json({url: googleAuthURL()});
 });
+
+
 
 //pomyślna autoryzacja przy pomocy google przekieruje tutaj, tworzy konto(jesli to pierwsze logowanie przy pomocy danego konta) i tworzy sesje
 router.get('/google', async (req, res) => {
@@ -204,10 +214,14 @@ router.get('/google', async (req, res) => {
     });
 });
 
+
+
 //zwraca link do autoryzacji przy pomocy facebooka req = {}
 router.get('/facebook/url', (req, res) => {
-    return res.status(200).json({url: `https://www.facebook.com/dialog/oauth?client_id=${process.env.FB_CLIENT_ID}&redirect_uri=http://localhost:2400/auth/facebook&scope=email,public_profile`});           
+    return res.status(200).json({url: getFacebookAuthURL()});           
 });
+
+
 
 //pomyślna autoryzacja przy pomocy facebooka przekieruje tutaj, tworzy konto(jesli to pierwsze logowanie przy pomocy danego konta) i tworzy sesje
 router.get('/facebook', async (req, res) => {
@@ -236,6 +250,8 @@ router.get('/facebook', async (req, res) => {
     });
 });
 
+
+
 //zwraca login, jesli user jest zalogowany i informacje ze nie jest zalogowany w przeciwnym wypadku
 router.get('/loggedin', (req, res) => {
     if(req.session.login){
@@ -243,6 +259,8 @@ router.get('/loggedin', (req, res) => {
     }
     return res.status(403).json({msg: 'not logged in'});
 });
+
+
 
 //niszczy sesje jest user byl zalogowany i informacje ze nie jest zalogowany w przeciwnym wypadku
 router.get('/logout', (req, res) => {
@@ -252,5 +270,7 @@ router.get('/logout', (req, res) => {
     }
     return res.status(403).json({msg: 'not logged in'});
 });
+
+
 
 module.exports = router;

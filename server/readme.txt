@@ -1,4 +1,4 @@
-﻿server obsługuje nastepujące requesty:
+server obsługuje nastepujące requesty:
 
 post /auth/signup - zakładanie nowego konta
 	request.body = {login : string, password : string, email : string}
@@ -10,7 +10,7 @@ post /auth/signup - zakładanie nowego konta
 		- email zajety
 		- haslo za slabe - haslo musi miec miedzy 8 a 50 znakow, zawierac co najmniej 1 mala i wielka litere, 2 cyfry i nie zawierac spacji
 
-patch /auth/activate - aktywowanie nieaktywnego konta
+post /auth/activate - aktywowanie nieaktywnego konta
 	request.body = {email : string, code : string}
 		email - email aktywowanego konta
 		code - kod aktywacyjny
@@ -20,7 +20,7 @@ patch /auth/activate - aktywowanie nieaktywnego konta
 		- konto juz jest aktywne
 		- niepoprawny kod aktywacyjny - dodatkowo zostanie wygenerowany i wyslany nowy kod - stary bedzie juz nieaktualny
 		
-get /auth/login - logowanie przy pomocy konta natywnego
+post /auth/login - logowanie przy pomocy konta natywnego
 	request.body = {email : string, password : string}
 		email - email konta
 		haslo - haslo konta
