@@ -10,14 +10,20 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 
 const app = express();
-app.use(cookieParser());
+app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: parseInt(process.env.COOKIE_MAXAGE) }
+    cookie: { 
+        maxAge: parseInt(process.env.COOKIE_MAXAGE),
+        secure: false
+    }
 }));
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
 app.use(helmet());
 app.use(express.json());
 

@@ -145,6 +145,9 @@ router.post('/activate', (req, res) => {
 //logowanie req = {email : string, password : string}
 router.post('/login', (req, res) => {
     //pobranie informacji o koncie z bazy danych
+    if(req.session.login){
+        return res.status(400).json({msg: 'already logged in'});
+    }
     con.get(`SELECT login, password, is_activated, is_native FROM users WHERE email = ?;`, req.body.email, (err, row) => {
         if(err){
             return res.sendStatus(500);
@@ -171,7 +174,7 @@ router.post('/login', (req, res) => {
             }
             // haslo sie zgadza
             req.session.login = row.login;
-            res.status(200).json({msg: 'ok', login: row.login});
+            return res.status(200).json({msg: 'ok', login: row.login});          
         });
     });
 
@@ -198,7 +201,7 @@ router.get('/google', async (req, res) => {
         }
         //konto nie istnieje - utworzenie nowego konta przy pomocy pobranych danych
         if(!row){
-            con.run(`INSERT INTO users(login, password, email, is_activated, is_native) VALUES (? ? ?, 1, 0);`, user.name, user.id, user.email, (err, result) => {
+            con.run(`INSERT INTO users(login, password, email, is_activated, is_native) VALUES (?, ?, ?, 1, 0);`, user.name, user.id, user.email, (err, result) => {
                 if(err){
                     return res.sendStatus(500);
                 }
