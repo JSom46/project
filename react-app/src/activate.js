@@ -32,9 +32,9 @@ export default function Activate() {
     <div className="login-wrapper">
       <h1>Aktywacja</h1>
       <form onSubmit={handleSubmit}>
-        <label for="email">Email: </label><br />
+        <label htmlFor="email">Email: </label><br />
           <input type="email" id="email" required onChange={e => setEmail(e.target.value)}/><br />
-          <label for="code">Kod: </label><br />
+          <label htmlFor="code">Kod: </label><br />
           <input type="text" id="text" required onChange={e => setCode(e.target.value)}/>
         <div>
           <button type="submit">Aktywuj</button>

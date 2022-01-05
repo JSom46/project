@@ -37,13 +37,13 @@ export default function Register() {
     <div className="login-wrapper">
       <h1>Rejestracja</h1>
       <form onSubmit={handleSubmit}>
-          <label for="username">Login: </label><br />
+          <label htmlFor="username">Login: </label><br />
           <input type="text" id="username" required onChange={e => setLogin(e.target.value)}/><br />
-          <label for="email">Email: </label><br />
+          <label htmlFor="email">Email: </label><br />
           <input type="email" id="email" required onChange={e => setEmail(e.target.value)}/><br />
-          <label for="password">Hasło: </label><br />
+          <label htmlFor="password">Hasło: </label><br />
           <input type="password" id="password" required onChange={e => setPassword(e.target.value)}/><br />
-          <label for="password">Powtórz hasło: </label><br />
+          <label htmlFor="password">Powtórz hasło: </label><br />
           <input type="password" id="passwordRepeat" required onChange={e => setPasswordRepeat(e.target.value)}/><br />
           <button type="submit">Zarejestruj</button>
       </form>
