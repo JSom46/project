@@ -1,18 +1,20 @@
 //import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Route, Switch, Link } from 'react-router-dom';
+import { BrowserRouter, Route, Switch, /*Link*/ } from 'react-router-dom';
 
 import './App.css';
 import Register from './Register';
 import Login from './Login';
 import Activate  from './activate';
-
+import BootstrapNavbar from './bootstrapNavbar';
 function App() {
     return (
-    <div style={{marginRight: 10 + 'em'}}>
+      
+    <div>
     <BrowserRouter>
-      <Link to="/register"><button>Rejestracja</button></Link><br />
+      {/* <Link to="/register"><button>Rejestracja</button></Link><br />
       <Link to="/login"><button>Logowanie</button></Link><br />
-      <Link to="/activate"><button>Aktywacja</button></Link><br />
+      <Link to="/activate"><button>Aktywacja</button></Link><br /> */}
+        <BootstrapNavbar /> 
          <Switch>
           <Route path="/register">
             <Register />
@@ -23,7 +25,7 @@ function App() {
           <Route path="/activate">
            <Activate />
           </Route>
-        </Switch> 
+        </Switch>
       </BrowserRouter>
     </div>
     );

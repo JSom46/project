@@ -66,6 +66,3 @@ export default function Register() {
       }
   }
 }
-// Login.propTypes = {
-//     setToken: PropTypes.func.isRequired
-//   }
