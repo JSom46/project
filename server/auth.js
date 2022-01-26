@@ -146,6 +146,7 @@ router.post('/activate', (req, res) => {
 router.post('/login', (req, res) => {
     //pobranie informacji o koncie z bazy danych
     if(req.session.login){
+		console.log(req.session);
         return res.status(400).json({msg: 'already logged in'});
     }
     con.get(`SELECT login, password, is_activated, is_native FROM users WHERE email = ?;`, req.body.email, (err, row) => {
@@ -257,6 +258,7 @@ router.get('/facebook', async (req, res) => {
 
 //zwraca login, jesli user jest zalogowany i informacje ze nie jest zalogowany w przeciwnym wypadku
 router.get('/loggedin', (req, res) => {
+	console.log(req.session);
     if(req.session.login){
         return res.status(200).json({login: req.session.login});
     }

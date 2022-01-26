@@ -13,7 +13,8 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "^5.0.0",
     "reactstrap": "^9.0.1",
-    "web-vitals": "^1.1.2"
+    "web-vitals": "^1.1.2",
+    "websocket": "^1.0.34"
   },
   "scripts": {
     "start": "react-scripts start",
