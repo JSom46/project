@@ -2,3 +2,7 @@ server/node_modules/
 SSR/node_modules/
 SSR/db/server.db
 server/db/serverdb.db
+
+mobileApp/android/build
+mobileApp/ios
+mobileApp/node_modules
