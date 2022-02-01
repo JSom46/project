@@ -1,0 +1,45 @@
+GET http://localhost:2137/users
+
+###
+
+POST http://localhost:2137/users
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "password": "yyyyyy"
+}
+
+###
+
+POST http://localhost:2137/login
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "password": "yyyyyy"
+}
+
+###
+
+GET http://localhost:2137/user
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3R1c2VyIiwiaWF0IjoxNjQwNzg3NjEyLCJleHAiOjE2NDA3ODc2Mjd9.A1DTtk1fY93yrDcJLfUrauZGq6IRmF9S7s9IDs2DpiY
+
+###
+
+POST http://localhost:2137/token
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1ldGluMiIsImlhdCI6MTY0MDcyNjg5NH0.dRwQ7k-uZcutg82Gg1o33TxpmZofry9oRUTZPtwZN00"
+}
+
+###
+
+DELETE http://localhost:2137/logout
+Content-Type: application/json
+
+{
+    "username": "testuser"
+}
