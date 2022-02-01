@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 import './login.css'
 
 
@@ -87,33 +88,37 @@ export default function Login() {
 }, []);
 if(auth?.login){
   return(
-    <div className="login-wrapper">
+    <div>
     <h1>Zalogowany</h1>
     <h2>Login:{" "+auth.login}</h2>
     <div>
-    <button onClick={logout}>Wyloguj</button><br />
+    <Button color="primary" onClick={logout}>Wyloguj</Button><br />
     </div>
     </div>
     )
   }
   else return(
-    <div className="login-wrapper">
+    <div>
     <h1>Logowanie</h1>
-    <form onSubmit={handleSubmit}>
-    <label htmlFor="email">Email: </label><br />
-    <input type="email" id="email" required onChange={e => setEmail(e.target.value)}/><br />
-    <label htmlFor="password">Hasło: </label><br />
-    <input type="password" id="password" required onChange={e => setPassword(e.target.value)}/>
-    <div>
-    <button type="submit">Zaloguj</button>
+    <Form onSubmit={handleSubmit}>
+    <FormGroup>
+      <Label for="email">Email</Label>
+      <Input type="email" name="email" id="email" required onChange={e => setEmail(e.target.value)} placeholder="email" />
+    </FormGroup>
+    <FormGroup>
+      <Label for="password">Hasło</Label>
+      <Input type="password" name="password" id="password" placeholder="hasło" onChange={e => setPassword(e.target.value)}/>
+    </FormGroup>
+    <Button color="primary" type='submit' onClick={handleSubmit}>Zaloguj</Button>
+    <FormGroup>
+      <Button color="secondary" onClick={LoginGoogleFunc}>LogowanieGoogle</Button>
+      <Button color="secondary" onClick={LoginFacebookFunc}>LogowanieFacebook</Button>
+      <p id="loginError">&nbsp;</p>
+    </FormGroup>
+    </Form>
     </div>
-    </form>
-    <p id="loginError">&nbsp;</p>
-    <div>
-    <button onClick={LoginGoogleFunc}>LogowanieGoogle</button><br />
-    <button onClick={LoginFacebookFunc}>LogowanieFacebook</button><br />
-    </div>
-    </div>
+    // <button onClick={LoginGoogleFunc}>LogowanieGoogle</button><br />
+    // <button onClick={LoginFacebookFunc}>LogowanieFacebook</button><br />
     )
     function errorMessage(msg) {
       var element = document.getElementById("loginError");

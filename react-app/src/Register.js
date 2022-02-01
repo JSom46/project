@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './login.css'
+import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 
 async function registerUser(credentials) {
   console.log(credentials);
@@ -34,20 +35,30 @@ export default function Register() {
   }
 
   return(
-    <div className="login-wrapper">
-      <h1>Rejestracja</h1>
-      <form onSubmit={handleSubmit}>
-          <label htmlFor="username">Login: </label><br />
-          <input type="text" id="username" required onChange={e => setLogin(e.target.value)}/><br />
-          <label htmlFor="email">Email: </label><br />
-          <input type="email" id="email" required onChange={e => setEmail(e.target.value)}/><br />
-          <label htmlFor="password">Hasło: </label><br />
-          <input type="password" id="password" required onChange={e => setPassword(e.target.value)}/><br />
-          <label htmlFor="password">Powtórz hasło: </label><br />
-          <input type="password" id="passwordRepeat" required onChange={e => setPasswordRepeat(e.target.value)}/><br />
-          <button type="submit">Zarejestruj</button>
-      </form>
-      <p id="registerMessage">&nbsp;</p>
+    <div>
+    <h1>Rejestracja</h1>
+    <Form onSubmit={handleSubmit}>
+    <FormGroup>
+      <Label for="username">Login:</Label>
+      <Input type="text" name="username" id="username" required onChange={e => setLogin(e.target.value)} placeholder="login" />
+    </FormGroup>
+    <FormGroup>
+      <Label for="email">Email</Label>
+      <Input type="email" name="email" id="email" required onChange={e => setEmail(e.target.value)} placeholder="email" />
+    </FormGroup>
+    <FormGroup>
+      <Label for="password">Hasło</Label>
+      <Input type="password" name="password" id="password" placeholder="hasło" onChange={e => setPassword(e.target.value)}/>
+    </FormGroup>
+    <FormGroup>
+      <Label for="password">Powtórz hasło</Label>
+      <Input type="password" name="passwordRepeat" id="passwordRepeat" placeholder="hasło" onChange={e => setPasswordRepeat(e.target.value)}/>
+    </FormGroup>
+    <Button color="primary" type='submit'>Zarejestruj</Button>
+    <FormGroup>
+      <p id="loginError">&nbsp;</p>
+    </FormGroup>
+    </Form>
     </div>
   )
   function errorMessage(code) {

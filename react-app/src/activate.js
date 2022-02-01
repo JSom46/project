@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './login.css'
+import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 
 
 async function activateAccount(userData) {
@@ -29,21 +30,22 @@ export default function Activate() {
   }
 
   return(
-    <div className="login-wrapper">
-      <h1>Aktywacja</h1>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="email">Email: </label><br />
-          <input type="email" id="email" required onChange={e => setEmail(e.target.value)}/><br />
-          <label htmlFor="code">Kod: </label><br />
-          <input type="text" id="text" required onChange={e => setCode(e.target.value)}/>
-        <div>
-          <button type="submit">Aktywuj</button>
-        </div>
-        <div>
-        {/* <button onClick={test}>LoggedInTest</button><br /> */}
-        </div>
-      </form>
+    <div>
+    <h1>Aktywacja</h1>
+    <Form onSubmit={handleSubmit}>
+    <FormGroup>
+      <Label for="email">Email</Label>
+      <Input type="email" name="email" id="email" required onChange={e => setEmail(e.target.value)} placeholder="email" />
+    </FormGroup>
+    <FormGroup>
+      <Label for="code">Kod</Label>
+      <Input type="number" name="code" id="code" placeholder="kod" onChange={e => setCode(e.target.value)}/>
+    </FormGroup>
+    </Form>
+    <Button color="primary" type='submit' onClick={handleSubmit}>Aktywuj</Button>
+    <FormGroup>
       <p id="activateError">&nbsp;</p>
+    </FormGroup>
     </div>
   )
   function errorMessage(msg) {
