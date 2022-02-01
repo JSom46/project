@@ -1,0 +1,4 @@
+server/node_modules/
+SSR/node_modules/
+SSR/db/server.db
+server/db/serverdb.db
