@@ -20,6 +20,15 @@ const stylesAuth = StyleSheet.create({
         backgroundColor: 'white',
         margin: 5,
     },
-})
+});
 
-export default stylesAuth;
+const stylesHome = StyleSheet.create({
+    dashboard: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    }
+});
+
+
+export {stylesAuth, stylesHome};
