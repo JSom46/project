@@ -63,11 +63,28 @@ router.post('/signup', (req, res) => {
                 return res.sendStatus(500);
             }
 
-            //wygeneruj kod aktywacyjny
-            let code = codeGenerator(5);
+            //wygeneruj kod aktywacyjny i sprawdź jego unikalność. wygeneruj nowy jesli nie jest unikalny
+            let code;
+            let isUnique = true;
+            do{
+                code = codeGenerator(64);
+                con.get(`SELECT COUNT(*) FROM users WHERE is_activated = 0 AND activation_code = ?`, code, (err, result) => {
+                    if(err){
+                        return res.sendStatus(500);
+                    }
+                    console.log(result);
+                    if(result != 0){
+                        isUnique = false;
+                    }
+                });
+            } while(!isUnique)
 
             //informacje potrzebne do wyslania maila
-            let mailOpt = mailOptions(process.env.EMAIL_ADDR, req.body.email, 'kod aktywacyjny', `twój kod aktywacyjny dla konta ${req.body.login} to ${code}.`);
+            let mailOpt = mailOptions(
+                process.env.EMAIL_ADDR, 
+                req.body.email, 
+                'kod aktywacyjny', 
+                `${req.body.login}, aktywuj swoje konto klikając w link poniżej:\n localhost:3000/activate?code=${code}`);
 
             //dodaj usera do bazy
             con.run(`INSERT INTO users (login, password, email, activation_code, is_activated, is_native) 
@@ -89,54 +106,25 @@ router.post('/signup', (req, res) => {
     });
 });
 
-
-
-//aktywacja konta req = {email : string, code : string}
+//aktywacja konta req = {code : string}
 router.post('/activate', (req, res) => {
-    //pobierz informacje o koncie z bazy
-    con.get(`SELECT activation_code, is_activated, is_native FROM users WHERE email = ?;`, req.body.email, (err, row) => {
+    // sprawdz, czy istnieje nieaktywowane konto z podanym kodem
+    con.get(`SELECT * FROM users WHERE is_activated = 0 AND activation_code = ?`, req.body.code, (err, row) => {
         if(err){
             return res.sendStatus(500);
         }
-        if(!row){
-            //konto nie istnieje
-            return res.status(400).json({msg: 'account not found'});
+        // brak takiego konta, zwroc informacje o niewlasciwym kodzie
+        if(!row){           
+            return res.status(400).json({msg: 'invalid code'});
         }
-        if(row.is_activated != 0){
-            //konto zostalo juz aktywowane
-            return res.status(400).json({msg: 'account already active'});
-        }
-        if(req.body.code != row.activation_code){
-            //kod aktywacyjny sie nie zgadza, wygeneruj nowy kod
-            let code = codeGenerator(5);
-            //zaktualizuj kod w bazie danych
-            con.run(`UPDATE users SET activation_code = ? WHERE email = ?;`, code, req.body.email, (err, resp) => {
-                if(err){
-                    return res.sendStatus(500);
-                }
-                //informacje potrzebne do wyslania maila
-                let mailOpt = mailOptions(process.env.EMAIL_ADDR, req.body.email, 'kod aktywacyjny', `twój kod aktywacyjny dla twojego konta to ${code}.`);
-                //wyslij nowego maila z kodem
-                transporter.sendMail(mailOpt, (err, info) => {
-                    if(err){
-                        console.log(err);
-                        return res.sendStatus(500);
-                    }
-                    //wyslij informacje o niepoprawnym kodzie aktywacyjnym
-                    return res.status(400).json({msg: 'invalid code'});
-                });
-            });
-        }
-        else{
-            //kod sie zgadza, aktyywuj konto
-            con.run(`UPDATE users SET is_activated = 1 WHERE email = ?`, req.body.email, (err, resp) => {
-                if(err){
-                    console.log(err);
-                    return res.sendStatus(500);
-                }
-                res.status(200).json({msg: 'account activated'});
-            });
-        }
+        // konto istanieje, aktywuj je
+        con.run(`UPDATE users SET is_activated = 1 WHERE is_activated = 0 AND activation_code = ?`, req.body.code, (err, info) => {
+            if(err){
+                console.log(err);
+                return res.sendStatus(500);
+            }
+            res.status(200).json({msg: 'account activated'});
+        });
     });
 });
 
