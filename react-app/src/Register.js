@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import './login.css'
-import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
+// import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
+
+import FormControl from '@mui/material/FormControl';
+import FormGroup from '@mui/material/FormGroup';
+import { TextField } from '@mui/material';
+import { Button } from '@mui/material';
+import { Typography } from '@mui/material';
 
 async function registerUser(credentials) {
   console.log(credentials);
@@ -36,7 +42,7 @@ export default function Register() {
 
   return(
     <div>
-    <h1>Rejestracja</h1>
+    {/* <h1>Rejestracja</h1>
     <Form onSubmit={handleSubmit}>
     <FormGroup>
       <Label for="username">Login:</Label>
@@ -58,7 +64,20 @@ export default function Register() {
     <FormGroup>
       <p id="loginError">&nbsp;</p>
     </FormGroup>
-    </Form>
+    </Form> */}
+
+    <Typography variant="h4"> Rejestracja </Typography>
+    <FormControl>
+    <FormGroup>
+    <TextField type='text' id="username" label="Login" variant="standard" required onChange={e => setLogin(e.target.value)} />
+    <TextField type='email' id="email" label="Email" variant="standard" required onChange={e => setEmail(e.target.value)} />
+    <TextField type='password' id="my-input" label="Hasło" variant="standard" required onChange={e => setPassword(e.target.value)} />
+    <TextField type='password' id="my-input" label="Hasło" variant="standard" required onChange={e => setPasswordRepeat(e.target.value)} />
+    </FormGroup>
+    <br />
+    <Button variant="contained" type="submit" onClick={handleSubmit}>Zarejestruj</Button>
+    </FormControl>
+    <p id="registerMessage">&nbsp;</p>
     </div>
   )
   function errorMessage(code) {

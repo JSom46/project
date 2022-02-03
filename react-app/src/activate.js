@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BrowserRouter,Switch, Route, useParams } from 'react-router-dom';
 import './login.css'
 import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 
@@ -15,10 +16,15 @@ async function activateAccount(userData) {
   return data;
  }
 
-
+ function ProfilePage() {
+   let { userId } = useParams();
+   console.log(userId);
+ }
 export default function Activate() {
   const [email, setEmail] = useState();
   const [code, setCode] = useState();
+
+  let { id } = useParams();
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -28,11 +34,11 @@ export default function Activate() {
     });
     errorMessage(response.msg);
   }
-
   return(
     <div>
     <h1>Aktywacja</h1>
-    <Form onSubmit={handleSubmit}>
+    <p>id: {id}</p>
+    {/* <Form onSubmit={handleSubmit}>
     <FormGroup>
       <Label for="email">Email</Label>
       <Input type="email" name="email" id="email" required onChange={e => setEmail(e.target.value)} placeholder="email" />
@@ -45,7 +51,7 @@ export default function Activate() {
     <Button color="primary" type='submit' onClick={handleSubmit}>Aktywuj</Button>
     <FormGroup>
       <p id="activateError">&nbsp;</p>
-    </FormGroup>
+    </FormGroup> */}
     </div>
   )
   function errorMessage(msg) {
