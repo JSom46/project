@@ -169,8 +169,12 @@ router.post('/login', (req, res) => {
 
 
 
-//zwraca link do autoryzacji przy pomocy google req = {}
+//zwraca link do autoryzacji przy pomocy google req = {type : string}
+// jeśli type = 'web' po zalogowaniu nastąpi przekierowanie do strony glownej aplikacji webowej
 router.get('/google/url', (req, res) => {
+    if(req.body.type == 'web'){
+        req.session.type = 'web';
+    }
     return res.status(200).json({url: googleAuthURL()});
 });
 
@@ -199,6 +203,10 @@ router.get('/google', async (req, res) => {
         //konto istnieje - utworzenie sesji
         else{
             req.session.login = user.name;
+            if(req.session.type == 'web'){
+                req.session.type = null;
+                return res.redirect(301, 'http://localhost:3000');
+            }
             return res.status(200).json({msg: 'ok', login: user.name});
         }
     });
@@ -206,8 +214,12 @@ router.get('/google', async (req, res) => {
 
 
 
-//zwraca link do autoryzacji przy pomocy facebooka req = {}
+//zwraca link do autoryzacji przy pomocy facebooka req = {type : string}
+// jeśli type = 'web' po zalogowaniu nastąpi przekierowanie do strony glownej aplikacji webowej
 router.get('/facebook/url', (req, res) => {
+    if(req.body.type == 'web'){
+        req.session.type = 'web';
+    }
     return res.status(200).json({url: getFacebookAuthURL()});           
 });
 
@@ -235,6 +247,10 @@ router.get('/facebook', async (req, res) => {
         //konto istnieje - utworzenie sesji
         else{
             req.session.login = user.name;
+            if(req.session.type == 'web'){
+                req.session.type = null;
+                return res.redirect(301, 'http://localhost:3000');
+            }
             return res.status(200).json({msg: 'ok', login: user.name});
         }
     });
