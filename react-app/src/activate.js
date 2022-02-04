@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import './login.css'
-import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 
 
 async function activateAccount(userData) {
@@ -14,43 +13,37 @@ async function activateAccount(userData) {
   }).then(data => data.json())
   return data;
  }
-
-
 export default function Activate() {
-  const [email, setEmail] = useState();
-  const [code, setCode] = useState();
+  const [activated,setActivated] = useState(false);
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-    const response = await activateAccount({
-      email,
-      code
-    });
-    errorMessage(response.msg);
-  }
-
+  useEffect(() => {
+    let paramString = window.location.search;
+    let searchParams = new URLSearchParams(paramString);
+    const handleActivate = async e => {
+      // e.preventDefault();
+      var code = searchParams.get("code");
+      const response = await activateAccount({
+        code
+      });
+      console.log(response.msg);
+      if(response.msg === 'account activated') setActivated(true);
+    }
+    handleActivate();
+}, []);
+if(activated === true){
+  setTimeout(()=>{window.location.href = '/login'},5000)
   return(
     <div>
-    <h1>Aktywacja</h1>
-    <Form onSubmit={handleSubmit}>
-    <FormGroup>
-      <Label for="email">Email</Label>
-      <Input type="email" name="email" id="email" required onChange={e => setEmail(e.target.value)} placeholder="email" />
-    </FormGroup>
-    <FormGroup>
-      <Label for="code">Kod</Label>
-      <Input type="number" name="code" id="code" placeholder="kod" onChange={e => setCode(e.target.value)}/>
-    </FormGroup>
-    </Form>
-    <Button color="primary" type='submit' onClick={handleSubmit}>Aktywuj</Button>
-    <FormGroup>
-      <p id="activateError">&nbsp;</p>
-    </FormGroup>
-    </div>
-  )
-  function errorMessage(msg) {
-      var element = document.getElementById("activateError");
-      element.style.color = "red";
-      element.innerHTML = msg;
+      <h3 style={{color:"green"}}>Pomyślnie aktywowano konto</h3>
+      <p>Nastąpi przekierowanie na stronę logowania...</p>
+      </div>
+    )
+  }
+  else {
+  return(
+    <div>
+     <h3 style={{color:"red"}}>To konto zostało już aktywowane lub kod aktywacyjny jest błędny.</h3>
+     </div>
+   )
   }
 }
