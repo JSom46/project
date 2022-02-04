@@ -33,7 +33,7 @@ function logout() {
   });
 }
 async function LoginGoogle() {
-  const data = await fetch('http://localhost:2400/auth/google/url', {
+  const data = await fetch('http://localhost:2400/auth/google/url?type=web', {
   method: 'GET',
   credentials: 'include'
 });
@@ -46,7 +46,7 @@ const LoginGoogleFunc = async e => {
   window.location.assign(response.url);
 }
 async function LoginFacebook() {
-  const data = await fetch('http://localhost:2400/auth/facebook/url', {
+  const data = await fetch('http://localhost:2400/auth/facebook/url?type=web', {
   method: 'GET',
   credentials: 'include'
 });

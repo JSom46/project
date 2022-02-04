@@ -172,7 +172,7 @@ router.post('/login', (req, res) => {
 //zwraca link do autoryzacji przy pomocy google req = {type : string}
 // jeśli type = 'web' po zalogowaniu nastąpi przekierowanie do strony glownej aplikacji webowej
 router.get('/google/url', (req, res) => {
-    if(req.body.type == 'web'){
+    if(req.query.type == 'web'){
         req.session.type = 'web';
     }
     return res.status(200).json({url: googleAuthURL()});
@@ -217,7 +217,7 @@ router.get('/google', async (req, res) => {
 //zwraca link do autoryzacji przy pomocy facebooka req = {type : string}
 // jeśli type = 'web' po zalogowaniu nastąpi przekierowanie do strony glownej aplikacji webowej
 router.get('/facebook/url', (req, res) => {
-    if(req.body.type == 'web'){
+    if(req.query.type == 'web'){
         req.session.type = 'web';
     }
     return res.status(200).json({url: getFacebookAuthURL()});           
