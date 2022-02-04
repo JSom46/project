@@ -10,7 +10,7 @@
 import React, {Component, useState} from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import {Button, StatusBar} from 'react-native';
+import {Button, StatusBar, Linking} from 'react-native';
 
 import AuthScreenLog from './AuthScreenLog';
 import AuthScreenSign from './AuthScreenSign';
@@ -65,6 +65,7 @@ const App = () => {
     dzieki temu nie musimy przerzucac danych uzytkownika pomiedzy komponentami
     Uzywamy React.useMemo zeby nie wysylac requestow do serwera kilka razy*/
     const authContextData = React.useMemo(() => ({
+
       logIn: async (credentials) => {
         let response = await fetch('http://'+ adresSerwera +':2400/auth/login', {
           method: 'POST',
@@ -84,13 +85,33 @@ const App = () => {
         
       },
 
+      logInGoogle: async () => {
+          let response = await fetch('http://'+ adresSerwera +':2400/auth/google/url', {
+          method: 'GET',
+          credentials: 'include'
+        }).then(data => data.json())
+
+        Linking.openURL(response.url).catch(err => console.error("Couldn't load page", err));
+
+        //console.log(response);
+      },
+
+      logInFacebook: async () => {
+          let response = await fetch('http://'+ adresSerwera +':2400/auth/facebook/url', {
+          method: 'GET',
+          credentials: 'include'
+        }).then(data => data.json())
+
+        Linking.openURL(response.url).catch(err => console.error("Couldn't load page", err));
+      },
+
       logOut: () => {
           let response = fetch('http://'+ adresSerwera +':2400/auth/logout', {
             credentials: 'include',
             method: 'GET',
           }).then(data => data.json())
 
-          alert(response.msg);
+          //alert(response.msg);
 
         dispatch({type: 'LOG_OUT'});
       },
@@ -161,6 +182,8 @@ const App = () => {
       }
 
         fetchData();
+
+        dispatch({ type: 'RESTORE_TOKEN', token: null });
 
         // to wg. oficjalnego poradnika (https://reactnavigation.org/docs/auth-flow/), prawdopodobnie cos takiego bedziemy docelowo chcieli
       /*

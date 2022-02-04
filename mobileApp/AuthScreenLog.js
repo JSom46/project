@@ -1,6 +1,6 @@
 import { useLinkProps } from '@react-navigation/native';
 import React from 'react';
-import { View, Text, Button, TextInput } from 'react-native';
+import { View, Text, Button, TextInput, Touchable, TouchableHighlight } from 'react-native';
 import {stylesAuth} from './styles'
 import PropTypes from 'prop-types';
 import {AuthContext} from './App'
@@ -9,6 +9,8 @@ import {AuthContext} from './App'
 
 const AuthScreenLog = ({navigation}) => {
     const {logIn} = React.useContext(AuthContext);
+    const {logInGoogle} = React.useContext(AuthContext);
+    const {logInFacebook} = React.useContext(AuthContext);
 
     const [email, setEmail] = React.useState();
     const [password, setPassword] = React.useState();
@@ -30,6 +32,22 @@ const AuthScreenLog = ({navigation}) => {
                     onPress={validate}
                     style={{margin: 5}}
                 />
+
+                <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                }}>
+                    <Button
+                        title='Google'
+                        onPress={logInGoogle}
+                    />
+
+                    <Button
+                        title='Facebook'
+                        onPress={logInFacebook}
+                    />
+                </View>
+                
                 <Text style={{marginTop: 10}}>Nie masz konta?</Text>
                 <Button
                     title='Zarejestruj się!'
