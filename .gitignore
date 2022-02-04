@@ -3,6 +3,8 @@ SSR/node_modules/
 SSR/db/serverdb.db
 server/db/serverdb.db
 
+react-app/node_modules/
+
 mobileApp/android/build
 mobileApp/ios
 mobileApp/node_modules

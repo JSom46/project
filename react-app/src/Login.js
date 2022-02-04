@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
+// import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
+
+import FormControl from '@mui/material/FormControl';
+import FormGroup from '@mui/material/FormGroup';
+import { TextField } from '@mui/material';
+import { Button,IconButton } from '@mui/material';
+import { Google,Facebook } from '@mui/icons-material';
+import { Stack } from '@mui/material';
+import  Item  from '@mui/material/ListItem';
+import { Typography } from '@mui/material';
+
 import './login.css'
 
 
@@ -99,26 +109,23 @@ if(auth?.login){
   }
   else return(
     <div>
-    <h1>Logowanie</h1>
-    <Form onSubmit={handleSubmit}>
+    <Typography variant="h4"> Logowanie </Typography>
+    <FormControl>
+    <form onSubmit={handleSubmit}>
     <FormGroup>
-      <Label for="email">Email</Label>
-      <Input type="email" name="email" id="email" required onChange={e => setEmail(e.target.value)} placeholder="email" />
+    <TextField type='email' id="email" label="Email" variant="standard" required onChange={e => setEmail(e.target.value)} />
+    <TextField type='password' id="my-input" label="Hasło" variant="standard" required onChange={e => setPassword(e.target.value)} />
+    <br />
+    <Button variant="contained" type="submit" onClick={handleSubmit}>Zaloguj</Button>
     </FormGroup>
-    <FormGroup>
-      <Label for="password">Hasło</Label>
-      <Input type="password" name="password" id="password" placeholder="hasło" onChange={e => setPassword(e.target.value)}/>
-    </FormGroup>
-    <Button color="primary" type='submit' onClick={handleSubmit}>Zaloguj</Button>
-    <FormGroup>
-      <Button color="secondary" onClick={LoginGoogleFunc}>LogowanieGoogle</Button>
-      <Button color="secondary" onClick={LoginFacebookFunc}>LogowanieFacebook</Button>
-      <p id="loginError">&nbsp;</p>
-    </FormGroup>
-    </Form>
+    </form>
+    <Stack direction="row" spacing={2}>
+    <Item><IconButton onClick={LoginGoogleFunc}> <Google /> </IconButton></Item>
+    <Item><IconButton onClick={LoginFacebookFunc}> <Facebook /> </IconButton></Item>
+    </Stack>
+    </FormControl>
+    <p id="loginError">&nbsp;</p>
     </div>
-    // <button onClick={LoginGoogleFunc}>LogowanieGoogle</button><br />
-    // <button onClick={LoginFacebookFunc}>LogowanieFacebook</button><br />
     )
     function errorMessage(msg) {
       var element = document.getElementById("loginError");
