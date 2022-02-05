@@ -4,6 +4,7 @@ require('dotenv').config();
 const express = require('express');
 const helmet = require ('helmet');
 const authRoute = require('./auth.js');
+const anonsRoute = require('./anons.js');
 const cors = require('cors');
 
 const session = require('express-session');
@@ -28,6 +29,7 @@ app.use(helmet());
 app.use(express.json());
 
 app.use('/auth', authRoute);
+app.use('/anons', anonsRoute);
 
 app.listen(2400, () => {
 	console.log("Server started: 2400");

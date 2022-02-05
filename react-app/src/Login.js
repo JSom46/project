@@ -33,7 +33,7 @@ function logout() {
   });
 }
 async function LoginGoogle() {
-  const data = await fetch('http://localhost:2400/auth/google/url', {
+  const data = await fetch('http://localhost:2400/auth/google/url?type=web', {
   method: 'GET',
   credentials: 'include'
 });
@@ -46,7 +46,7 @@ const LoginGoogleFunc = async e => {
   window.location.assign(response.url);
 }
 async function LoginFacebook() {
-  const data = await fetch('http://localhost:2400/auth/facebook/url', {
+  const data = await fetch('http://localhost:2400/auth/facebook/url?type=web', {
   method: 'GET',
   credentials: 'include'
 });
@@ -111,12 +111,14 @@ if(auth?.login){
     <div>
     <Typography variant="h4"> Logowanie </Typography>
     <FormControl>
+    <form onSubmit={handleSubmit}>
     <FormGroup>
     <TextField type='email' id="email" label="Email" variant="standard" required onChange={e => setEmail(e.target.value)} />
     <TextField type='password' id="my-input" label="Hasło" variant="standard" required onChange={e => setPassword(e.target.value)} />
-    </FormGroup>
     <br />
     <Button variant="contained" type="submit" onClick={handleSubmit}>Zaloguj</Button>
+    </FormGroup>
+    </form>
     <Stack direction="row" spacing={2}>
     <Item><IconButton onClick={LoginGoogleFunc}> <Google /> </IconButton></Item>
     <Item><IconButton onClick={LoginFacebookFunc}> <Facebook /> </IconButton></Item>

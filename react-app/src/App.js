@@ -1,6 +1,6 @@
 //import React, { useState, useEffect } from 'react';
 import { Redirect } from 'react-router-dom/cjs/react-router-dom.min';
-import { BrowserRouter, Route, Switch,useParams /*Link*/ } from 'react-router-dom';
+import { BrowserRouter, Route, Switch /*Link*/ } from 'react-router-dom';
 
 import './App.css';
 import Register from './Register';
@@ -34,8 +34,7 @@ function App() {
   <Route path="/login">
   <Login />
   </Route>
-  <Route path="/activate/:id" children={<Activate />}>
-  </Route>
+  <Route path="/activate" children={<Activate />} />
   </Switch>
   </Item>
   </Grid>
