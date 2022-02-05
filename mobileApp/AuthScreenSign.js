@@ -1,15 +1,15 @@
 import React from 'react';
-import { View, Text, Button, TextInput} from 'react-native';
+import { View, Text, Button, TextInput, TouchableHighlight} from 'react-native';
 import {stylesAuth} from './styles'
 import { AuthContext } from './App';
 
 const AuthScreenSign = ({navigation}) => {
     const {signUp} = React.useContext(AuthContext);
 
-    const [login, setLogin] = React.useState();
-    const [email, setEmail] = React.useState();
-    const [password, setPassword] = React.useState();
-    const [passwordRepeat, setPasswordRepeat] = React.useState();
+    const [login, setLogin] = React.useState('');
+    const [email, setEmail] = React.useState('');
+    const [password, setPassword] = React.useState('');
+    const [passwordRepeat, setPasswordRepeat] = React.useState('');
 
     const validate = () => {
         if(password !== passwordRepeat){
@@ -32,10 +32,14 @@ const AuthScreenSign = ({navigation}) => {
                 <TextInput style={stylesAuth.input} secureTextEntry={true} placeholder='Powtórz hasło' onChangeText={setPasswordRepeat}></TextInput>
                 <TextInput style={stylesAuth.input} placeholder='Adres email' onChangeText={setEmail}></TextInput>
 
-                <Button
-                    title='Zarejestruj się'
+                <TouchableHighlight
+                    style={[stylesAuth.button, {marginTop: 15}]}
                     onPress={validate}
-                />
+                    underlayColor={'#2670ab'}
+                >
+                    <Text style={stylesAuth.buttonText}>Zarejestruj się</Text>
+                </TouchableHighlight>
+
             </View>
         </View>
     )

@@ -6,10 +6,12 @@
  * @format
  * @flow strict-local
  */
-
+import 'react-native-gesture-handler';
 import React, {Component, useState} from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+
 import {Button, StatusBar, Linking} from 'react-native';
 
 import AuthScreenLog from './AuthScreenLog';
@@ -19,11 +21,18 @@ import HomeScreen from './HomeScreen';
 import AuthScreenActivate from './AuthScreenActivate';
 
 
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { fab } from '@fortawesome/free-brands-svg-icons'
+import { faCheckSquare, faCoffee } from '@fortawesome/free-solid-svg-icons'
+library.add(fab, faCheckSquare, faCoffee)
+
+
 const Stack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
 export const AuthContext = React.createContext();
 
 /*Ta zmienna musi byc ustawiona na adres pod ktorym dziala komputer*/
-const adresSerwera = 'localhost';
+const adresSerwera = '192.168.31.47';
 
 
 const App = () => {
@@ -76,7 +85,7 @@ const App = () => {
           body: JSON.stringify(credentials)
         }).then(data => data.json())
 
-        alert(response.msg);
+        alert(response.login);
         console.log(response.msg);
 
         if(response.msg === 'ok'){
@@ -152,7 +161,6 @@ const App = () => {
             return true;
           }
 
-          //navigation.navigate('Aktywacja');
         //dispatch({type: 'LOG_IN', token: 'dummy-token'});
       },
     }),
@@ -166,19 +174,21 @@ const App = () => {
         let userToken;
   
         const fetchData = async () => {
-          try {
-            const response = await fetch('http://'+ adresSerwera +':2400/auth/loggedin', {
-            method: 'GET',
-            credentials: 'include'
-          });
-          const json = await response.json();
-          // console.log(json);
-          //setAuth(json);
-          userToken = json;
-          dispatch({ type: 'RESTORE_TOKEN', token: userToken });
-        } catch (error) {
-          console.log("error", error);
-        }
+            try {
+              const response = await fetch('http://'+ adresSerwera +':2400/auth/loggedin', {
+              method: 'GET',
+              credentials: 'include'
+            });
+            const json = await response.json();
+
+            console.log(json);
+            if(json.msg != 'not logged in'){
+              userToken = json.login;
+              dispatch({ type: 'RESTORE_TOKEN', token: userToken });
+            }
+          } catch (error) {
+            console.log("error", error);
+          }
       }
 
         fetchData();
@@ -226,13 +236,12 @@ const App = () => {
               component={SplashScreen}
               />
             ) : state.userToken ? (
-              <Stack.Screen
-              name='Strona domowa'
-              component={HomeScreen}
-              />
+                <Stack.Screen
+                  name='Strona domowa'
+                  component={HomeScreen}
+                />
             ) : (
               <>
-              
               <Stack.Screen
               name='Logowanie'
               component={AuthScreenLog}
@@ -257,6 +266,7 @@ const App = () => {
               </>
             )}
           </Stack.Navigator>
+          
         </NavigationContainer>
       </AuthContext.Provider>
     )
