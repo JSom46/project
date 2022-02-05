@@ -1,6 +1,4 @@
 server/node_modules/
-SSR/node_modules/
-SSR/db/serverdb.db
 server/db/serverdb.db
 
 react-app/node_modules/
