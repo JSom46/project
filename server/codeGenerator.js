@@ -1,9 +1,11 @@
 "use strict";
 
 module.exports = (length) => {
-    let result = "";
-    for(let i = 0; i < length; i++){
-        result += Math.round(Math.random() * 9);
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
-};
+}; 
