@@ -23,22 +23,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-const sqlite3 = require('sqlite3').verbose();
-const con = new sqlite3.Database('./db/serverdb.db', (err) => {
-    if(err){
-		console.log('db connecting error!');
-		throw err;
-	}
-	console.log('connected succesfully to database!');
-});
-con.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL, email TEXT UNIQUE NOT NULL, activation_code TEXT, is_activated INTEGER, is_native INTEGER);', (err, res) => {
-    if(err){
-        console.log(err.name + " | " + err.message);
-        throw err;
-    }
-});
-
-
+const con = require('./dbCon.js');
 
 //rejestracja req = {login : string, password : string, email : string}
 router.post('/signup', (req, res) => {

@@ -42,32 +42,10 @@ export default function Register() {
 
   return(
     <div>
-    {/* <h1>Rejestracja</h1>
-    <Form onSubmit={handleSubmit}>
-    <FormGroup>
-      <Label for="username">Login:</Label>
-      <Input type="text" name="username" id="username" required onChange={e => setLogin(e.target.value)} placeholder="login" />
-    </FormGroup>
-    <FormGroup>
-      <Label for="email">Email</Label>
-      <Input type="email" name="email" id="email" required onChange={e => setEmail(e.target.value)} placeholder="email" />
-    </FormGroup>
-    <FormGroup>
-      <Label for="password">Hasło</Label>
-      <Input type="password" name="password" id="password" placeholder="hasło" onChange={e => setPassword(e.target.value)}/>
-    </FormGroup>
-    <FormGroup>
-      <Label for="password">Powtórz hasło</Label>
-      <Input type="password" name="passwordRepeat" id="passwordRepeat" placeholder="hasło" onChange={e => setPasswordRepeat(e.target.value)}/>
-    </FormGroup>
-    <Button color="primary" type='submit'>Zarejestruj</Button>
-    <FormGroup>
-      <p id="loginError">&nbsp;</p>
-    </FormGroup>
-    </Form> */}
 
     <Typography variant="h4"> Rejestracja </Typography>
     <FormControl>
+    <form onSubmit={handleSubmit}>
     <FormGroup>
     <TextField type='text' id="username" label="Login" variant="standard" required onChange={e => setLogin(e.target.value)} />
     <TextField type='email' id="email" label="Email" variant="standard" required onChange={e => setEmail(e.target.value)} />
@@ -76,6 +54,7 @@ export default function Register() {
     </FormGroup>
     <br />
     <Button variant="contained" type="submit" onClick={handleSubmit}>Zarejestruj</Button>
+    </form>
     </FormControl>
     <p id="registerMessage">&nbsp;</p>
     </div>
