@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-	"start": "node main.js"
+    "start": "node main.js"
   },
   "author": "Jan Sompolinski",
   "license": "ISC",
@@ -19,6 +19,7 @@
     "express-session": "^1.17.2",
     "googleapis": "^92.0.0",
     "helmet": "^4.6.0",
+    "multer": "^1.4.4",
     "nodemailer": "^6.7.2",
     "password-validator": "^5.2.1",
     "sqlite3": "^4.2.0"

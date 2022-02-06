@@ -25,6 +25,7 @@ const transporter = nodemailer.createTransport({
 
 const con = require('./dbCon.js');
 
+
 //rejestracja req = {login : string, password : string, email : string}
 router.post('/signup', (req, res) => {
     //sprawdzenie, czy mail nie jest już w uzyciu
@@ -67,7 +68,7 @@ router.post('/signup', (req, res) => {
                 process.env.EMAIL_ADDR, 
                 req.body.email, 
                 'Aktywuj swoje konto', 
-                `${req.body.login}, aktywuj swoje konto klikając w link poniżej:\n localhost:3000/activate?code=${code}`);
+                `${req.body.login}, aktywuj swoje konto klikając w link poniżej:\n ${process.env.WEB_APP_ADDR}/activate?code=${code}`);
 
             //dodaj usera do bazy
             con.run(`INSERT INTO users (login, password, email, activation_code, is_activated, is_native) 
@@ -88,6 +89,7 @@ router.post('/signup', (req, res) => {
         });
     });
 });
+
 
 //aktywacja konta req = {code : string}
 router.post('/activate', (req, res) => {
@@ -111,14 +113,13 @@ router.post('/activate', (req, res) => {
 });
 
 
-
 //logowanie req = {email : string, password : string}
 router.post('/login', (req, res) => {
     //pobranie informacji o koncie z bazy danych
     if(req.session.login){
         return res.status(400).json({msg: 'already logged in'});
     }
-    con.get(`SELECT login, password, is_activated, is_native FROM users WHERE email = ?;`, req.body.email, (err, row) => {
+    con.get(`SELECT * FROM users WHERE email = ?;`, req.body.email, (err, row) => {
         if(err){
             return res.sendStatus(500);
         }
@@ -144,6 +145,8 @@ router.post('/login', (req, res) => {
             }
             // haslo sie zgadza
             req.session.login = row.login;
+            req.session.user_id = row.id;
+            req.session.email = row.email;
             return res.status(200).json({msg: 'ok', login: row.login});          
         });
     });
@@ -151,16 +154,13 @@ router.post('/login', (req, res) => {
 });
 
 
-
-//zwraca link do autoryzacji przy pomocy google req = {type : string}
-// jeśli type = 'web' po zalogowaniu nastąpi przekierowanie do strony glownej aplikacji webowej
+//zwraca link do autoryzacji przy pomocy google req = {}
 router.get('/google/url', (req, res) => {
     if(req.query.type == 'web'){
         req.session.type = 'web';
     }
     return res.status(200).json({url: googleAuthURL()});
 });
-
 
 
 //pomyślna autoryzacja przy pomocy google przekieruje tutaj, tworzy konto(jesli to pierwsze logowanie przy pomocy danego konta) i tworzy sesje
@@ -179,33 +179,43 @@ router.get('/google', async (req, res) => {
                 if(err){
                     return res.sendStatus(500);
                 }
+
                 req.session.login = user.name;
-                return res.status(200).json({msg: 'ok', login: user.name});
+                req.session.email = user.email;
+                req.session.user_id = this.lastID;
+
+                if(req.session.type == 'web'){
+                    req.session.type = undefined;
+                    return res.redirect(301, process.env.WEB_APP_ADDR);
+                }
+
+                return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: this.lastID});  
             });
         }
         //konto istnieje - utworzenie sesji
         else{
-            req.session.login = user.name;
+            req.session.login = row.login;
+            req.session.user_id = row.id;
+            req.session.email = row.email;
+
             if(req.session.type == 'web'){
-                req.session.type = null;
-                return res.redirect(301, 'http://localhost:3000');
+                req.session.type = undefined;
+                return res.redirect(301, process.env.WEB_APP_ADDR);
             }
+
             return res.status(200).json({msg: 'ok', login: user.name});
         }
     });
 });
 
 
-
-//zwraca link do autoryzacji przy pomocy facebooka req = {type : string}
-// jeśli type = 'web' po zalogowaniu nastąpi przekierowanie do strony glownej aplikacji webowej
+//zwraca link do autoryzacji przy pomocy facebooka req = {}
 router.get('/facebook/url', (req, res) => {
     if(req.query.type == 'web'){
         req.session.type = 'web';
     }
     return res.status(200).json({url: getFacebookAuthURL()});           
 });
-
 
 
 //pomyślna autoryzacja przy pomocy facebooka przekieruje tutaj, tworzy konto(jesli to pierwsze logowanie przy pomocy danego konta) i tworzy sesje
@@ -219,39 +229,50 @@ router.get('/facebook', async (req, res) => {
         }
         //konto nie istnieje - utworzenie nowego konta przy pomocy pobranych danych
         if(!row){
-            con.run('INSERT INTO users(login, password, email, is_activated, is_native) VALUES(?, ?, ?, 1, 0);', user.name, user.id, user.email, (err, result) => {
+            con.run('INSERT INTO users(login, password, email, is_activated, is_native) VALUES(?, ?, ?, 1, 0);', user.name, user.id, user.email, function(err){
                 if(err){
                     return res.sendStatus(500);
                 }
+
                 req.session.login = user.name;
-                return res.status(200).json({msg: 'ok', login: user.name});
+                req.session.email = user.email;
+                req.session.user_id = this.lastID;
+
+                if(req.session.type == 'web'){
+                    req.session.type = undefined;
+                    return res.redirect(301, process.env.WEB_APP_ADDR);
+                }
+
+                return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: this.lastID});   
             });
         }
         //konto istnieje - utworzenie sesji
         else{
-            req.session.login = user.name;
+            req.session.login = row.login;
+            req.session.user_id = row.id;
+            req.session.email = row.email;
+
             if(req.session.type == 'web'){
-                req.session.type = null;
-                return res.redirect(301, 'http://localhost:3000');
+                req.session.type = undefined;
+                return res.redirect(301, process.env.WEB_APP_ADDR);
             }
+
             return res.status(200).json({msg: 'ok', login: user.name});
         }
     });
 });
 
 
-
-//zwraca login, jesli user jest zalogowany i informacje ze nie jest zalogowany w przeciwnym wypadku
+//zwraca id, login i email zalogowanego usera, lub informacje o niezalogowaniu
 router.get('/loggedin', (req, res) => {
     if(req.session.login){
-        return res.status(200).json({login: req.session.login});
+        return res.status(200).json({id: req.session.user_id, email: req.session.email, login: req.session.login});
     }
     return res.status(403).json({msg: 'not logged in'});
 });
 
 
-
-//niszczy sesje jest user byl zalogowany i informacje ze nie jest zalogowany w przeciwnym wypadku
+//niszczy sesje jesli user byl zalogowany lub wysyla informacje ze nie jest zalogowany w przeciwnym wypadku
 router.get('/logout', (req, res) => {
     if(req.session.login){
         req.session.destroy();
@@ -259,7 +280,6 @@ router.get('/logout', (req, res) => {
     }
     return res.status(403).json({msg: 'not logged in'});
 });
-
 
 
 module.exports = router;
