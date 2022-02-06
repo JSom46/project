@@ -147,7 +147,7 @@ router.post('/login', (req, res) => {
             req.session.login = row.login;
             req.session.user_id = row.id;
             req.session.email = row.email;
-            return res.status(200).json({msg: 'ok', login: row.login});          
+            return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: this.lastID});          
         });
     });
 

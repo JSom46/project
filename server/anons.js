@@ -50,7 +50,7 @@ router.post('/add', upload.array('pictures'), (req, res) => {
         console.log('blad ez!');
         // usuniecie zdjec przeslanych z ogloszeniem
 
-        return res.status(400).json({msg: 'required field is empty'});
+        return res.status(400).json({msg: 'required field is empty/contain invalid data'});
     }
 
     //utworzenie listy zdjec
