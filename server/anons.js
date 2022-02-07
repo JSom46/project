@@ -47,7 +47,7 @@ router.post('/add', upload.array('pictures'), (req, res) => {
     if(!(req.body.title && req.body.description && req.body.category && req.body.lat && req.body.lng) || 
     (req.body.category != 0 && req.body.category != 1) || 
     isNaN(parseFloat(req.body.lat)) || isNaN(parseFloat(req.body.lng))){
-        console.log('blad ez!');
+        // do dodania
         // usuniecie zdjec przeslanych z ogloszeniem
 
         return res.status(400).json({msg: 'required field is empty/contain invalid data'});
@@ -68,7 +68,6 @@ router.post('/add', upload.array('pictures'), (req, res) => {
     con.run('INSERT INTO anons(title, description, category, images, author_id, create_date, lat, lng) VALUES(?, ?, ?, ?, ?, (SELECT strftime ("%s", "now")), ?, ?);', 
     req.body.title, req.body.description, req.body.category, pictures, req.session.user_id, req.body.lat, req.body.lng, function(err){
         if(err){
-            console.log(err);
             return res.sendStatus(500);
         }
         console.log(this.lastID);
@@ -109,6 +108,35 @@ router.get('/', (req, res) => {
     });
 });
 
+
+// zwraca liste ogloszen sortowana po dacie utworzenia malejaco i liczbe przeslanych ogloszen
+// parametr page informuje ktora trzydziestke ogloszen ma zwrocic serwer tj.
+// page = 1 - zwraca ogloszenia 1 - 30
+// page = 2 - zwraca ogloszenia 31 - 60 itd.
+// jesli parametr page jest niezdefiniowany, to zwraca ogloszenia 1 - 30
+router.get('/list', (req, res) => {
+    let page = (isNaN(parseInt(req.query.page)) ? 1 : req.query.page);
+    con.all('SELECT id, title, category, create_date, image FROM (SELECT ROW_NUMBER() OVER (ORDER BY create_date DESC) row, id, category, title, datetime(create_date, "unixepoch", "localtime") create_date, images image FROM anons) WHERE row BETWEEN ? AND ?', 1 + (page - 1) * 30, page * 30, (err, rows) => {
+        if(err){
+            return res.sendStatus(500);
+        }
+
+        rows.forEach((e, i) => {rows[i].image = e.image.split('#')[0];});
+
+        res.status(200).json({
+            num: rows.length,
+            list: rows
+        });
+    });
+});
+
+
+/*con.all('SELECT (ROW_NUMBER () OVER (ORDER BY create_date)) RowNum, id, title, create_date FROM anons WHERE RowNum < 10', (err, rows) => {
+    if(err){
+        console.log(err);
+    }
+    console.log(rows);
+});*/
 
 //zwraca liste ogloszen o zadanych, opcjonalnych parametrach: 
 //category = 0 - ogłoszenia zaginiecia, 1 - ogloszenia znalezienia, brak - wszystkie ogloszenia
