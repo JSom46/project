@@ -45,11 +45,13 @@ router.post('/add', upload.array('pictures'), (req, res) => {
 
     //brakuje ktoregos z niezbednych pol lub ktores z pol zawiera niepoprawne dane - ogloszenie nie moze zostac dodane
     if(!(req.body.title && req.body.description && req.body.category && req.body.lat && req.body.lng) || 
-    (req.body.category != 0 && req.body.category != 1) || 
-    isNaN(parseFloat(req.body.lat)) || isNaN(parseFloat(req.body.lng))){
-        // do dodania
-        // usuniecie zdjec przeslanych z ogloszeniem
-
+    (req.body.category != 0 && req.body.category != 1) || isNaN(parseFloat(req.body.lat)) || isNaN(parseFloat(req.body.lng))){
+        //ogloszenie nie zostanie dodane - kasujemy powiazane z nim zdjecia
+        req.files.filename.forEach((e) => {
+            fs.unlink('./pictures/' + e.filename, (err) => {
+                console.log(err);
+            });
+        });
         return res.status(400).json({msg: 'required field is empty/contain invalid data'});
     }
 
@@ -68,6 +70,12 @@ router.post('/add', upload.array('pictures'), (req, res) => {
     con.run('INSERT INTO anons(title, description, category, images, author_id, create_date, lat, lng) VALUES(?, ?, ?, ?, ?, (SELECT strftime ("%s", "now")), ?, ?);', 
     req.body.title, req.body.description, req.body.category, pictures, req.session.user_id, req.body.lat, req.body.lng, function(err){
         if(err){
+            //dodanie ogloszenia sie nie powiodlo - kasujemy powiazane z nim zdjecia
+            req.files.filename.forEach((e) => {
+                fs.unlink('./pictures/' + e.filename, (err) => {
+                    console.log(err);
+                });
+            });
             return res.sendStatus(500);
         }
         console.log(this.lastID);
