@@ -27,14 +27,27 @@ export default function AddAnnoucment() {
         }
 		setPictures(formData);
   };
-  async function postAnnoucement(credentials) {
+  async function postAnnoucement() {
+    // let data = {
+    //   'json': JSON.stringify(credentials,files),
+    //   'files': pictures
+    // };
+    const formData = new FormData();
+    formData.append('title',title);
+    formData.append('description',description);
+    for (var value of pictures.values()) {
+      formData.append('pictures',value);
+    }
+    formData.append('category',category);
+    formData.append('lat',lat);
+    formData.append('lng',lng);
       return fetch('http://localhost:2400/anons/add', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        // headers: {
+        //   'Content-Type': 'application/json'
+        // },
         credentials: 'include',
-        body: JSON.stringify(credentials),
+        body: formData
       })
         .then(data => data.json())
      }
@@ -42,13 +55,7 @@ export default function AddAnnoucment() {
     e.preventDefault();
     setLat(120.243);
     setLng(130.231);
-    const response = await postAnnoucement({
-      title,
-      description,
-      category,
-      lat,
-      lng
-    });
+    const response = await postAnnoucement();
     console.log(response.msg);
   }
   return(
