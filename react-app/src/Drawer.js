@@ -6,8 +6,8 @@ import Divider from '@mui/material/Divider';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+import LoginIcon from '@mui/icons-material/Login';
+import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import MenuIcon from '@mui/icons-material/Menu';
 import { IconButton } from '@mui/material';
 
@@ -43,13 +43,13 @@ export default function TemporaryDrawer() {
       <List>
           <ListItem button key={'Login'} component="a" href="/login">
             <ListItemIcon>
-               <InboxIcon />
+               <LoginIcon />
             </ListItemIcon>
             <ListItemText primary={'Login'} />
           </ListItem>
           <ListItem button key={'Rejestracja'} component="a" href="/register">
             <ListItemIcon>
-               <MailIcon />
+               <AppRegistrationIcon />
             </ListItemIcon>
             <ListItemText primary={'Rejestracja'} />
           </ListItem>

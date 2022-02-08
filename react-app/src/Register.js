@@ -49,8 +49,8 @@ export default function Register() {
     <FormGroup>
     <TextField type='text' id="username" label="Login" variant="standard" required onChange={e => setLogin(e.target.value)} />
     <TextField type='email' id="email" label="Email" variant="standard" required onChange={e => setEmail(e.target.value)} />
-    <TextField type='password' id="my-input" label="Hasło" variant="standard" required onChange={e => setPassword(e.target.value)} />
-    <TextField type='password' id="my-input" label="Hasło" variant="standard" required onChange={e => setPasswordRepeat(e.target.value)} />
+    <TextField type='password' id="password" label="Hasło" variant="standard" required onChange={e => setPassword(e.target.value)} />
+    <TextField type='password' id="passwordRepeat" label="Hasło" variant="standard" required onChange={e => setPasswordRepeat(e.target.value)} />
     </FormGroup>
     <br />
     <Button variant="contained" type="submit" onClick={handleSubmit}>Zarejestruj</Button>

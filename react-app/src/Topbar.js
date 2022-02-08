@@ -8,9 +8,10 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import MUIDrawer from './Drawer'
+// import { FormGroup,FormControlLabel,Switch } from '@mui/material';
 
-export default function MenuAppBar() {
-  const [auth, /*setAuth*/] = React.useState(false);
+export default function MenuAppBar(props) {
+  // const [auth, /*setAuth*/] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   // const handleChange = (event) => {
@@ -31,12 +32,12 @@ export default function MenuAppBar() {
         <FormControlLabel
           control={
             <Switch
-              checked={auth}
-              onChange={handleChange}
+              checked={props.auth}
+              // onChange={handleChange}
               aria-label="login switch"
             />
           }
-          label={auth ? 'Logout' : 'Login'}
+          label={props.auth ? 'Logout' : 'Login'}
         />
       </FormGroup> */}
       <AppBar position="static">
@@ -54,7 +55,7 @@ export default function MenuAppBar() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             PZ-XIV
           </Typography>
-          {auth && (
+          {props.auth?.login && (
             <div>
               <IconButton
                 size="large"
@@ -81,8 +82,8 @@ export default function MenuAppBar() {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
-                <MenuItem onClick={handleClose}>Profile</MenuItem>
-                <MenuItem onClick={handleClose}>My account</MenuItem>
+                <MenuItem onClick={function(event){handleClose();window.location.href="/profile"}}>Profile</MenuItem>
+                <MenuItem onClick={function(event){handleClose();window.location.href="/account"}}>My account</MenuItem>
               </Menu>
             </div>
           )}

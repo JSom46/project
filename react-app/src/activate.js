@@ -1,6 +1,8 @@
 import React, { useState,useEffect } from 'react';
 import './login.css'
 
+import { CircularProgress } from '@mui/material';
+
 
 async function activateAccount(userData) {
   const data = fetch('http://localhost:2400/auth/activate', {
@@ -14,7 +16,7 @@ async function activateAccount(userData) {
   return data;
  }
 export default function Activate() {
-  const [activated,setActivated] = useState(false);
+  const [activated,setActivated] = useState(0);
 
   useEffect(() => {
     let paramString = window.location.search;
@@ -26,11 +28,12 @@ export default function Activate() {
         code
       });
       console.log(response.msg);
-      if(response.msg === 'account activated') setActivated(true);
+      if(response.msg === 'account activated') setActivated(2);
+      else if(response.msg === 'invalid code') setActivated(1);
     }
     handleActivate();
 }, []);
-if(activated === true){
+if(activated === 2){
   setTimeout(()=>{window.location.href = '/login'},5000)
   return(
     <div>
@@ -39,11 +42,16 @@ if(activated === true){
       </div>
     )
   }
-  else {
+  else if(activated === 1){
   return(
     <div>
      <h3 style={{color:"red"}}>To konto zostało już aktywowane lub kod aktywacyjny jest błędny.</h3>
      </div>
    )
   }
+  else return(
+    <div>
+     <CircularProgress />
+    </div>
+   )
 }
