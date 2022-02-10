@@ -68,7 +68,7 @@ router.post('/signup', (req, res) => {
                 process.env.EMAIL_ADDR, 
                 req.body.email, 
                 'Aktywuj swoje konto', 
-                `${req.body.login}, aktywuj swoje konto klikając w link poniżej:\n ${process.env.WEB_APP_ADDR}/activate?code=${code}`);
+                `${req.body.login}, aktywuj swoje konto klikając w link poniżej:\n ${process.env.WEB_APP_ROOT_URI}/activate?code=${code}`);
 
             //dodaj usera do bazy
             con.run(`INSERT INTO users (login, password, email, activation_code, is_activated, is_native) 
@@ -186,7 +186,7 @@ router.get('/google', async (req, res) => {
 
                 if(req.session.type == 'web'){
                     req.session.type = undefined;
-                    return res.redirect(301, process.env.WEB_APP_ADDR);
+                    return res.redirect(301, process.env.WEB_APP_ROOT_URI);
                 }
 
                 return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: this.lastID});  
@@ -200,10 +200,10 @@ router.get('/google', async (req, res) => {
 
             if(req.session.type == 'web'){
                 req.session.type = undefined;
-                return res.redirect(301, process.env.WEB_APP_ADDR);
+                return res.redirect(301, process.env.WEB_APP_ROOT_URI);
             }
 
-            return res.status(200).json({msg: 'ok', login: user.name});
+            return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: this.lastID});
         }
     });
 });
@@ -240,7 +240,7 @@ router.get('/facebook', async (req, res) => {
 
                 if(req.session.type == 'web'){
                     req.session.type = undefined;
-                    return res.redirect(301, process.env.WEB_APP_ADDR);
+                    return res.redirect(301, process.env.WEB_APP_ROOT_URI);
                 }
 
                 return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: this.lastID});   
@@ -254,10 +254,10 @@ router.get('/facebook', async (req, res) => {
 
             if(req.session.type == 'web'){
                 req.session.type = undefined;
-                return res.redirect(301, process.env.WEB_APP_ADDR);
+                return res.redirect(301, process.env.WEB_APP_ROOT_URI);
             }
 
-            return res.status(200).json({msg: 'ok', login: user.name});
+            return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: this.lastID});
         }
     });
 });
@@ -266,7 +266,7 @@ router.get('/facebook', async (req, res) => {
 //zwraca id, login i email zalogowanego usera, lub informacje o niezalogowaniu
 router.get('/loggedin', (req, res) => {
     if(req.session.login){
-        return res.status(200).json({id: req.session.user_id, email: req.session.email, login: req.session.login});
+        return res.status(200).json({user_id: req.session.user_id, email: req.session.email, login: req.session.login});
     }
     return res.status(403).json({msg: 'not logged in'});
 });

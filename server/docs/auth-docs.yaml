@@ -1,0 +1,276 @@
+paths:
+  /google/url/{type}:
+    get:
+      tags:
+        - /auth - autentyfikacja
+      summary: Zwraca link do logowania przy pomocy konta google
+      produces:
+      - application/json
+      parameters:
+      - name: type
+        in: path 
+        description: Jeśli parametr jest równy 'web' - po udanym zalogowaniu, zamiast zwracać jsona, przekieruje do strony głównej aplikacji webowej
+        required: false
+        type: string
+      responses:
+        '200':
+          description: Zwraca link do logowania
+          schema:
+            type: object
+            properties:
+              url:
+                type: string
+              
+/google/{code}:
+    get:
+      tags:
+        - /auth - autentyfikacja
+      summary: punkt do którego następuje automatyczne przekierowanie po zalogowaniu przy pomocy konta google
+      produces:
+      - application/json
+      parameters:
+      - name: code
+        in: path
+        description: Kod zwracany przez usługę autentyfikacji google
+        required: true
+        type: string
+      responses:
+        '200':
+          description: zalogowano
+          schema:
+            type: object
+            properties:
+              msg:
+                type: string
+                enum:
+                - 'ok'
+              login:
+                type: string
+              email:
+                type: string
+              user_id:
+                type: integer
+        '301':
+          description: Przy pobieraniu linku ustawiono parametr type na 'web' - następuje przekierowanie na strone główną aplikacji webowej
+        '500':
+          description: Błąd po stronie serwera
+
+/facebook/url/{type}:
+  get:
+    tags:
+      - /auth - autentyfikacja
+    summary: Zwraca link do logowania przy pomocy konta facebook
+    produces:
+    - application/json
+    parameters:
+    - name: type
+      in: path 
+      description: Jeśli parametr jest równy 'web' - po udanym zalogowaniu, zamiast zwracać jsona, przekieruje do strony głównej aplikacji webowej
+      required: false
+      type: string
+    responses:
+      '200':
+        description: Zwraca link do logowania
+        schema:
+          type: object
+          properties:
+            url:
+              type: string
+
+/facebook/{code}:
+    get:
+      tags:
+        - /auth - autentyfikacja
+      summary: punkt do którego następuje automatyczne przekierowanie po zalogowaniu przy pomocy konta facebook
+      produces:
+      - application/json
+      parameters:
+      - name: code
+        in: path
+        description: Kod zwracany przez usługę autentyfikacji facebooka
+        required: true
+        type: string
+      responses:
+        '200':
+          description: zalogowano
+          schema:
+            type: object
+            properties:
+              msg:
+                type: string
+                enum:
+                - 'ok'
+              login:
+                type: string
+              email:
+                type: string
+              user_id:
+                type: integer
+        '301':
+          description: Przy pobieraniu linku ustawiono parametr type na 'web' - następuje przekierowanie na strone główną aplikacji webowej
+        '500':
+          description: Błąd po stronie serwera
+
+/loggedin:
+    get:
+      tags:
+        - /auth - autentyfikacja
+      summary: zwraca informacje o zalogowanym użytkowniku
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: lista ogłoszeń
+          schema:
+            type: object
+            properties:
+              login:
+                type: string
+              email:
+                type: string
+              user_id:
+                type: integer
+        '403':
+          description: użytkownik nie jest zalogowany
+
+/logout:
+    get:
+      tags:
+        - /auth - autentyfikacja
+      summary: wylogowuje użytkownika
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: wylogowano
+          schema:
+            type: object
+            properties:
+              msg:
+                type: string
+                enum:
+                - 'logged out'
+        '403':
+          description: użytkownik nie jest zalogowany
+          schema:
+            type: object
+            properties:
+              msg:
+                type: string
+                enum:
+                - 'not logged in'
+
+/signup:
+    post:
+      tags:
+        - /auth - autentyfikacja
+      summary: zakładanie konta natywnego
+      produces:
+      - application/json
+      parameters:
+        - in: body
+          name: login
+          type: string
+        - in: body
+          name: password
+          type: string
+        - in: body
+          name: email
+          type: string
+
+      responses:
+        '201':
+          description: konto utworzone
+          schema:
+            type: object
+            properties:
+              msg:
+                type: string
+                enum:
+                - 'account created'
+        '400':
+          description: błędne dane
+          schema:
+            type: object
+            properties:
+              msg:
+                type: string
+        '500':
+          description: Błąd po stronie serwera
+
+/activate:
+    post:
+      tags:
+        - /auth - autentyfikacja
+      summary: aktywacja konta natywnego
+      produces:
+      - application/json
+      parameters:
+        - in: body
+          name: code
+          type: string
+          description: kod aktywacyjny
+      responses:
+        '200':
+          description: konto aktywowane
+          schema:
+            type: object
+            properties:
+              msg:
+                type: string
+                enum:
+                - 'account activated'
+        '400':
+          description: nieprawidłowy kod
+          schema:
+            type: object
+            properties:
+              msg:
+                type: string
+                enum:
+                - 'invalid code'
+        '500':
+          description: Błąd po stronie serwera
+
+/login:
+    post:
+      tags:
+        - /auth - autentyfikacja
+      summary: logowanie do konta natywnego
+      produces:
+      - application/json
+      parameters:
+        - in: body
+          name: email
+          type: string
+        - in: body
+          name: password
+          type: string            
+      responses:
+        '200':
+          description: zalogowano
+          schema:
+            type: object
+            properties:
+              msg:
+                type: string
+                enum:
+                - 'ok'
+              user_id:
+                type: integer
+              login:
+                type: string
+              email:
+                type: string
+
+        '400':
+          description: nieprawidłowy kod
+          schema:
+            type: object
+            properties:
+              msg:
+                type: string
+                enum:
+                - 'invalid code'
+        '500':
+          description: Błąd po stronie serwera

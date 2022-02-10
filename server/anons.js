@@ -131,57 +131,12 @@ router.get('/list', (req, res) => {
 
         rows.forEach((e, i) => {rows[i].image = e.image.split('#')[0];});
 
-        res.status(200).json({
+        return res.status(200).json({
             num: rows.length,
             list: rows
         });
     });
 });
 
-
-/*con.all('SELECT (ROW_NUMBER () OVER (ORDER BY create_date)) RowNum, id, title, create_date FROM anons WHERE RowNum < 10', (err, rows) => {
-    if(err){
-        console.log(err);
-    }
-    console.log(rows);
-});*/
-
-//zwraca liste ogloszen o zadanych, opcjonalnych parametrach: 
-//category = 0 - ogłoszenia zaginiecia, 1 - ogloszenia znalezienia, brak - wszystkie ogloszenia
-//lat, lng - ogloszenia oddalone od punktu (lat, lng) o nie wiecej niz range kilometrow. jesli lat lub lng nie jest podane, jest to pomijane
-//range - jesli pominiety, domyslnie przyjmuje wartosc 10
-//sortby = 'date' - ogloszenia sortowane po dacie dodania, 'dist' - ogloszenia sortowane po odleglosci od punktu (lat, lng) - jesli nie podano, ogloszenia sortowane po dacie dodania
-
-/*router.get('/list', (req, res) => {
-    let options = {};
-    options.sortby = (req.query.sortby == 'dist' && !isNaN(parseFloat(req.query.lat)) && !isNaN(parseFloat(req.query.lng)) ? 'dist' : 'date');
-    options.category = (req.query.category == 0 || req.query.category == 1 ? req.query.category : undefined);
-    options.range = (req.query.lat && req.query.lng ? (parseFloat(req.query.range) ? parseFloat(req.query.range) : 10) : undefined)
-
-    let arr = {};
-
-    if(!range){
-        con.all('SELECT id, title, category, images, lat, lng' + (options.category ? ' WHERE category = ' + options.category : '') + ' SORT BY create_date DSC;', (err, rows) => {
-            if(err){
-                res.sendStatus(500);
-            }
-            if(sortby == 'dist'){
-                rows.sort((a, b) => {distance(a, {lat: req.query.lat, lng: req.query.lng}) - distance(b, {lat: req.query.lat, lng: req.query.lng})});
-            }
-        });
-    }
-
-    try{
-        con.each('SELECT id, title, category, images, lat, lng' + (options.category ? ' WHERE category = ' + options.category : '') + ' SORT BY create_date DSC;', (err, row) => {
-            if(err){
-                throw err;
-            }
-
-        });
-    } catch(err){
-        console.log(err);
-        return res.sendStatus(500);
-    }
-});*/
 
 module.exports = router;

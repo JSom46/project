@@ -1,0 +1,176 @@
+paths:
+  /{id}:
+    get:
+      tags:
+        - /anons - ogłoszenia
+      summary: Zwraca informacje o ogłoszeniu o podanym id
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path 
+        description: id ogłoszenia
+        required: true
+        type: string
+      responses:
+        '200':
+          description: objekt zawierający informacje o ogłoszeniu
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+              title:
+                type: string
+              description:
+                type: string
+              category:
+                type: integer
+                description: "0 - zgłoszenie zaginięcia, 1 - znalezienia"
+                enum:
+                - 0
+                - 1
+              images:
+                type: array
+                items:
+                  type: string
+              author_id:
+                type: integer
+              create_date:
+                type: string
+              lat:
+                type: number
+                format: float
+              lng:
+                type: number
+                format: float
+        '404':
+          description: Ogłoszenie o podanym id nie istnieje
+        '500':
+          description: Błąd po stronie serwera
+
+/list/{page}:
+    get:
+      tags:
+        - /anons - ogłoszenia
+      summary: Zwraca listę ogłoszeń posortowaną od najnowszego
+      produces:
+      - application/json
+      parameters:
+      - name: page
+        in: path
+        description: informuje, którą z kolei trzydziestke ogłoszeń zwrócić, domyslnie zwraca pierwszą
+        required: false
+        type: string
+      responses:
+        '200':
+          description: lista ogłoszeń
+          schema:
+            type: object
+            properties:
+              num:
+                type: integer
+                description: 'liczba wysłanych ogłoszeń'
+              list:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    title:
+                      type: string
+                    category:
+                      type: integer
+                      description: "0 - zgłoszenie zaginięcia, 1 - znalezienia"
+                      enum:
+                      - 0
+                      - 1
+                    create_date:
+                      type: string
+                    image:
+                      type: string
+                      description: 'nazwa głównego zdjęcia ogłoszenia - puste, jeśli zdjęć brak'
+        '500':
+          description: Błąd po stronie serwera
+
+/photo/{name}:
+    get:
+      tags:
+        - /anons - ogłoszenia
+      summary: Zwraca zdjęcię o podanej nazwie
+      produces:
+      - application/json
+      parameters:
+      - name: name
+        in: path
+        description: nazwa żądanego zdjęcia
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Zwraca zdjęcie.
+          schema:
+            type: file
+        '404':
+          description: Nie znaleziono żądanego zdjęcia
+        '500':
+          description: Błąd po stronie serwera
+
+/add:
+    post:
+      tags:
+        - /anons - ogłoszenia
+      summary: Dodaje nowe ogłoszenie
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: formData
+          name: pictures
+          type: array
+          items:
+            type: file
+            description: Zdjęcia do ogłoszenia
+        - in: formData
+          name: title
+          type: string
+        - in: formData
+          name: description
+          type: string
+        - in: formData
+          name: category
+          type: integer
+          description: "0 - zgłoszenie zaginięcia, 1 - znalezienia"
+          enum:
+          - 0
+          - 1
+        - in: formData
+          name: lat
+          type: number
+          format: float
+          description: szerokość geograficzna
+        - in: formData
+          name: lng
+          type: number
+          format: float 
+          description: długość geograficzna     
+            
+      responses:
+        '200':
+          description: Ogłoszenie dodane
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: 'id dodanego ogłoszenia'
+        '400':
+          description: Błędne dane
+          schema:
+            type: object
+            properties:
+              msg:
+                type: string
+                description: 'informacja, co poszło nie tak'
+        '500':
+          description: Błąd po stronie serwera
