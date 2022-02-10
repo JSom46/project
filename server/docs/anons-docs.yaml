@@ -134,12 +134,15 @@ paths:
         - in: formData
           name: title
           type: string
+          required: true
         - in: formData
           name: description
           type: string
+          required: true
         - in: formData
           name: category
           type: integer
+          required: true
           description: "0 - zgłoszenie zaginięcia, 1 - znalezienia"
           enum:
           - 0
@@ -148,11 +151,13 @@ paths:
           name: lat
           type: number
           format: float
+          required: true
           description: szerokość geograficzna
         - in: formData
           name: lng
           type: number
           format: float 
+          required: true
           description: długość geograficzna     
             
       responses:

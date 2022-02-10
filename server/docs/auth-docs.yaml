@@ -165,19 +165,22 @@ paths:
       tags:
         - /auth - autentyfikacja
       summary: zakładanie konta natywnego
+      consumes:
+      - "application/json"
       produces:
       - application/json
       parameters:
         - in: body
-          name: login
-          type: string
-        - in: body
-          name: password
-          type: string
-        - in: body
-          name: email
-          type: string
-
+          name: body
+          required: true
+          type: object
+          properties:
+            login:
+              type: string
+            password:
+              type: string
+            email:
+              type: string
       responses:
         '201':
           description: konto utworzone
@@ -203,13 +206,19 @@ paths:
       tags:
         - /auth - autentyfikacja
       summary: aktywacja konta natywnego
+      consumes:
+      - "application/json"
       produces:
       - application/json
       parameters:
         - in: body
-          name: code
-          type: string
-          description: kod aktywacyjny
+          name: body
+          required: true
+          type: object
+          properties:
+            code:
+              type: string
+              description: kod aktywacyjny
       responses:
         '200':
           description: konto aktywowane
@@ -237,15 +246,20 @@ paths:
       tags:
         - /auth - autentyfikacja
       summary: logowanie do konta natywnego
+      consumes:
+      - "application/json"
       produces:
       - application/json
       parameters:
         - in: body
-          name: email
-          type: string
-        - in: body
-          name: password
-          type: string            
+          name: body
+          required: true
+          type: object
+          properties:
+            email:
+              type: string
+            password:
+              type: string          
       responses:
         '200':
           description: zalogowano
