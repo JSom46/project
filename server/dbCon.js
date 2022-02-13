@@ -4,10 +4,9 @@ require('dotenv').config();
 const sqlite3 = require('sqlite3').verbose();
 const con = new sqlite3.Database('./db/serverdb.db', (err) => {
     if(err){
-		console.log('db connecting error!');
+		console.log('db connecting error! ' + err.message);
 		throw err;
 	}
-	console.log('connected succesfully to database!');
 });
 con.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL, email TEXT UNIQUE NOT NULL, activation_code TEXT, is_activated INTEGER, is_native INTEGER);', (err, res) => {
     if(err){

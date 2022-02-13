@@ -32,6 +32,7 @@ paths:
                 - 1
               images:
                 type: array
+                description: lista nazw zdjęć powiązanych z ogłoszeniem
                 items:
                   type: string
               author_id:
@@ -46,6 +47,164 @@ paths:
                 format: float
         '404':
           description: Ogłoszenie o podanym id nie istnieje
+        '500':
+          description: Błąd po stronie serwera
+
+/:
+    post:
+      tags:
+        - /anons - ogłoszenia
+      summary: Dodaje nowe ogłoszenie (wymagane zalogowanie)
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: formData
+          name: pictures
+          type: array
+          items:
+            type: file
+            description: Zdjęcia do ogłoszenia
+        - in: formData
+          name: title
+          type: string
+          required: true
+        - in: formData
+          name: description
+          type: string
+          required: true
+        - in: formData
+          name: category
+          type: integer
+          required: true
+          description: "0 - zgłoszenie zaginięcia, 1 - znalezienia"
+          enum:
+          - 0
+          - 1
+        - in: formData
+          name: lat
+          type: number
+          format: float
+          required: true
+          description: szerokość geograficzna
+        - in: formData
+          name: lng
+          type: number
+          format: float 
+          required: true
+          description: długość geograficzna          
+      responses:
+        '200':
+          description: Ogłoszenie dodane
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: 'id dodanego ogłoszenia'
+        '400':
+          description: Błędne dane
+          schema:
+            type: object
+            properties:
+              msg:
+                type: string
+                description: 'informacja, co poszło nie tak'
+        '401':
+          description: Użytkownik niezalogowany
+          schema:
+            type: object
+            properties:
+              msg:
+                type: string
+                enum:
+                - 'not logged in'
+        '500':
+          description: Błąd po stronie serwera
+    put:
+      tags:
+        - /anons - ogłoszenia
+      summary: Edytuje istniejące ogłoszenie (wymagane zalogowanie)
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: formData
+          name: id
+          type: integer
+          description: id edytowanego ogłosznia
+          required: true
+        - in: formData
+          name: pictures
+          type: array
+          required: false
+          items:
+            type: file
+            description: Zdjęcia do ogłoszenia
+        - in: formData
+          name: title
+          type: string
+          required: true
+        - in: formData
+          name: description
+          type: string
+          required: true
+        - in: formData
+          name: category
+          type: integer
+          required: true
+          description: "0 - zgłoszenie zaginięcia, 1 - znalezienia"
+          enum:
+          - 0
+          - 1
+        - in: formData
+          name: lat
+          type: number
+          format: float
+          required: true
+          description: szerokość geograficzna
+        - in: formData
+          name: lng
+          type: number
+          format: float 
+          required: true
+          description: długość geograficzna          
+      responses:
+        '200':
+          description: Ogłoszenie zmienione
+        '404':
+          description: Ogłoszenie nie istnieje
+        '400':
+          description: Podano nieprawidłowe dane
+        '401':
+          description: Użytkownik nie jest zalogowany
+        '403':
+          description: Użytkownik nie jest autorem ogłoszenia
+        '500':
+          description: Błąd po stronie serwera
+    delete:
+      tags:
+        - /anons - ogłoszenia
+      summary: Usuwa istniejące ogłoszenie (wymagane zalogowanie)
+      consumes:
+        - "application/json"
+      parameters:
+        - in: body
+          name: id
+          required: true  
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                required: true  
+      responses:
+        '200':
+          description: Ogłoszenie usunięte
+        '404':
+          description: Ogłoszenie nie istnieje
+        '401':
+          description: Użytkownik nie jest zalogowany
+        '403':
+          description: Użytkownik nie jest autorem ogłoszenia
         '500':
           description: Błąd po stronie serwera
 
@@ -94,13 +253,58 @@ paths:
         '500':
           description: Błąd po stronie serwera
 
+/my/{page}:
+    get:
+      tags:
+        - /anons - ogłoszenia
+      summary: Zwraca listę ogłoszeń utworzonych przez użytkownika posortowaną od najnowszego
+      produces:
+      - application/json
+      parameters:
+      - name: page
+        in: path
+        description: informuje, którą z kolei trzydziestke ogłoszeń zwrócić, domyslnie zwraca pierwszą
+        required: false
+        type: string
+      responses:
+        '200':
+          description: lista ogłoszeń
+          schema:
+            type: object
+            properties:
+              num:
+                type: integer
+                description: 'liczba wysłanych ogłoszeń'
+              list:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    title:
+                      type: string
+                    category:
+                      type: integer
+                      description: "0 - zgłoszenie zaginięcia, 1 - znalezienia"
+                      enum:
+                      - 0
+                      - 1
+                    create_date:
+                      type: string
+                    image:
+                      type: string
+                      description: 'nazwa głównego zdjęcia ogłoszenia - puste, jeśli zdjęć brak'
+        '500':
+          description: Błąd po stronie serwera
+
 /photo/{name}:
     get:
       tags:
         - /anons - ogłoszenia
       summary: Zwraca zdjęcię o podanej nazwie
       produces:
-      - application/json
+      - image/png
       parameters:
       - name: name
         in: path
@@ -114,68 +318,5 @@ paths:
             type: file
         '404':
           description: Nie znaleziono żądanego zdjęcia
-        '500':
-          description: Błąd po stronie serwera
-
-/add:
-    post:
-      tags:
-        - /anons - ogłoszenia
-      summary: Dodaje nowe ogłoszenie
-      consumes:
-        - multipart/form-data
-      parameters:
-        - in: formData
-          name: pictures
-          type: array
-          items:
-            type: file
-            description: Zdjęcia do ogłoszenia
-        - in: formData
-          name: title
-          type: string
-          required: true
-        - in: formData
-          name: description
-          type: string
-          required: true
-        - in: formData
-          name: category
-          type: integer
-          required: true
-          description: "0 - zgłoszenie zaginięcia, 1 - znalezienia"
-          enum:
-          - 0
-          - 1
-        - in: formData
-          name: lat
-          type: number
-          format: float
-          required: true
-          description: szerokość geograficzna
-        - in: formData
-          name: lng
-          type: number
-          format: float 
-          required: true
-          description: długość geograficzna     
-            
-      responses:
-        '200':
-          description: Ogłoszenie dodane
-          schema:
-            type: object
-            properties:
-              id:
-                type: integer
-                description: 'id dodanego ogłoszenia'
-        '400':
-          description: Błędne dane
-          schema:
-            type: object
-            properties:
-              msg:
-                type: string
-                description: 'informacja, co poszło nie tak'
         '500':
           description: Błąd po stronie serwera

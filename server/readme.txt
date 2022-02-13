@@ -1,4 +1,9 @@
-﻿serwer mozna uruchomic komenda node main.js lub npm start
+﻿SERWER UDOSTĘPNIA DOKUMENTACJE POD ADRESEM http://localhost:2400/api-docs
+
+
+
+serwer mozna uruchomic komenda node main.js lub npm start
+
 server obsługuje nastepujące requesty:
 
 

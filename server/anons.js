@@ -23,15 +23,19 @@ const upload = multer({
 });
 
 const con = require('./dbCon.js');
-
-
-// przed dodaniem ogloszenia, sprawdza, czy uzytkownik jest zalogowany, jesli nie, zwraca blad 401
-router.post('/add', (req, res, next) => {/*
+const authorize = (req, res, next) => {
     if(!req.session.login){
-        return res.status(401).json({msg: 'not logged in'});
-    }*/
+        return res.sendStatus(401);
+    }
     next();
-});
+}
+
+
+// użytkownik musi być zalogowany, by móc dodawać, edytować lub usuwać ogłoszenia lub pobrac liste swoich ogloszen
+router.post('/', authorize);
+router.put('/', authorize);
+router.delete('/', authorize);
+router.get('/my', authorize);
 
 
 //dodanie nowego ogloszenia o zaginionym zwierzeciu
@@ -39,7 +43,7 @@ router.post('/add', (req, res, next) => {/*
 //category = 0 - ogłoszenie zaginiecia, category = 1 - ogloszenie znalezienia
 //lat - szerokosc geograficzna w stopniach
 //lng - dlugosc geograficzna w stopniach
-router.post('/add', upload.array('pictures'), (req, res) => {
+router.post('/', upload.array('pictures'), (req, res) => {
     console.log(req.body);
     console.log(req.files);
 
@@ -47,9 +51,12 @@ router.post('/add', upload.array('pictures'), (req, res) => {
     if(!(req.body.title && req.body.description && req.body.category && req.body.lat && req.body.lng) || 
     (req.body.category != 0 && req.body.category != 1) || isNaN(parseFloat(req.body.lat)) || isNaN(parseFloat(req.body.lng))){
         //ogloszenie nie zostanie dodane - kasujemy powiazane z nim zdjecia
-        req.files.filename.forEach((e) => {
+        req.files.forEach((e) => {
+            console.log(e);
             fs.unlink('./pictures/' + e.filename, (err) => {
-                console.log(err);
+                if(err){
+                    console.log(err);
+                }
             });
         });
         return res.status(400).json({msg: 'required field is empty/contain invalid data'});
@@ -73,7 +80,9 @@ router.post('/add', upload.array('pictures'), (req, res) => {
             //dodanie ogloszenia sie nie powiodlo - kasujemy powiazane z nim zdjecia
             req.files.filename.forEach((e) => {
                 fs.unlink('./pictures/' + e.filename, (err) => {
-                    console.log(err);
+                    if(err){
+                        console.log(err);
+                    }
                 });
             });
             return res.sendStatus(500);
@@ -86,11 +95,14 @@ router.post('/add', upload.array('pictures'), (req, res) => {
 
 //wysyla obrazek o nazwie podanej w parametrze name gdy plik istnieje, lub 404 gdy nie istnieje
 router.get('/photo', (req, res) => {
-    if (fs.existsSync('./pictures/' + req.query.name)){
-        //return res.sendFile('./pictures/' + req.query.name);
+    fs.stat('./pictures/' + req.query.name, (err, stat) => {
+        //plik nie istnieje
+        if(err){
+            return res.sendStatus(404);
+        }
+        //plik istnieje, wyslij go
         return res.sendFile(path.join(__dirname, './pictures', req.query.name));
-    }
-    return res.sendStatus(404);
+    });
 });
 
 
@@ -124,13 +136,142 @@ router.get('/', (req, res) => {
 // jesli parametr page jest niezdefiniowany, to zwraca ogloszenia 1 - 30
 router.get('/list', (req, res) => {
     let page = (isNaN(parseInt(req.query.page)) ? 1 : req.query.page);
-    con.all('SELECT id, title, category, create_date, image FROM (SELECT ROW_NUMBER() OVER (ORDER BY create_date DESC) row, id, category, title, datetime(create_date, "unixepoch", "localtime") create_date, images image FROM anons) WHERE row BETWEEN ? AND ?', 1 + (page - 1) * 30, page * 30, (err, rows) => {
+    con.all('SELECT id, title, category, create_date, image FROM (SELECT ROW_NUMBER() OVER (ORDER BY create_date DESC) row, id, category, title, datetime(create_date, "unixepoch", "localtime") create_date, images image FROM anons) WHERE row BETWEEN ? AND ?;', 1 + (page - 1) * 30, page * 30, (err, rows) => {
         if(err){
             return res.sendStatus(500);
         }
-
+        // nazwy zdjec sa przechowywane w nastepujacym formacie: nazwa1#nazwa2#...#nazwan
         rows.forEach((e, i) => {rows[i].image = e.image.split('#')[0];});
+        return res.status(200).json({
+            num: rows.length,
+            list: rows
+        });
+    });
+});
 
+
+//aktualizuje informacje o ogloszeniu o podanym id - użytkownik musi być zalogowany i byc autorem ogloszenia
+//req = {id : int, title : string, description : string, category : int, pictures : file[], lat : float, lng : float}
+router.put('/', upload.array('pictures'), (req, res) => {
+    console.log(req.body);
+    console.log(req.files);
+    //brakuje ktoregos z niezbednych pol lub ktores z pol zawiera niepoprawne dane - ogloszenie nie moze zostac zaktualizowane
+    if(!(req.body.id && req.body.title && req.body.description && req.body.category && req.body.lat && req.body.lng) || 
+    (req.body.category != 0 && req.body.category != 1) || isNaN(parseFloat(req.body.lat)) || isNaN(parseFloat(req.body.lng))){
+        req.files.filename.forEach((e) => {
+            fs.unlink('./pictures/' + e.filename, (err) => {
+                if(err){
+                    console.log(err);
+                }
+            });
+        });
+        return res.status(400).json({msg: 'required field is empty/contain invalid data'});
+    }
+    con.get('SELECT author_id, images FROM anons WHERE id = ?;', req.body.id, (err, row) => {
+        if(err){
+            console.log(err);
+            return res.sendStatus(500);
+        }
+        //ogloszenie nie istnieje
+        if(!row){
+            return res.sendStatus(404);
+        }
+        //uzytkownik nie jest autorem ogloszenia
+        if(row.author_id != req.session.user_id){
+            return res.sendStatus(403);
+        }
+
+        //nowa lista nazw zdjec
+        let pictures = '';
+        req.files.forEach((e, i, arr) => {
+            pictures += e.filename;
+            if(i < arr.length - 1){
+                pictures += '#';
+            }
+        });
+
+        //dodanie ogloszenia
+        con.run('UPDATE anons SET title = ?, description = ?, category = ?, images = ?, lat = ?, lng = ? WHERE id = ?;', 
+        req.body.title, req.body.description, req.body.category, pictures, req.body.lat, req.body.lng, req.body.id, function(err){
+            if(err){
+                //aktualizacja ogloszenia sie nie powiodlo - kasujemy powiazane z nim zdjecia
+                req.files.filename.forEach((e) => {
+                    fs.unlink('./pictures/' + e.filename, (err) => {
+                        if(err){
+                            console.log(err);
+                        }
+                    });
+                });
+                return res.sendStatus(500);
+            }
+            //usuwamy stare zdjecia
+            if(row.images.length > 0){
+                row.images.split('#').forEach((e) => {
+                    fs.unlink('./pictures/' + e, (err) => {
+                        if(err){
+                            console.log(err);
+                        }
+                    });
+                });
+            }
+            console.log("hwdp " + this.lastID);
+            return res.sendStatus(200);
+        });
+    });
+});
+
+
+//usuwa ogloszenie o podanym id - użytkownik musi być zalogowany i byc autorem ogloszenia
+//req = {id : int}
+router.delete('/', (req, res) => {
+    con.get('SELECT images, author_id FROM anons WHERE id = ?;', req.body.id, (err, row) => {
+        if(err){
+            console.log(err);
+            return res.sendStatus(500);
+        }
+        //ogloszenie nie istnieje
+        if(!row){
+            return res.sendStatus(404);
+        }
+        //uzytkownik nie jest autorem ogloszenia
+        if(row.author_id != req.session.user_id){
+            return res.sendStatus(403);
+        }
+        //usun ogloszenie z bazy
+        con.run('DELETE FROM anons WHERE id = ?', req.body.id, (err) => {
+            if(err){
+                console.log(err);
+                return res.sendStatus(500);
+            }
+            return res.sendStatus(200);
+        }); 
+        //jesli ogłoszenie mialo jakies zdjecia - usun je
+        if(row.images.length > 0){
+            row.images.split('#').forEach((e) => {
+                fs.unlink('./pictures/' + e, (err) => {
+                    if(err){
+                        console.log(err);
+                    }
+                });
+            });
+        }  
+    });
+});
+
+
+// zwraca liste ogloszen utworzonych przez uzytkownika sortowana po dacie utworzenia malejaco i liczbe przeslanych ogloszen
+// parametr page informuje ktora trzydziestke ogloszen ma zwrocic serwer tj.
+// page = 1 - zwraca ogloszenia 1 - 30
+// page = 2 - zwraca ogloszenia 31 - 60 itd.
+// jesli parametr page jest niezdefiniowany, to zwraca ogloszenia 1 - 30
+router.get('/my', (req, res) => {
+    let page = (isNaN(parseInt(req.query.page)) ? 1 : req.query.page);
+    con.all('SELECT id, title, category, create_date, image FROM (SELECT ROW_NUMBER() OVER (ORDER BY create_date DESC) row, id, category, title, datetime(create_date, "unixepoch", "localtime") create_date, images image FROM anons WHERE author_id = ?) WHERE row BETWEEN ? AND ?', req.session.user_id, 1 + (page - 1) * 30, page * 30, (err, rows) => {
+        if(err){
+            return res.sendStatus(500);
+        }
+        // nazwy zdjec sa przechowywane w nastepujacym formacie: nazwa1#nazwa2#...#nazwan
+        rows.forEach((e, i) => {rows[i].image = e.image.split('#')[0];});
         return res.status(200).json({
             num: rows.length,
             list: rows

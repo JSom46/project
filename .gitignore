@@ -1,6 +1,6 @@
 server/node_modules/
 server/db/serverdb.db
-server/pictures/
+server/pictures/*
 
 react-app/node_modules/
 

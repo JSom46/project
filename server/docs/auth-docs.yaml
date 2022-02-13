@@ -172,15 +172,18 @@ paths:
       parameters:
         - in: body
           name: body
-          required: true
-          type: object
-          properties:
-            login:
-              type: string
-            password:
-              type: string
-            email:
-              type: string
+          schema:
+            type: object
+            properties:
+              login:
+                type: string
+                required: true
+              email:
+                type: string
+                required: true
+              password:
+                type: string
+                required: true
       responses:
         '201':
           description: konto utworzone
@@ -213,12 +216,13 @@ paths:
       parameters:
         - in: body
           name: body
-          required: true
-          type: object
-          properties:
-            code:
-              type: string
-              description: kod aktywacyjny
+          required: true  
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+                required: true  
       responses:
         '200':
           description: konto aktywowane
@@ -253,13 +257,15 @@ paths:
       parameters:
         - in: body
           name: body
-          required: true
-          type: object
-          properties:
-            email:
-              type: string
-            password:
-              type: string          
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                required: true
+              password:
+                type: string
+                required: true      
       responses:
         '200':
           description: zalogowano
