@@ -47,7 +47,7 @@ function App() {
   <MenuAppBar auth={auth}/>
   <Grid container spacing={2} columns={16} justifyContent="center">
   <Grid item xs="auto" justifyItems="center">
-  <Item style={{border:"1px solid"}}>
+  <Item>
   <Switch>
   <Route exact path="/" render={() => {  return ( <Redirect to="/dashboard" /> )}}  />
   <Route path="/dashboard">

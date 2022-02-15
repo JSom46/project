@@ -28,10 +28,6 @@ export default function AddAnnoucment() {
 		setPictures(formData);
   };
   async function postAnnoucement() {
-    // let data = {
-    //   'json': JSON.stringify(credentials,files),
-    //   'files': pictures
-    // };
     const formData = new FormData();
     formData.append('title',title);
     formData.append('description',description);
@@ -41,7 +37,7 @@ export default function AddAnnoucment() {
     formData.append('category',category);
     formData.append('lat',lat);
     formData.append('lng',lng);
-      return fetch('http://localhost:2400/anons/add', {
+      return fetch('http://localhost:2400/anons/', {
         method: 'POST',
         // headers: {
         //   'Content-Type': 'application/json'
@@ -66,7 +62,7 @@ export default function AddAnnoucment() {
             <FormGroup>
                 <TextField fullWidth={true} type='text' id="title" label="Tytuł" variant="standard" required onChange={e => setTitle(e.target.value)} />
                 <FormControl variant="standard">
-                    <InputLabel id="category">Rodzaj zgłoszenia</InputLabel>
+                    <InputLabel id="category" required>Rodzaj zgłoszenia</InputLabel>
                         <Select value={category} labelId="category" id="category" onChange={handleCategoryChange}>
                         <MenuItem value={0}>Zaginięcie</MenuItem>
                         <MenuItem value={1}>Znalezienie</MenuItem>
@@ -75,7 +71,6 @@ export default function AddAnnoucment() {
                     <br />
                     <Button variant="contained" component="label">Dodaj zdjęcia
                     <input type="file" accept='.jpg, .png' onChange={handlePictures} hidden multiple/> 
-                    <p></p>
                     </Button>
                 </FormControl>
             </FormGroup>

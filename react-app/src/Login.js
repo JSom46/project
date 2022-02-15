@@ -59,7 +59,6 @@ const LoginFacebookFunc = async e => {
   console.log(response);
   window.location.assign(response.url);
 }
-
 export default function Login(props) {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
@@ -76,25 +75,6 @@ export default function Login(props) {
     }
     else window.location.reload();
   }
-//   const [auth, setAuth] = useState("");
-  
-//   useEffect(() => {
-    
-//     const fetchData = async () => {
-//       try {
-//         const response = await fetch('http://localhost:2400/auth/loggedin', {
-//         method: 'GET',
-//         credentials: 'include'
-//       });
-//       const json = await response.json();
-//       //console.log(json);
-//       setAuth(json);
-//     } catch (error) {
-//       console.log("error", error);
-//     }
-//   };
-//   fetchData();
-// }, []);
 if(props.auth?.login)
   return(
     <div>
@@ -115,7 +95,7 @@ if(props.auth?.login)
     <TextField type='email' id="email" label="Email" variant="standard" required onChange={e => setEmail(e.target.value)} />
     <TextField type='password' id="password" label="Hasło" variant="standard" required onChange={e => setPassword(e.target.value)} />
     <br />
-    <Button variant="contained" type="submit" onClick={handleSubmit}>Zaloguj</Button>
+    <Button variant="contained" type="submit">Zaloguj</Button>
     </FormGroup>
     <Stack direction="row" spacing={0}>
     <Item><IconButton onClick={LoginGoogleFunc}> <Google /> </IconButton></Item>
