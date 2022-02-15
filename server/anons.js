@@ -24,7 +24,8 @@ const upload = multer({
 
 const con = require('./dbCon.js');
 const authorize = (req, res, next) => {
-    if(!req.session.login){
+    if(!req.session.user_id){
+        //req.session.user_id = 2137;
         return res.sendStatus(401);
     }
     next();
@@ -71,14 +72,14 @@ router.post('/', upload.array('pictures'), (req, res) => {
         }
     });
     console.log(pictures);
-    req.session.user_id = 69;
 
     //dodanie ogloszenia
     con.run('INSERT INTO anons(title, description, category, images, author_id, create_date, lat, lng) VALUES(?, ?, ?, ?, ?, (SELECT strftime ("%s", "now")), ?, ?);', 
     req.body.title, req.body.description, req.body.category, pictures, req.session.user_id, req.body.lat, req.body.lng, function(err){
         if(err){
+            console.log(err);
             //dodanie ogloszenia sie nie powiodlo - kasujemy powiazane z nim zdjecia
-            req.files.filename.forEach((e) => {
+            req.files.forEach((e) => {
                 fs.unlink('./pictures/' + e.filename, (err) => {
                     if(err){
                         console.log(err);
@@ -158,7 +159,7 @@ router.put('/', upload.array('pictures'), (req, res) => {
     //brakuje ktoregos z niezbednych pol lub ktores z pol zawiera niepoprawne dane - ogloszenie nie moze zostac zaktualizowane
     if(!(req.body.id && req.body.title && req.body.description && req.body.category && req.body.lat && req.body.lng) || 
     (req.body.category != 0 && req.body.category != 1) || isNaN(parseFloat(req.body.lat)) || isNaN(parseFloat(req.body.lng))){
-        req.files.filename.forEach((e) => {
+        req.files.forEach((e) => {
             fs.unlink('./pictures/' + e.filename, (err) => {
                 if(err){
                     console.log(err);
