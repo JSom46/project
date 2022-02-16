@@ -8,57 +8,63 @@ import { InputLabel, TextField } from '@mui/material';
 import { Button } from '@mui/material';
 import { Typography } from '@mui/material';
 import {Select, MenuItem} from '@mui/material';
+// import ImageList from '@mui/material/ImageList';
+import Box from '@mui/material/Box';
+import ImageListItem from '@mui/material/ImageListItem';
+
 
 export default function AddAnnoucment() {
   const [title, setTitle] = useState();
   const [description, setDescription] = useState();
   const [category, setCategory] = useState('');
   const [pictures, setPictures] = useState();
-  const [lat, setLat] = useState();
-  const [lng, setLng] = useState();
+  const [picturesPreview, setPicturesPreview] = useState();
+  // const [lat, setLat] = useState(); //Dane z mapy
+  // const [lng, setLng] = useState(); //Dane z mapy
 
   const handleCategoryChange = (event) => {
     setCategory(event.target.value);
   };
   const handlePictures = (event) => {
     const formData = new FormData();
-        for(let i=0;i<event.target.files.length;i++){
-            formData.append('pictures',event.target.files[i]);
-        }
+    const picturesPreviewArray = [];
+    for(let i=0;i<event.target.files.length;i++){
+      picturesPreviewArray.push(URL.createObjectURL(event.target.files[i]));
+      formData.append('pictures',event.target.files[i]);
+    }
 		setPictures(formData);
+    setPicturesPreview(picturesPreviewArray);
+    // console.log(picturesPreview);
   };
   async function postAnnoucement() {
     const formData = new FormData();
     formData.append('title',title);
+    formData.append('category',category);
     formData.append('description',description);
-    for (var value of pictures.values()) {
+    for (let value of pictures.values()) {
       formData.append('pictures',value);
     }
-    formData.append('category',category);
-    formData.append('lat',lat);
-    formData.append('lng',lng);
-      return fetch('http://localhost:2400/anons/', {
-        method: 'POST',
-        // headers: {
-        //   'Content-Type': 'application/json'
-        // },
-        credentials: 'include',
-        body: formData
-      })
-        .then(data => data.json())
-     }
+    formData.append('lat',Math.random()); //Dane z mapy
+    formData.append('lng',Math.random()); //Dane z mapy
+    return fetch('http://localhost:2400/anons/', {
+      method: 'POST',
+      // headers: {
+      //   'Content-Type': 'application/json'
+      // },
+      credentials: 'include',
+      body: formData
+    }).then(data => data.json())
+  }
   const handleSubmit = async e => {
     e.preventDefault();
-    setLat(120.243);
-    setLng(130.231);
     const response = await postAnnoucement();
     console.log(response.msg);
   }
   return(
     <div>
     <Typography variant="h4"> Dodaj ogłoszenie </Typography>
-    <FormControl style={{width:500}}>
-        <form /*onSubmit={handleSubmit}*/>
+    <FormControl style={{width:'100%'}}>
+        <form autoComplete='off' /*onSubmit={handleSubmit}*/>
             <FormGroup>
                 <TextField fullWidth={true} type='text' id="title" label="Tytuł" variant="standard" required onChange={e => setTitle(e.target.value)} />
                 <FormControl variant="standard">
@@ -74,7 +80,18 @@ export default function AddAnnoucment() {
                     </Button>
                 </FormControl>
             </FormGroup>
-            <br />
+            <Box sx={{ border: (picturesPreview ? "1px solid" : ""), marginTop: 1, marginBottom: 1}}>
+            {picturesPreview && picturesPreview.map((item) => (
+              <ImageListItem key={Math.random()} sx={{margin: 1}}>
+                <img
+                  style={{ width: "100px",height:"100px",objectFit: "cover"}}
+                  src={item}
+                  alt={item}
+                  loading="lazy"
+                />
+              </ImageListItem>
+            ))}
+            </Box>
             <Button variant="contained" /*type="submit"*/ onClick={handleSubmit}>Zgłoś</Button>
         </form>
     </FormControl>

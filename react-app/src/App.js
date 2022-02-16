@@ -38,36 +38,31 @@ function App() {
 }, []);
 //console.log(auth);
   return (
-    <div>
+  <div>
     <BrowserRouter>
-    {/* <Link to="/register"><button>Rejestracja</button></Link><br />
-    <Link to="/login"><button>Logowanie</button></Link><br />
-  <Link to="/activate"><button>Aktywacja</button></Link><br /> */}
-  {/* <BootstrapNavbar /> */}
-  <MenuAppBar auth={auth}/>
-  <Grid container spacing={2} columns={16} justifyContent="center">
-  <Grid item xs="auto" justifyItems="center">
-  <Item>
-  <Switch>
-  <Route exact path="/" render={() => {  return ( <Redirect to="/dashboard" /> )}}  />
-  <Route path="/dashboard">
-  <Dashboard auth={auth}/>
-  </Route>
-  <Route path="/register">
-  <Register auth={auth}/>
-  </Route>
-  <Route path="/login">
-  <Login auth={auth}/>
-  </Route>
-  <Route path="/activate" children={<Activate />} />
-  <Route path="/profile" children={<Profile auth={auth}/>}/>
-  <Route path="/account" children={<Account auth={auth}/>}/>
-  </Switch>
-  </Item>
-  </Grid>
-  </Grid>
-  
-  </BrowserRouter>
+    <MenuAppBar auth={auth}/>
+      <Grid container spacing={2} columns={16} justifyContent="center">
+        <Grid item xs="auto" justifyItems="center">
+          <Item>
+            <Switch>
+              <Route exact path="/" render={() => {  return ( <Redirect to="/dashboard" /> )}}  />
+              <Route path="/dashboard">
+                <Dashboard auth={auth}/>
+              </Route>
+              <Route path="/register">
+                <Register auth={auth}/>
+              </Route>
+              <Route path="/login">
+                <Login auth={auth}/>
+              </Route>
+              <Route path="/activate" children={<Activate />} />
+              <Route path="/profile" children={<Profile auth={auth}/>}/>
+              <Route path="/account" children={<Account auth={auth}/>}/>
+            </Switch>
+          </Item>
+        </Grid>
+      </Grid>
+    </BrowserRouter>
   </div>
   );
 }
