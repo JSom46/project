@@ -7,7 +7,9 @@ import IconButton from '@mui/material/IconButton';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
+import { Button } from '@mui/material';
 import MUIDrawer from './Drawer'
+import Divider from '@mui/material/Divider';
 // import { FormGroup,FormControlLabel,Switch } from '@mui/material';
 
 export default function MenuAppBar(props) {
@@ -17,7 +19,14 @@ export default function MenuAppBar(props) {
   // const handleChange = (event) => {
   //   setAuth(event.target.checked);
   // };
-
+  function logout() {
+    sessionStorage.removeItem('token');
+    window.location.assign("/");
+    fetch('http://localhost:2400/auth/logout', {
+      credentials: 'include',
+      method: 'GET',
+    });
+  }
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -55,7 +64,7 @@ export default function MenuAppBar(props) {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             PZ-XIV
           </Typography>
-          {props.auth?.login && (
+          {(props.auth?.login && (
             <div>
               <IconButton
                 size="large"
@@ -84,9 +93,16 @@ export default function MenuAppBar(props) {
               >
                 <MenuItem onClick={function(event){handleClose();window.location.href="/profile"}}>Profile</MenuItem>
                 <MenuItem onClick={function(event){handleClose();window.location.href="/account"}}>My account</MenuItem>
+                <Divider />
+                <MenuItem onClick={function(event){logout()}}>Wyloguj</MenuItem>
               </Menu>
             </div>
-          )}
+          )) || (
+            <div>
+              <Button variant='contained' color='info' href='/login'> Login
+              </Button>
+            </div>
+            )}
         </Toolbar>
       </AppBar>
     </Box>

@@ -12,8 +12,8 @@ import Profile from './Profile';
 import Account from './Account';
 import Dashboard from './Dashboard';
 
-import Grid from '@mui/material/Grid';
-import Item from '@mui/material/ListItem';
+// import Grid from '@mui/material/Grid';
+// import Item from '@mui/material/ListItem';
 
 
 
@@ -41,9 +41,9 @@ function App() {
   <div>
     <BrowserRouter>
     <MenuAppBar auth={auth}/>
-      <Grid container spacing={2} columns={16} justifyContent="center">
+      {/* <Grid container spacing={2} columns={16} justifyContent="center">
         <Grid item xs="auto" justifyItems="center">
-          <Item>
+          <Item> */}
             <Switch>
               <Route exact path="/" render={() => {  return ( <Redirect to="/dashboard" /> )}}  />
               <Route path="/dashboard">
@@ -59,9 +59,9 @@ function App() {
               <Route path="/profile" children={<Profile auth={auth}/>}/>
               <Route path="/account" children={<Account auth={auth}/>}/>
             </Switch>
-          </Item>
+          {/* </Item>
         </Grid>
-      </Grid>
+      </Grid> */}
     </BrowserRouter>
   </div>
   );

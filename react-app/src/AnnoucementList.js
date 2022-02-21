@@ -19,8 +19,8 @@ import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
 
-function createData( title, category, time, description ) {
-  return { title, category, time, description };
+function createData( id, title, category, time, description ) {
+  return { id, title, category, time, description };
 }
 
 function Row(props) {
@@ -116,14 +116,17 @@ TablePaginationActions.propTypes = {
 export default function AnnoucementList() {
   const [data, setData] = useState([]);
   const [page, setPage] = React.useState(0);
+  const [pageToFetch, setPageToFetch] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
     useEffect(() => {
-      const fetchData = async (page) => {
+      const fetchData = async (pageToFetch) => {
+        let url='http://localhost:2400/anons/list?page=' + (pageToFetch);
+        console.log(url);
         try {
-          const response = await fetch('http://localhost:2400/anons/list', {
+          const response = await fetch(url, {
             method: 'GET',
             credentials: 'include'
           });
@@ -131,23 +134,29 @@ export default function AnnoucementList() {
           const rows = [];
           json.list.forEach(element => {
             rows.push(createData(
+              element.id,
               element.title,
               (element.category === 0 ? "Zaginięcie" : "Znalezienie"),
               element.create_date,
               element.description
               ));
             });
-        setData(rows)
+        setData((prev) => (prev.concat(rows))); // TO JEST DO POPRAWY
       } catch (error) {
         console.log("error", error);
       }
     };
-      fetchData(page);
-    }, [page]);
+      fetchData(pageToFetch);
+    }, [pageToFetch]);
 
   const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-
+    if((3 * pageToFetch) < (newPage+1)){
+      setPage(newPage);
+      setPageToFetch((prev) => (prev+1));
+    }
+    else{
+      setPage(newPage);
+    }
   };
 
   const handleChangeRowsPerPage = (event) => {
@@ -156,7 +165,7 @@ export default function AnnoucementList() {
   };
   return (
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }}>
+      <Table /*sx={{ minWidth: 650 }}*/>
         <TableHead>
           <TableRow>
             <TableCell>Tytuł</TableCell>
@@ -169,7 +178,7 @@ export default function AnnoucementList() {
             ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
             : data
           ).map((row) => (
-            <Row key={row.title} row={row} />
+            <Row key={row.id} row={row} />
           ))}
         {emptyRows > 0 && (
             <TableRow style={{ height: 53 * emptyRows }}>
@@ -182,7 +191,7 @@ export default function AnnoucementList() {
             <TablePagination
               rowsPerPageOptions={[]}
               colSpan={3}
-              count={data.length}
+              count={data.length + 1}
               rowsPerPage={rowsPerPage}
               page={page}
               SelectProps={{
