@@ -71,8 +71,8 @@ router.post('/signup', (req, res) => {
                 `${req.body.login}, aktywuj swoje konto klikając w link poniżej:\n ${process.env.WEB_APP_ROOT_URI}/activate?code=${code}`);
 
             //dodaj usera do bazy
-            con.run(`INSERT INTO users (login, password, email, activation_code, is_activated, is_native) 
-            VALUES (?, ?, ?, ?, 0, 1);`, req.body.login, hash, req.body.email, code, (err, result) => {
+            con.run(`INSERT INTO users (login, password, email, activation_code, is_activated, is_native, is_admin) 
+            VALUES (?, ?, ?, ?, 0, 1, 0);`, req.body.login, hash, req.body.email, code, (err, result) => {
                 if(err){
                     return res.sendStatus(500);
                 }
@@ -147,7 +147,8 @@ router.post('/login', (req, res) => {
             req.session.login = row.login;
             req.session.user_id = row.id;
             req.session.email = row.email;
-            return res.status(200).json({msg: 'ok', login: row.login, email: row.email, user_id: this.lastID});          
+            req.session.is_admin = row.is_admin;
+            return res.status(200).json({msg: 'ok', login: row.login, email: row.email, user_id: row.id, is_admin: row.is_admin});          
         });
     });
 
@@ -175,7 +176,7 @@ router.get('/google', async (req, res) => {
         }
         //konto nie istnieje - utworzenie nowego konta przy pomocy pobranych danych
         if(!row){
-            con.run(`INSERT INTO users(login, password, email, is_activated, is_native) VALUES (?, ?, ?, 1, 0);`, user.name, user.id, user.email, (err, result) => {
+            con.run(`INSERT INTO users(login, password, email, is_activated, is_native, is_admin) VALUES (?, ?, ?, 1, 0, 0);`, user.name, user.id, user.email, (err, result) => {
                 if(err){
                     return res.sendStatus(500);
                 }
@@ -183,13 +184,14 @@ router.get('/google', async (req, res) => {
                 req.session.login = user.name;
                 req.session.email = user.email;
                 req.session.user_id = this.lastID;
+                req.session.is_admin = 0;
 
                 if(req.session.type == 'web'){
                     req.session.type = undefined;
                     return res.redirect(301, process.env.WEB_APP_ROOT_URI);
                 }
 
-                return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: this.lastID});  
+                return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: this.lastID, is_admin: 0});  
             });
         }
         //konto istnieje - utworzenie sesji
@@ -197,13 +199,14 @@ router.get('/google', async (req, res) => {
             req.session.login = row.login;
             req.session.user_id = row.id;
             req.session.email = row.email;
+            req.session.is_admin = row.is_admin;
 
             if(req.session.type == 'web'){
                 req.session.type = undefined;
                 return res.redirect(301, process.env.WEB_APP_ROOT_URI);
             }
 
-            return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: this.lastID});
+            return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: row.id, is_admin: row.is_admin});
         }
     });
 });
@@ -229,7 +232,7 @@ router.get('/facebook', async (req, res) => {
         }
         //konto nie istnieje - utworzenie nowego konta przy pomocy pobranych danych
         if(!row){
-            con.run('INSERT INTO users(login, password, email, is_activated, is_native) VALUES(?, ?, ?, 1, 0);', user.name, user.id, user.email, function(err){
+            con.run('INSERT INTO users(login, password, email, is_activated, is_native, is_admin) VALUES(?, ?, ?, 1, 0, 0);', user.name, user.id, user.email, function(err){
                 if(err){
                     return res.sendStatus(500);
                 }
@@ -237,13 +240,14 @@ router.get('/facebook', async (req, res) => {
                 req.session.login = user.name;
                 req.session.email = user.email;
                 req.session.user_id = this.lastID;
+                req.session.is_admin = 0;
 
                 if(req.session.type == 'web'){
                     req.session.type = undefined;
                     return res.redirect(301, process.env.WEB_APP_ROOT_URI);
                 }
 
-                return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: this.lastID});   
+                return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: this.lastID, is_admin: 0});   
             });
         }
         //konto istnieje - utworzenie sesji
@@ -251,13 +255,14 @@ router.get('/facebook', async (req, res) => {
             req.session.login = row.login;
             req.session.user_id = row.id;
             req.session.email = row.email;
+            req.session.is_admin = row.is_admin;
 
             if(req.session.type == 'web'){
                 req.session.type = undefined;
                 return res.redirect(301, process.env.WEB_APP_ROOT_URI);
             }
 
-            return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: this.lastID});
+            return res.status(200).json({msg: 'ok', login: row.login, email: row.email, user_id: row.id, is_admin: row.is_admin});
         }
     });
 });
@@ -266,7 +271,7 @@ router.get('/facebook', async (req, res) => {
 //zwraca id, login i email zalogowanego usera, lub informacje o niezalogowaniu
 router.get('/loggedin', (req, res) => {
     if(req.session.login){
-        return res.status(200).json({user_id: req.session.user_id, email: req.session.email, login: req.session.login});
+        return res.status(200).json({user_id: req.session.user_id, email: req.session.email, login: req.session.login, is_admin: req.session.is_admin});
     }
     return res.status(403).json({msg: 'not logged in'});
 });

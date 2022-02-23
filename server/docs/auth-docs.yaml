@@ -50,6 +50,11 @@ paths:
                 type: string
               user_id:
                 type: integer
+              is_admin:
+                type: integer
+                enum:
+                - 0
+                - 1
         '301':
           description: Przy pobieraniu linku ustawiono parametr type na 'web' - następuje przekierowanie na strone główną aplikacji webowej
         '500':
@@ -106,6 +111,11 @@ paths:
                 type: string
               user_id:
                 type: integer
+              is_admin:
+                type: integer
+                enum:
+                - 0
+                - 1
         '301':
           description: Przy pobieraniu linku ustawiono parametr type na 'web' - następuje przekierowanie na strone główną aplikacji webowej
         '500':
@@ -282,6 +292,11 @@ paths:
                 type: string
               email:
                 type: string
+              is_admin:
+                type: integer
+                enum:
+                - 0
+                - 1
 
         '400':
           description: nieprawidłowy kod
