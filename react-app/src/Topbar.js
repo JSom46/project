@@ -20,7 +20,8 @@ export default function MenuAppBar(props) {
   //   setAuth(event.target.checked);
   // };
   function logout() {
-    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('login');
+    sessionStorage.removeItem('msg');
     window.location.assign("/");
     fetch('http://localhost:2400/auth/logout', {
       credentials: 'include',

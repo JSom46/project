@@ -20,7 +20,6 @@ import Dashboard from './Dashboard';
 function App() {
   const [auth, setAuth] = useState("");
   useEffect(() => {
-    
     const fetchData = async () => {
       try {
         const response = await fetch('http://localhost:2400/auth/loggedin', {
@@ -28,42 +27,56 @@ function App() {
         credentials: 'include'
       });
       const json = await response.json();
-      //console.log(json);
+      console.log(json);
       setAuth(json);
+      if(json.login !== undefined) sessionStorage.setItem('login',json.login);
+      else sessionStorage.removeItem('login');
+      sessionStorage.setItem('msg',json.msg);
+      // console.log(json.login);
     } catch (error) {
       console.log("error", error);
     }
   };
-  fetchData();
+  if(sessionStorage.getItem('msg') === "logged in" || sessionStorage.getItem('msg') === "logged with other") fetchData();
+  else if(sessionStorage.getItem('login') !== null){
+    setAuth({
+      "login": sessionStorage.getItem('login'),
+    });
+  }
+  else {
+    setAuth({
+      // "login": sessionStorage.getItem('login'),
+      "msg": "not logged in"
+    });
+  }
 }, []);
-//console.log(auth);
-  return (
+return (
   <div>
-    <BrowserRouter>
-    <MenuAppBar auth={auth}/>
-      {/* <Grid container spacing={2} columns={16} justifyContent="center">
-        <Grid item xs="auto" justifyItems="center">
-          <Item> */}
-            <Switch>
-              <Route exact path="/" render={() => {  return ( <Redirect to="/dashboard" /> )}}  />
-              <Route path="/dashboard">
-                <Dashboard auth={auth}/>
-              </Route>
-              <Route path="/register">
-                <Register auth={auth}/>
-              </Route>
-              <Route path="/login">
-                <Login auth={auth}/>
-              </Route>
-              <Route path="/activate" children={<Activate />} />
-              <Route path="/profile" children={<Profile auth={auth}/>}/>
-              <Route path="/account" children={<Account auth={auth}/>}/>
-            </Switch>
-          {/* </Item>
-        </Grid>
-      </Grid> */}
-    </BrowserRouter>
-  </div>
-  );
+  <BrowserRouter>
+  <MenuAppBar auth={auth}/>
+  {/* <Grid container spacing={2} columns={16} justifyContent="center">
+  <Grid item xs="auto" justifyItems="center">
+<Item> */}
+<Switch>
+<Route exact path="/" render={() => {  return ( <Redirect to="/dashboard" /> )}}  />
+<Route path="/dashboard">
+<Dashboard auth={auth}/>
+</Route>
+<Route path="/register">
+<Register auth={auth}/>
+</Route>
+<Route path="/login">
+<Login auth={auth}/>
+</Route>
+<Route path="/activate" children={<Activate />} />
+<Route path="/profile" children={<Profile auth={auth}/>}/>
+<Route path="/account" children={<Account auth={auth}/>}/>
+</Switch>
+{/* </Item>
+  </Grid>
+</Grid> */}
+</BrowserRouter>
+</div>
+);
 }
 export default App;

@@ -7,9 +7,9 @@ import { TextField } from '@mui/material';
 import { Button,IconButton } from '@mui/material';
 import { Google,Facebook } from '@mui/icons-material';
 import { Stack } from '@mui/material';
-import  Item  from '@mui/material/ListItem';
 import { Typography } from '@mui/material';
 import { CircularProgress } from '@mui/material';
+import { Grid } from '@mui/material';
 
 import './login.css'
 
@@ -26,7 +26,8 @@ async function loginUser(userData) {
 return await data;
 }
 function logout() {
-  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('login');
+  sessionStorage.removeItem('msg');
   window.location.assign("/");
   fetch('http://localhost:2400/auth/logout', {
     credentials: 'include',
@@ -44,6 +45,7 @@ const LoginGoogleFunc = async e => {
   e.preventDefault();
   const response = await LoginGoogle();
   console.log(response);
+  sessionStorage.setItem('msg',"logged with other");
   window.location.assign(response.url);
 }
 async function LoginFacebook() {
@@ -57,6 +59,7 @@ const LoginFacebookFunc = async e => {
   e.preventDefault();
   const response = await LoginFacebook();
   console.log(response);
+  sessionStorage.setItem('msg',"logged with other");
   window.location.assign(response.url);
 }
 export default function Login(props) {
@@ -73,23 +76,32 @@ export default function Login(props) {
     if(response.msg !== 'ok'){
       errorMessage(response.msg);
     }
-    else window.location.reload();
+    else {
+      sessionStorage.setItem('msg',"logged in");
+      window.location.reload(); 
+    }
   }
 if(props.auth?.login)
   return(
     <div>
-    <h1>Zalogowany</h1>
-    <h2>Login:{" "+props.auth.login}</h2>
-    <div>
-    <Button color="primary" onClick={logout}>Wyloguj</Button><br />
-    </div>
+      <Grid container spacing={2} columns={16} justifyContent="center">
+        <Grid item xs="auto" justifyItems="center">
+          <h1>Zalogowany</h1>
+          <h2>Login:{" "+props.auth.login}</h2>
+          <div>
+          <Button color="primary" onClick={logout}>Wyloguj</Button><br />
+          </div>
+        </Grid>
+      </Grid>
     </div>
     )
   else if(props.auth?.msg) 
   return(
     <div>
+    <Grid container spacing={2} columns={16} justifyContent="center">
+    <Grid item xs="auto" justifyItems="center">
     <Typography variant="h4"> Logowanie </Typography>
-    <FormControl>
+    <FormControl sx={{width:300}}>
     <form onSubmit={handleSubmit}>
     <FormGroup>
     <TextField type='email' id="email" label="Email" variant="standard" required onChange={e => setEmail(e.target.value)} />
@@ -97,13 +109,15 @@ if(props.auth?.login)
     <br />
     <Button variant="contained" type="submit">Zaloguj</Button>
     </FormGroup>
-    <Stack direction="row" spacing={0}>
-    <Item><IconButton onClick={LoginGoogleFunc}> <Google /> </IconButton></Item>
-    <Item><IconButton onClick={LoginFacebookFunc}> <Facebook /> </IconButton></Item>
+    <Stack direction="row" spacing={8} justifyContent="center" alignItems="center">
+    <IconButton onClick={LoginGoogleFunc}> <Google /> </IconButton>
+    <IconButton onClick={LoginFacebookFunc}> <Facebook /> </IconButton>
     </Stack>
     </form>
     </FormControl>
     <p id="loginError">&nbsp;</p>
+    </Grid>
+    </Grid>
     </div>
     )
   else

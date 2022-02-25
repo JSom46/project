@@ -124,7 +124,7 @@ export default function AnnoucementList() {
     useEffect(() => {
       const fetchData = async (pageToFetch) => {
         let url='http://localhost:2400/anons/list?page=' + (pageToFetch);
-        console.log(url);
+        // console.log(url);
         try {
           const response = await fetch(url, {
             method: 'GET',

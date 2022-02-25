@@ -7,10 +7,13 @@ import FormGroup from '@mui/material/FormGroup';
 import { TextField } from '@mui/material';
 import { Button } from '@mui/material';
 import { Typography } from '@mui/material';
+import { Alert } from '@mui/material';
+import { Grid } from '@mui/material';
 
 
 async function registerUser(credentials) {
-  console.log(credentials);
+  credentials.password = credentials.password.value;
+  // console.log(credentials);
     return fetch('http://localhost:2400/auth/signup', {
       method: 'POST',
       headers: {
@@ -22,6 +25,11 @@ async function registerUser(credentials) {
    }
 
 export default function Register() {
+  const [alert, setAlert] = useState({
+    "value": "",
+    "severity": "",
+    "hidden": true
+  });
   const [login, setLogin] = useState();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState({
@@ -74,17 +82,35 @@ export default function Register() {
   }
   const handleSubmit = async e => {
     e.preventDefault();
-    if(!validate()) return -1;
+    if(validate()){
+      return -1;
+    }
     const response = await registerUser({
       login,
       email,
       password
     });
+    if(response.msg === 'account created'){
+      setAlert({
+        "value": "Pomyślnie utworzono konto. Sprawdź e-mail w celu aktywacji konta.",
+        "severity": "success",
+        "hidden": false
+      })
+    }
+    else if(response.msg === 'email already in use'){
+      setAlert({
+        "value": "E-mail jest już w użyciu.",
+        "severity": "error",
+        "hidden": false
+      })
+    }
   }
   return(
     <div>
+    <Grid container spacing={2} columns={16} justifyContent="center">
+    <Grid item xs="auto" justifyItems="center">
     <Typography variant="h4"> Rejestracja </Typography>
-    <FormControl>
+    <FormControl sx={{width:300}}>
     <form onSubmit={handleSubmit}>
     <FormGroup>
     <TextField type='text' id="username" label="Login" variant="standard" required onChange={e => setLogin(e.target.value)} />
@@ -95,7 +121,10 @@ export default function Register() {
     <br />
     <Button variant="contained" type="submit" onClick={handleSubmit}>Zarejestruj</Button>
     </form>
+    <Alert severity={alert.severity !== "" ? alert.severity : "error"} hidden={alert.hidden}>{alert.value}</Alert>
     </FormControl>
+    </Grid>
+    </Grid>
     </div>
   )
 }
