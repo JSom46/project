@@ -11,9 +11,8 @@ import MenuAppBar from './Topbar';
 import Profile from './Profile';
 import Account from './Account';
 import Dashboard from './Dashboard';
-
-// import Grid from '@mui/material/Grid';
-// import Item from '@mui/material/ListItem';
+import Announcements from './Announcements';
+import DataGridDemo from './DataGrid';
 
 
 
@@ -29,15 +28,18 @@ function App() {
       const json = await response.json();
       console.log(json);
       setAuth(json);
-      if(json.login !== undefined) sessionStorage.setItem('login',json.login);
+      if(json.login !== undefined) {
+        sessionStorage.setItem('login',json.login);
+        sessionStorage.setItem('msg',"ok");
+      }
       else sessionStorage.removeItem('login');
-      sessionStorage.setItem('msg',json.msg);
       // console.log(json.login);
     } catch (error) {
       console.log("error", error);
     }
   };
-  if(sessionStorage.getItem('msg') === "logged in" || sessionStorage.getItem('msg') === "logged with other") fetchData();
+  if(sessionStorage.getItem('msg') === "logged in" || sessionStorage.getItem('msg') === "logged with other" || sessionStorage.getItem('msg') === null
+  || (sessionStorage.getItem('msg') === "ok" && sessionStorage.getItem('login') === null)) fetchData();
   else if(sessionStorage.getItem('login') !== null){
     setAuth({
       "login": sessionStorage.getItem('login'),
@@ -45,7 +47,6 @@ function App() {
   }
   else {
     setAuth({
-      // "login": sessionStorage.getItem('login'),
       "msg": "not logged in"
     });
   }
@@ -54,29 +55,29 @@ return (
   <div>
   <BrowserRouter>
   <MenuAppBar auth={auth}/>
-  {/* <Grid container spacing={2} columns={16} justifyContent="center">
-  <Grid item xs="auto" justifyItems="center">
-<Item> */}
-<Switch>
-<Route exact path="/" render={() => {  return ( <Redirect to="/dashboard" /> )}}  />
-<Route path="/dashboard">
-<Dashboard auth={auth}/>
-</Route>
-<Route path="/register">
-<Register auth={auth}/>
-</Route>
-<Route path="/login">
-<Login auth={auth}/>
-</Route>
-<Route path="/activate" children={<Activate />} />
-<Route path="/profile" children={<Profile auth={auth}/>}/>
-<Route path="/account" children={<Account auth={auth}/>}/>
-</Switch>
-{/* </Item>
-  </Grid>
-</Grid> */}
-</BrowserRouter>
-</div>
+  <Switch>
+  <Route exact path="/" render={() => {  return ( <Redirect to="/dashboard" /> )}}  />
+  <Route path="/dashboard">
+  <Dashboard auth={auth}/>
+  </Route>
+  <Route path="/test">
+  <DataGridDemo />
+  </Route>
+  <Route path="/announcements">
+  <Announcements auth={auth}/>
+  </Route>
+  <Route path="/register">
+  <Register auth={auth}/>
+  </Route>
+  <Route path="/login">
+  <Login auth={auth}/>
+  </Route>
+  <Route path="/activate" children={<Activate />} />
+  <Route path="/profile" children={<Profile auth={auth}/>}/>
+  <Route path="/account" children={<Account auth={auth}/>}/>
+  </Switch>
+  </BrowserRouter>
+  </div>
 );
 }
 export default App;

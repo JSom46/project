@@ -35,24 +35,30 @@ export default function TemporaryDrawer() {
       onKeyDown={toggleDrawer(anchor, false)}
     >
         <List>
-          <ListItem  component="a" href="/dashboard">
+          <ListItem button component="a" href="/dashboard">
             <ListItemText primary={'PZ-XIV'} />
           </ListItem>
         </List>
     <Divider />
       <List>
-          <ListItem button key={'Login'} component="a" href="/login">
-            <ListItemIcon>
-               <LoginIcon />
-            </ListItemIcon>
-            <ListItemText primary={'Login'} />
-          </ListItem>
-          <ListItem button key={'Rejestracja'} component="a" href="/register">
-            <ListItemIcon>
-               <AppRegistrationIcon />
-            </ListItemIcon>
-            <ListItemText primary={'Rejestracja'} />
-          </ListItem>
+        <ListItem button component="a" href="/announcements">
+          <ListItemText primary={'Zarządzanie ogłoszeniami'} />
+        </ListItem>
+      </List>
+    <Divider />
+      <List>
+        <ListItem button key={'Login'} component="a" href="/login">
+          <ListItemIcon>
+              <LoginIcon />
+          </ListItemIcon>
+          <ListItemText primary={'Login'} />
+        </ListItem>
+        <ListItem button key={'Rejestracja'} component="a" href="/register">
+          <ListItemIcon>
+              <AppRegistrationIcon />
+          </ListItemIcon>
+          <ListItemText primary={'Rejestracja'} />
+        </ListItem>
       </List>
       <Divider />
     </Box>

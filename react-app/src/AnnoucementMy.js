@@ -12,50 +12,141 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import Collapse from '@mui/material/Collapse';
 import Box from '@mui/material/Box';
-import { Typography } from '@mui/material';
+import { Dialog, Button } from '@mui/material';
+import DialogTitle from '@mui/material/DialogTitle';
+import { DialogActions } from '@mui/material';
+import { Alert } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import FirstPageIcon from '@mui/icons-material/FirstPage';
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
 import LastPageIcon from '@mui/icons-material/LastPage';
+import { styled } from '@mui/system';
+import { Stack } from '@mui/material';
+import { Typography } from '@mui/material';
 
-function createData(id, title, category, time, description) {
-  return { id, title, category, time, description };
+function createData(id, title, category, create_date, description, image) {
+  return { id, title, category, create_date, description, image };
 }
 
 function Row(props) {
   const { row } = props;
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [id, setId] = useState();
+  const [enabled, setEnabled] = useState(true);
+  const [alert, setAlert] = useState({
+    "value": "",
+    "severity": "",
+    "hidden": true,
+    "disableButton": false
+  });
 
-  return (
-    <React.Fragment>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }} onClick={() => setOpen(!open)}>
-        <TableCell component="th" scope="row">{row.title}</TableCell>
-        <TableCell align="right">{row.category}</TableCell>
-        <TableCell align="right">{row.time}</TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
-              <Typography variant="h6" gutterBottom component="div">
-                Opis
-              </Typography>
-              <Typography variant="body1" gutterBottom component="div">
-                {row.description}
-              </Typography>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </React.Fragment>
-  );
+  const StyledTableRow = styled(TableRow)(() => ({
+    backgroundColor: '#ff7b63',
+  }));
+
+  async function deleteAnnouncement(announcementData) {
+    // console.log(JSON.stringify(id));
+    try {
+      const response = await fetch('http://localhost:2400/anons/', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(announcementData)
+      });
+      return response;
+    } catch (error) {
+      console.log("error", error);
+      return error;
+    }
+  }
+
+  const handleDelete = async e => {
+    e.preventDefault();
+    const response = await deleteAnnouncement({
+      id
+    });
+    if (response.status === 200) {
+      setAlert({
+        "value": "Pomyślnie usunięto ogłoszenie.",
+        "severity": "success",
+        "hidden": false,
+        "disableButton": true
+      })
+      setTimeout(() => {
+        setAlert({ "hidden": true, "disableButton": false });
+        setOpenDialog(false);
+        setEnabled(false);
+      }, 3000);
+    }
+    else {
+      setAlert({
+        "value": "Błąd: " + response.status,
+        "severity": "error",
+        "hidden": false
+      })
+      setTimeout(() => {
+        setAlert({ "hidden": true, "disableButton": false });
+        setOpenDialog(false);
+      }, 3000);
+    }
+    console.log(response);
+  }
+
+  const handleOpenDialog = (e) => {
+    setOpenDialog((prev) => !(prev));
+    setId(parseInt(e.target.id));
+  }
+  if (enabled)
+    return (
+      <React.Fragment>
+        <TableRow sx={{ '& > *': { borderBottom: 'unset' } }} onClick={() => setOpen(!open)}>
+          <TableCell component="th" scope="row">{row.title}</TableCell>
+          <TableCell align="right">{row.category}</TableCell>
+          <TableCell align="right">{row.create_date}</TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+            <Collapse in={open} timeout="auto" unmountOnExit>
+              <Stack direction="row" justifyContent="space-between" alignItems="stretch" sx={{ margin: 1 }}>
+                <img style={{ width: "100px", height: "100px", objectFit: "cover" }} src={'http://localhost:2400/anons/photo?name=' + row.image} alt={row.title} />
+                <Typography variant="h4">{row.title}</Typography>
+                <Button id={row.id} variant="contained" onClick={handleOpenDialog} color='error'>
+                  Usuń
+                </Button>
+                <Dialog open={openDialog} onClose={handleOpenDialog} fullWidth>
+                  <DialogTitle>Usuń ogłoszenie</DialogTitle>
+                  <DialogActions>
+                    <Button onClick={handleOpenDialog}>Anuluj</Button>
+                    <Button color='error' onClick={handleDelete} disabled={alert.disableButton}>Usuń</Button>
+                  </DialogActions>
+                  <Alert severity={alert.severity !== "" ? alert.severity : "error"} hidden={alert.hidden}>{alert.value}</Alert>
+                </Dialog>
+              </Stack>
+              {/* <Box sx={{ margin: 1 }}>
+            </Box> */}
+            </Collapse>
+          </TableCell>
+        </TableRow>
+      </React.Fragment>
+    );
+  else
+    return (
+      <React.Fragment>
+        <StyledTableRow >
+          <TableCell colSpan={3} align='center' component="th" scope="row">To ogłoszenie zostało usunięte</TableCell>
+        </StyledTableRow>
+      </React.Fragment>
+    );
 }
 
 function TablePaginationActions(props) {
   const theme = useTheme();
   const { count, page, rowsPerPage, onPageChange } = props;
-  
+
   const handleFirstPageButtonClick = (event) => {
     onPageChange(event, 0);
   };
@@ -97,7 +188,7 @@ function TablePaginationActions(props) {
       </IconButton>
       {/* <IconButton
         onClick={handleLastPageButtonClick}
-        // disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label="last page"
       >
         {theme.direction === 'rtl' ? <FirstPageIcon /> : <LastPageIcon />}
@@ -111,20 +202,19 @@ TablePaginationActions.propTypes = {
   onPageChange: PropTypes.func.isRequired,
   page: PropTypes.number.isRequired,
   rowsPerPage: PropTypes.number.isRequired,
-  // reachedend: PropTypes.any.isRequired,
 };
 
-export default function AnnoucementList() {
+export default function AnnoucementMy() {
   const [data, setData] = useState([]);
   const [page, setPage] = React.useState(0);
   const [pageToFetch, setPageToFetch] = React.useState(1);
-  const [rowsPerPage,] = React.useState(10);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
 
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
   useEffect(() => {
     const fetchData = async (pageToFetch) => {
-      let url = 'http://localhost:2400/anons/list?page=' + (pageToFetch);
+      let url = 'http://localhost:2400/anons/my?page=' + (pageToFetch);
       // console.log(url);
       try {
         const response = await fetch(url, {
@@ -139,9 +229,11 @@ export default function AnnoucementList() {
             element.title,
             (element.category === 0 ? "Zaginięcie" : "Znalezienie"),
             element.create_date,
-            element.description
+            element.description,
+            element.image
           ));
         });
+        // console.log(rows);
         setData((prev) => (prev.concat(rows))); // TO JEST DO POPRAWY
       } catch (error) {
         console.log("error", error);
@@ -153,14 +245,17 @@ export default function AnnoucementList() {
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
     if ((3 * pageToFetch) < (newPage + 1)) {
-      setPageToFetch((parseInt(newPage/3) + 1));
+      setPageToFetch((parseInt(newPage / 3) + 1));
     }
   };
 
   const handleChangeRowsPerPage = (event) => {
-    // setRowsPerPage(parseInt(event.target.value, 10));
+    setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+  const testss = (id) => {
+    console.log(id);
+  }
   return (
     <TableContainer component={Paper}>
       <Table /*sx={{ minWidth: 650 }}*/>
@@ -176,7 +271,7 @@ export default function AnnoucementList() {
             ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
             : data
           ).map((row) => (
-            <Row key={row.id} row={row} />
+            <Row key={row.id} row={row} testfunc={testss} />
           ))}
           {emptyRows > 0 && (
             <TableRow style={{ height: 53 * emptyRows }}>
