@@ -287,4 +287,28 @@ router.get('/logout', (req, res) => {
 });
 
 
+//zwraca informacje o uzytkowniku o id rownym parametrowi id, jesli nie podano id,to zwraca informacje o zalogowanym uzytkowniku lub blad 403, jesli nie podano id i klient jest niezalogowany
+router.get('/user', (req, res) => {
+    if(req.query.id){
+        //podano id
+        con.get('SELECT id, login, email, is_admin FROM users WHERE id = ?;', req.query.id, (err, row) => {
+            if(err){
+                return res.sendStatus(500);
+            }
+            if(!row){
+                //brak konta o podanym id
+                return res.sendStatus(404);
+            }
+            return res.status(200).json({user_id: row.id, email: row.email, login: row.login, is_admin: row.is_admin});
+        });
+    }
+    else if(req.session.user_id){
+        //nie podano id, ale klient jest zalogowany
+        return res.status(200).json({user_id: req.session.user_id, email: req.session.email, login: req.session.login, is_admin: req.session.is_admin});
+    }
+    //nie podano id i klient nie jest zalogowany
+    return res.sendStatus(403);
+});
+
+
 module.exports = router;

@@ -215,7 +215,7 @@ router.put('/', upload.array('pictures'), (req, res) => {
                     });
                 });
             }
-            console.log("hwdp " + this.lastID);
+            console.log(this.lastID);
             return res.sendStatus(200);
         });
     });
@@ -234,8 +234,8 @@ router.delete('/', (req, res) => {
         if(!row){
             return res.sendStatus(404);
         }
-        //uzytkownik nie jest autorem ogloszenia
-        if(row.author_id != req.session.user_id){
+        //uzytkownik nie jest autorem ogloszenia lub administratorem
+        if((row.author_id != req.session.user_id) || (req.session.is_admin == 1)){
             return res.sendStatus(403);
         }
         //usun ogloszenie z bazy

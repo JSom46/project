@@ -14,7 +14,7 @@ paths:
         type: string
       responses:
         '200':
-          description: Zwraca link do logowania
+          description: zwraca link do logowania
           schema:
             type: object
             properties:
@@ -56,9 +56,9 @@ paths:
                 - 0
                 - 1
         '301':
-          description: Przy pobieraniu linku ustawiono parametr type na 'web' - następuje przekierowanie na strone główną aplikacji webowej
+          description: przy pobieraniu linku ustawiono parametr type na 'web' - następuje przekierowanie na strone główną aplikacji webowej
         '500':
-          description: Błąd po stronie serwera
+          description: błąd po stronie serwera
 
 /facebook/url/{type}:
   get:
@@ -75,7 +75,7 @@ paths:
       type: string
     responses:
       '200':
-        description: Zwraca link do logowania
+        description: zwraca link do logowania
         schema:
           type: object
           properties:
@@ -117,15 +117,16 @@ paths:
                 - 0
                 - 1
         '301':
-          description: Przy pobieraniu linku ustawiono parametr type na 'web' - następuje przekierowanie na strone główną aplikacji webowej
+          description: przy pobieraniu linku ustawiono parametr type na 'web' - następuje przekierowanie na strone główną aplikacji webowej
         '500':
-          description: Błąd po stronie serwera
+          description: błąd po stronie serwera
 
 /loggedin:
     get:
       tags:
         - /auth - autentyfikacja
       summary: zwraca informacje o zalogowanym użytkowniku
+      deprecated: true
       produces:
       - application/json
       responses:
@@ -140,8 +141,73 @@ paths:
                 type: string
               user_id:
                 type: integer
+              is_admin:
+                type: integer
+                enum:
+                - 0
+                - 1 
         '403':
           description: użytkownik nie jest zalogowany
+
+/user{id}:
+    get:
+      tags:
+        - /auth - autentyfikacja
+      summary: zwraca informacje o użytkowniku o podanym id.
+      produces:
+      - application/json
+      parameters:
+      - name: id
+        in: path
+        description: ID użytkownika, którego informacje mają zostać zwrócone
+        required: false
+        type: integer
+      responses:
+        '200':
+          description: wysłano informacje o użytkowniku
+          schema:
+            type: object
+            properties:
+              login:
+                type: string
+              email:
+                type: string
+              user_id:
+                type: integer
+              is_admin:
+                type: integer
+                enum:
+                - 0
+                - 1   
+        '500':
+          description: błąd po stronie serwera
+
+/user:
+    get:
+      tags:
+        - /auth - autentyfikacja
+      summary: zwraca informacje o zalogowanym użytkowniku - działa jak /loggedin.
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: wysłano informacje o zalogowanym użytkowniku
+          schema:
+            type: object
+            properties:
+              login:
+                type: string
+              email:
+                type: string
+              user_id:
+                type: integer
+              is_admin:
+                type: integer
+                enum:
+                - 0
+                - 1  
+        '403':
+          description: użytkownik nie jest zalogowany      
 
 /logout:
     get:

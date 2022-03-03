@@ -40,7 +40,8 @@ con.serialize(() => {
 });
 
 
-con.run('CREATE TABLE IF NOT EXISTS anons(id INTEGER PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, category INTEGER NOT NULL, images TEXT, author_id INTEGER NOT NULL, create_date INTEGER NOT NULL, lat REAL, lng REAL)', (err, res) => {
+//utworzenie tabeli ogloszen, jesli nie istnieje
+con.run('CREATE TABLE IF NOT EXISTS anons(id INTEGER PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, category INTEGER NOT NULL, images TEXT, author_id INTEGER NOT NULL, create_date INTEGER NOT NULL, lat REAL NOT NULL, lng REAL NOT NULL)', (err, res) => {
     if(err){
         console.log(err.name + " | " + err.message);
         throw err;
