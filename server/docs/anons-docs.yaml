@@ -42,9 +42,23 @@ paths:
               lat:
                 type: number
                 format: float
+                description: "szerokość geograficzna w stopniach"
               lng:
                 type: number
                 format: float
+                description: "długosć geograficzna w stopniach"
+              type:
+                type: string
+                description: "kategoria, do jakiej należy zwierzę"
+              coat:
+                type: string
+                description: "typ owłosienia zwierzęcia - undefined, jeśli autor nie podał"
+              color:
+                type: string
+                description: "kolor zwierzęcia - undefined, jeśli autor nie podał"
+              breed:
+                type: string
+                description: "gatunek zwierzęcia - undefined, jeśli autor nie podał"
         '404':
           description: Ogłoszenie o podanym id nie istnieje
         '500':
@@ -91,7 +105,27 @@ paths:
           type: number
           format: float 
           required: true
-          description: długość geograficzna          
+          description: długość geograficzna  
+        - in: formData
+          name: type
+          type: string
+          required: true
+          description: "kategoria, do jakiej należy zwierzę"
+        - in: formData
+          name: coat
+          type: string
+          required: false
+          description: "typ owłosienia zwierzęcia"
+        - in: formData
+          name: color
+          type: string
+          required: false
+          description: "kolor zwierzęcia"
+        - in: formData
+          name: breed
+          type: string
+          required: false
+          description: "gatunek zwierzęcia"
       responses:
         '200':
           description: Ogłoszenie dodane
@@ -166,7 +200,27 @@ paths:
           type: number
           format: float 
           required: true
-          description: długość geograficzna          
+          description: długość geograficzna  
+        - in: formData
+          name: type
+          type: string
+          required: true
+          description: "kategoria, do jakiej należy zwierzę"
+        - in: formData
+          name: coat
+          type: string
+          required: false
+          description: "typ owłosienia zwierzęcia"
+        - in: formData
+          name: color
+          type: string
+          required: false
+          description: "kolor zwierzęcia"
+        - in: formData
+          name: breed
+          type: string
+          required: false
+          description: "gatunek zwierzęcia"        
       responses:
         '200':
           description: Ogłoszenie zmienione
@@ -218,7 +272,32 @@ paths:
       parameters:
       - name: page
         in: path
-        description: informuje, którą z kolei trzydziestke ogłoszeń zwrócić, domyslnie zwraca pierwszą
+        description: "numer strony do wysłania. jesli pominięte, wysłane zostaną wszystkie ogłoszenia"
+        required: false
+        type: integer
+      - name: num
+        in: path
+        description: "ilosc ogłoszeń na stronę"
+        required: false
+        type: integer
+      - name: type
+        in: path
+        description: "przesłane zostaną tylko ogłoszenia, których type jest równy wartości tego parametru. mozna podać kilka możliwych wartości - należy je wypisać po przecinku(val1,val2,...)"
+        required: false
+        type: string
+      - name: coat
+        in: path
+        description: "przesłane zostaną tylko ogłoszenia, których coat jest równy wartości tego parametru. mozna podać kilka możliwych wartości - należy je wypisać po przecinku(val1,val2,...)"
+        required: false
+        type: string
+      - name: color
+        in: path
+        description: "przesłane zostaną tylko ogłoszenia, których coat jest równy wartości tego parametru. mozna podać kilka możliwych wartości - należy je wypisać po przecinku(val1,val2,...)"
+        required: false
+        type: string
+      - name: breed
+        in: path
+        description: "przesłane zostaną tylko ogłoszenia, których breed jest równy wartości tego parametru. mozna podać kilka możliwych wartości - należy je wypisać po przecinku(val1,val2,...)"
         required: false
         type: string
       responses:
@@ -250,6 +329,19 @@ paths:
                     image:
                       type: string
                       description: 'nazwa głównego zdjęcia ogłoszenia - puste, jeśli zdjęć brak'
+                    type:
+                      type: string
+                      description: kategoria, do której należy zwierzę
+                    coat: 
+                      type: string
+                      description: typ owłosienia zwierzęcia - undefined, jeśli autor nie podał
+                    color:
+                      type: string
+                      description: kolor zwierzęcia - undefined, jeśli autor nie podał
+                    breed:
+                      type: string
+                      description: gatunek zwierzęcia - undefined, jeśli autor nie podał
+                  
         '500':
           description: Błąd po stronie serwera
 
@@ -260,12 +352,6 @@ paths:
       summary: Zwraca listę ogłoszeń utworzonych przez użytkownika posortowaną od najnowszego
       produces:
       - application/json
-      parameters:
-      - name: page
-        in: path
-        description: informuje, którą z kolei trzydziestke ogłoszeń zwrócić, domyslnie zwraca pierwszą
-        required: false
-        type: string
       responses:
         '200':
           description: lista ogłoszeń
@@ -295,6 +381,18 @@ paths:
                     image:
                       type: string
                       description: 'nazwa głównego zdjęcia ogłoszenia - puste, jeśli zdjęć brak'
+                    type:
+                      type: string
+                      description: kategoria, do której należy zwierzę
+                    coat: 
+                      type: string
+                      description: typ owłosienia zwierzęcia - undefined, jeśli autor nie podał
+                    color:
+                      type: string
+                      description: kolor zwierzęcia - undefined, jeśli autor nie podał
+                    breed:
+                      type: string
+                      description: gatunek zwierzęcia - undefined, jeśli autor nie podał
         '500':
           description: Błąd po stronie serwera
 
@@ -320,3 +418,38 @@ paths:
           description: Nie znaleziono żądanego zdjęcia
         '500':
           description: Błąd po stronie serwera
+
+/types:
+    get:
+      tags:
+        - /anons - ogłoszenia
+      summary: Zwraca listę kategorii zwierząt i przyporządkowane im typy owłosienia, kolory i rasy
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Zwraca listę
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: nazwa kategorii
+                coats:
+                  type: array
+                  description: lista typów owłosienia dla danej kategorii - może być pusta
+                  items:
+                    type: string
+                colors:
+                  type: array
+                  description: lista kolorów dla danej kategorii
+                  items:
+                    type: string
+                breeds:
+                  type: array
+                  description: lista gatunków dla danej kategorii
+                  items:
+                    type: string
+

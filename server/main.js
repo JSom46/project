@@ -21,7 +21,7 @@ app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(session({
     store: new SqliteStore({
         driver: sqlite3.Database,
-        path: './db/serverdb.db',
+        path: './db/sessiondb.db',
         ttl: 12 * 60 * 60 * 1000,
     }),
     secret: process.env.SESSION_SECRET,

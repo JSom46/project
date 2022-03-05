@@ -1,5 +1,6 @@
 server/node_modules/
 server/db/serverdb.db
+server/db/sessiondb.db
 
 react-app/node_modules/
 

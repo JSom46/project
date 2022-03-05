@@ -180,18 +180,19 @@ router.get('/google', async (req, res) => {
                 if(err){
                     return res.sendStatus(500);
                 }
+                con.get('SELECT id FROM users WHERE email = ?;', user.email, (err, row) => {
+                    req.session.login = user.name;
+                    req.session.email = user.email;
+                    req.session.user_id = row.id;
+                    req.session.is_admin = 0;
 
-                req.session.login = user.name;
-                req.session.email = user.email;
-                req.session.user_id = this.lastID;
-                req.session.is_admin = 0;
+                    if(req.session.type == 'web'){
+                        req.session.type = undefined;
+                        return res.redirect(301, process.env.WEB_APP_ROOT_URI);
+                    }
 
-                if(req.session.type == 'web'){
-                    req.session.type = undefined;
-                    return res.redirect(301, process.env.WEB_APP_ROOT_URI);
-                }
-
-                return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: this.lastID, is_admin: 0});  
+                    return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: row.id, is_admin: 0});  
+                });
             });
         }
         //konto istnieje - utworzenie sesji

@@ -14,8 +14,14 @@ const con = new sqlite3.Database('./db/serverdb.db', (err) => {
 
 con.serialize(() => {
     //utworzenie tabeli users, jeśli jeszcze nie istnieje
-    con.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL, email TEXT UNIQUE NOT NULL, activation_code TEXT, is_activated INTEGER, is_native INTEGER, is_admin);')
-    .get('SELECT COUNT(*) num FROM users', (err, result) => {
+    con.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL, email TEXT UNIQUE NOT NULL, activation_code TEXT, is_activated INTEGER, is_native INTEGER, is_admin);', (err) => {
+        if(err){
+            console.log(err.name + " | " + err.message);
+            throw err;
+        }
+    });
+
+    con.get('SELECT COUNT(*) num FROM users', (err, result) => {
         if(err){
             console.log(err.name + " | " + err.message);
             throw err;
@@ -41,7 +47,7 @@ con.serialize(() => {
 
 
 //utworzenie tabeli ogloszen, jesli nie istnieje
-con.run('CREATE TABLE IF NOT EXISTS anons(id INTEGER PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, category INTEGER NOT NULL, images TEXT, author_id INTEGER NOT NULL, create_date INTEGER NOT NULL, lat REAL NOT NULL, lng REAL NOT NULL)', (err, res) => {
+con.run('CREATE TABLE IF NOT EXISTS anons(id INTEGER PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL, category INTEGER NOT NULL, images TEXT, author_id INTEGER NOT NULL, create_date INTEGER NOT NULL, lat REAL NOT NULL, lng REAL NOT NULL, type TEXT NOT NULL, coat TEXT, color TEXT, breed TEXT);', (err) => {
     if(err){
         console.log(err.name + " | " + err.message);
         throw err;
