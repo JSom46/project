@@ -8,13 +8,19 @@ const path = require('path');
 const distance = require('./distance.js');
 const types = require('./db/types.json').types;
 
+let date = Date.now();
+// funkcja generujaca unikalne nazwy dla plikow
+const getFilename = (file) => {
+    return ++date + path.extname(file.originalname);
+};
+
 const upload = multer({
     storage: multer.diskStorage({
         destination: (req, file, cb) => {
             cb(null, 'pictures/');
         },
         filename: function (req, file, cb) {
-            cb(null, Date.now() + path.extname(file.originalname));
+            cb(null, getFilename(file));
         }
     }),
     limits: {
@@ -173,7 +179,7 @@ router.get('/list', (req, res) => {
         req.query.breed.split(',').forEach((e) => {parameters.push(e);});
     }    
 
-    let statement = 'SELECT id, title, category, images image, lat, lng, type, coat, color, breed FROM anons' + 
+    let statement = 'SELECT id, title, category, images image, lat, lng, type FROM anons' + 
     (filters.length > 0 ? ' WHERE ' : '') + filters.join(' AND ') + ' ORDER BY create_date DESC;'
 
     // dane odsylane do klienta
@@ -204,11 +210,9 @@ router.get('/list', (req, res) => {
             arr = arr.filter((e, i) => {return (i < num * req.query.page) && (i >= num * (req.query.page - 1));})
         }
 
-        // usuwanie parametrow o wartosci null
-        arr.forEach((e) => {
-            e.coat = e.coat ? e.coat : undefined;
-            e.color = e.color ? e.color : undefined;
-            e.breed = e.breed ? e.breed : undefined;
+        // nazwy zdjec sa przechowywane w nastepujacym formacie: nazwa1#nazwa2#...#nazwan
+        arr.forEach((e, i) => {
+            arr[i].image = e.image.split('#')[0];
         });
 
         return res.status(200).json({
@@ -327,17 +331,16 @@ router.delete('/', (req, res) => {
 
 // zwraca liste ogloszen utworzonych przez uzytkownika sortowana po dacie utworzenia malejaco i liczbe przeslanych ogloszen
 router.get('/my', (req, res) => {
-    con.all('SELECT id, category, title, datetime(create_date, "unixepoch", "localtime") create_date, images image, type, coat, color, breed FROM anons WHERE author_id = ?', req.session.user_id, (err, rows) => {
+    con.all('SELECT id, category, title, datetime(create_date, "unixepoch", "localtime") create_date, images image, type FROM anons WHERE author_id = ?', req.session.user_id, (err, rows) => {
         if(err){
             return res.sendStatus(500);
         }
+
         // nazwy zdjec sa przechowywane w nastepujacym formacie: nazwa1#nazwa2#...#nazwan
         rows.forEach((e, i) => {
             rows[i].image = e.image.split('#')[0];
-            if(rows[i].coat == null){rows[i].coat = undefined;}
-            if(rows[i].color == null){rows[i].color = undefined;}
-            if(rows[i].breed == null){rows[i].breed = undefined;}
         });
+
         return res.status(200).json({
             num: rows.length,
             list: rows

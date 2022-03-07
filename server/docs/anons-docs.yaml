@@ -262,7 +262,7 @@ paths:
         '500':
           description: Błąd po stronie serwera
 
-/list/{page}:
+/list:
     get:
       tags:
         - /anons - ogłoszenia
@@ -280,6 +280,14 @@ paths:
         description: "ilosc ogłoszeń na stronę"
         required: false
         type: integer
+      - name: category
+        in: path
+        description: "0 - zgłoszenie zaginięcia, 1 - znalezienia"
+        required: false
+        type: integer
+        enum:
+        - 0
+        - 1
       - name: type
         in: path
         description: "przesłane zostaną tylko ogłoszenia, których type jest równy wartości tego parametru. mozna podać kilka możliwych wartości - należy je wypisać po przecinku(val1,val2,...)"
@@ -332,20 +340,10 @@ paths:
                     type:
                       type: string
                       description: kategoria, do której należy zwierzę
-                    coat: 
-                      type: string
-                      description: typ owłosienia zwierzęcia - undefined, jeśli autor nie podał
-                    color:
-                      type: string
-                      description: kolor zwierzęcia - undefined, jeśli autor nie podał
-                    breed:
-                      type: string
-                      description: gatunek zwierzęcia - undefined, jeśli autor nie podał
-                  
         '500':
           description: Błąd po stronie serwera
 
-/my/{page}:
+/my/:
     get:
       tags:
         - /anons - ogłoszenia
@@ -384,15 +382,6 @@ paths:
                     type:
                       type: string
                       description: kategoria, do której należy zwierzę
-                    coat: 
-                      type: string
-                      description: typ owłosienia zwierzęcia - undefined, jeśli autor nie podał
-                    color:
-                      type: string
-                      description: kolor zwierzęcia - undefined, jeśli autor nie podał
-                    breed:
-                      type: string
-                      description: gatunek zwierzęcia - undefined, jeśli autor nie podał
         '500':
           description: Błąd po stronie serwera
 
