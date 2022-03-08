@@ -7,6 +7,8 @@ import AnnoucementList from './AnnoucementList';
 import Grid from '@mui/material/Grid';
 import Item from '@mui/material/ListItem';
 
+import MapOverview from './MapOverview';
+
 
 export default function Dashboard(props) {
   // const [addAnnoucmentShown, setAddAnnoucmentShown] = React.useState(false);
@@ -17,7 +19,7 @@ export default function Dashboard(props) {
     <BrowserRouter>
     <Grid container spacing={2} columns={16}>
        <Grid item xs={11}>
-         <Item>mapa</Item>
+         <Item><MapOverview /></Item>
       </Grid>
       <Grid item xs={5}>
         <AnnoucementList/>

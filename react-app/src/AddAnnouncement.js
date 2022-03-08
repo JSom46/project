@@ -12,6 +12,8 @@ import { Select, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box';
 import ImageListItem from '@mui/material/ImageListItem';
 
+import MapPicker from './MapPicker';
+
 
 export default function AddAnnoucment(props) {
   const [title, setTitle] = useState();
@@ -19,12 +21,20 @@ export default function AddAnnoucment(props) {
   const [category, setCategory] = useState('');
   const [pictures, setPictures] = useState();
   const [picturesPreview, setPicturesPreview] = useState();
-  // const [lat, setLat] = useState(); //Dane z mapy
-  // const [lng, setLng] = useState(); //Dane z mapy
+  const [lat, setLat] = useState(); //Dane z mapy
+  const [lng, setLng] = useState(); //Dane z mapy
+  const [location, setLocation] = useState(null);
+
+  function handleLocationChange(loc) {
+    setLat(loc.lat);
+    setLng(loc.lng);
+    setLocation(loc);
+  }
 
   const handleCategoryChange = (event) => {
     setCategory(event.target.value);
   };
+
   const handlePictures = (event) => {
     const formData = new FormData();
     const picturesPreviewArray = [];
@@ -36,6 +46,7 @@ export default function AddAnnoucment(props) {
     setPicturesPreview(picturesPreviewArray);
     // console.log(picturesPreview);
   };
+
   async function postAnnoucement() {
     const formData = new FormData();
     formData.append('title', title);
@@ -44,8 +55,12 @@ export default function AddAnnoucment(props) {
     for (let value of pictures.values()) {
       formData.append('pictures', value);
     }
-    formData.append('lat', Math.random()); //Dane z mapy
-    formData.append('lng', Math.random()); //Dane z mapy
+    formData.append('lat', lat); //Dane z mapy
+    formData.append('lng', (((lng + 180) % 360 + 360) % 360) - 180); //Dane z mapy, znormalizowana dlugosc geog.
+    formData.append('type', "Unknown"); //type - do dodania w formularzu
+    //coat
+    //color
+    //breed
     try {
       const response = await fetch('http://localhost:2400/anons/', {
         method: 'POST',
@@ -58,11 +73,13 @@ export default function AddAnnoucment(props) {
       console.log("error", error);
     }
   }
+
   const handleSubmit = async e => {
     e.preventDefault();
     const response = await postAnnoucement();
     console.log(response);
   }
+
   return (
     <div>
       {/* <Typography variant="h4"> Dodaj ogłoszenie </Typography> */}
@@ -76,7 +93,9 @@ export default function AddAnnoucment(props) {
                 <MenuItem value={0}>Zaginięcie</MenuItem>
                 <MenuItem value={1}>Znalezienie</MenuItem>
               </Select>
-              <TextField fullWidth type='text' id="description" label="Opis" variant="standard" multiline minRows={7} required onChange={e => setDescription(e.target.value)} />
+              <TextField fullWidth type='text' id="description" label="Opis" variant="standard" multiline minRows={4} required onChange={e => setDescription(e.target.value)} />
+              <br />
+              <MapPicker location = {location} onLocationChange = {handleLocationChange} />
               <br />
               <Button variant="contained" component="label">Dodaj zdjęcia
                 <input type="file" accept='.jpg, .png' onChange={handlePictures} hidden multiple />
