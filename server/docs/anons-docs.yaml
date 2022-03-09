@@ -277,6 +277,7 @@ paths:
         type: integer
       - name: num
         in: path
+        default: 30
         description: "ilosc ogłoszeń na stronę"
         required: false
         type: integer
@@ -308,6 +309,23 @@ paths:
         description: "przesłane zostaną tylko ogłoszenia, których breed jest równy wartości tego parametru. mozna podać kilka możliwych wartości - należy je wypisać po przecinku(val1,val2,...)"
         required: false
         type: string
+      - name: lat
+        in: path
+        description: "szerokość geograficzna w stopniach punktu, od którego liczona ma być odległość - jeśli podano razem z lng, zwrówcone zostaną tylko ogłoszenia oddalone o rad km od punktu (lat, lng)"
+        required: false
+        type: number
+        format: float
+      - name: lng
+        in: path
+        description: "długość geograficzna w stopniach punktu, od którego liczona ma być odległość - jeśli podano razem z lat, zwrówcone zostaną tylko ogłoszenia oddalone o rad km od punktu (lat, lng)"
+        required: false
+        type: number
+        format: float
+      - name: rad
+        in: path
+        default: 30
+        description: "jaśli podano parametry lat i lng, przesłane zostaną tylko ogłoszenia, których lokalizacja jest oddalona od punktu (lat, lng) o nie więcej niż rad kilometrów."
+        type: integer
       responses:
         '200':
           description: lista ogłoszeń
@@ -340,6 +358,14 @@ paths:
                     type:
                       type: string
                       description: kategoria, do której należy zwierzę
+                    lat:
+                      type: number
+                      format: float
+                      description: szerokość geograficzna w stopniach punktu, w którym umieszczono ogłoszenie
+                    lng:
+                      type: number 
+                      format: float
+                      description: długość geograficzna w stopniach punktu, w którym umieszczono ogłoszenie
         '500':
           description: Błąd po stronie serwera
 
@@ -347,7 +373,7 @@ paths:
     get:
       tags:
         - /anons - ogłoszenia
-      summary: Zwraca listę ogłoszeń utworzonych przez użytkownika posortowaną od najnowszego
+      summary: Zwraca listę ogłoszeń utworzonych przez użytkownika posortowaną od najnowszego (wymagane zalogowanie)
       produces:
       - application/json
       responses:
@@ -442,3 +468,90 @@ paths:
                   items:
                     type: string
 
+/notifications:
+    get:
+      tags:
+        - /anons - ogłoszenia
+      summary: Zwraca listę notyfikacji dotyczących ogłoszeń umiszczonych przez klienta (wymagane zalogowanie)
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Zwraca listę
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                anon_id:
+                  type: integer
+                  description: "id ogłoszenia powiązanego z notyfikacją"
+                image: 
+                  type: string
+                  description: "nazwa zdjęcia powiązanego z notyfikacją"
+                lat:
+                  type: number
+                  format: float
+                  description: "szerokość geograficzna w stopniach punktu, w którym umieszczono notyfikację"
+                lng: 
+                  type: number
+                  fomat: float
+                  description: "szerokość geograficzna w stopniach punktu, w którym umieszczono notyfikację"
+        '500':
+          description: Błąd po stronie serwera
+    
+    post:
+      tags:
+        - /anons - ogłoszenia
+      summary: Dodanie notyfikacji do ogłoszenia
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: formData
+          name: anon_id
+          type: integer
+          description: id powiązanego ogłosznia
+          required: true
+        - in: formData
+          name: picture
+          type: file
+          description: Zdjęcie do notyfikacji
+          required: true
+        - in: formData
+          name: lat
+          type: number
+          format: float
+          required: true
+          description: szerokość geograficzna
+        - in: formData
+          name: lng
+          type: number
+          format: float 
+          required: true
+          description: długość geograficzna       
+      responses:
+        '200':
+          description: Notyfikacja dodana
+        '400':
+          description: Podano nieprawidłowe dane
+        '500':
+          description: Błąd po stronie serwera
+
+/notifications/count:
+    get:
+      tags:
+        - /anons - ogłoszenia
+      summary: Zwraca ilość nieodczytanych notyfikacji dotyczących ogłoszeń umiszczonych przez klienta (wymagane zalogowanie)
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Zwraca ilość nieodczytanych notyfikacji
+          schema:
+            type: object
+            properties:
+              count:
+                type: integer
+                description: ilość nieodczytanych notyfikacji
+        '500':
+          description: Błąd po stronie serwera
