@@ -25,14 +25,18 @@ import { styled } from '@mui/system';
 import { Stack } from '@mui/material';
 import { Typography } from '@mui/material';
 
-function createData(id, title, category, create_date, description, image) {
-  return { id, title, category, create_date, description, image };
+
+import EditAnnouncement from './EditAnnouncement';
+
+function createData(id, title, category, create_date, description, image, type) {
+  return { id, title, category, create_date, description, image, type };
 }
 
 function Row(props) {
   const { row } = props;
   const [open, setOpen] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
   const [id, setId] = useState();
   const [enabled, setEnabled] = useState(true);
   const [alert, setAlert] = useState({
@@ -78,7 +82,7 @@ function Row(props) {
       })
       setTimeout(() => {
         setAlert({ "hidden": true, "disableButton": false });
-        setOpenDialog(false);
+        setOpenDeleteDialog(false);
         setEnabled(false);
       }, 3000);
     }
@@ -90,22 +94,52 @@ function Row(props) {
       })
       setTimeout(() => {
         setAlert({ "hidden": true, "disableButton": false });
-        setOpenDialog(false);
+        setOpenDeleteDialog(false);
       }, 3000);
     }
     console.log(response);
   }
 
-  const handleOpenDialog = (e) => {
-    setOpenDialog((prev) => !(prev));
+  const handleOpenDeleteDialog = (e) => {
+    setOpenDeleteDialog((prev) => !(prev));
     setId(parseInt(e.target.id));
+  }
+  const handleOpenEditDialog = (e) => {
+    setOpenEditDialog((prev) => !(prev));
+  }
+  const handleCallback = (childData) => {
+    if (childData?.status) {
+      setAlert({
+        "value": "Pomyślnie zapisano.",
+        "severity": "success",
+        "hidden": false,
+        "disableButton": true
+      })
+      setTimeout(() => {
+        setAlert({ "hidden": true, "disableButton": false });
+        setOpenEditDialog(false);
+        setEnabled(false);
+      }, 3000);
+    }
+    else {
+      setAlert({
+        "value": "Błąd: " + childData.status,
+        "severity": "error",
+        "hidden": false
+      })
+      setTimeout(() => {
+        setAlert({ "hidden": true, "disableButton": false });
+        setOpenEditDialog(false);
+      }, 3000);
+    }
+    console.log(childData);
   }
   if (enabled)
     return (
       <React.Fragment>
         <TableRow sx={{ '& > *': { borderBottom: 'unset' } }} onClick={() => setOpen(!open)}>
           <TableCell component="th" scope="row">{row.title}</TableCell>
-          <TableCell align="right">{row.category}</TableCell>
+          <TableCell align="right">{(row.category === 0 ? "Zaginięcie" : "Znalezienie")}</TableCell>
           <TableCell align="right">{row.create_date}</TableCell>
         </TableRow>
         <TableRow>
@@ -114,13 +148,21 @@ function Row(props) {
               <Stack direction="row" justifyContent="space-between" alignItems="stretch" sx={{ margin: 1 }}>
                 <img style={{ width: "100px", height: "100px", objectFit: "cover" }} src={'http://localhost:2400/anons/photo?name=' + row.image} alt={row.title} />
                 <Typography variant="h4">{row.title}</Typography>
-                <Button id={row.id} variant="contained" onClick={handleOpenDialog} color='error'>
+                <Button id={row.id} variant="contained" onClick={handleOpenEditDialog}>
+                  Edytuj
+                </Button>
+                <Dialog open={openEditDialog} onClose={handleOpenEditDialog} fullWidth>
+                  <DialogTitle>Edytuj ogłoszenie</DialogTitle>
+                  <EditAnnouncement row={row} parentCallback={handleCallback}/>
+                  <Alert severity={alert.severity !== "" ? alert.severity : "error"} hidden={alert.hidden}>{alert.value}</Alert>
+                </Dialog>
+                <Button id={row.id} variant="contained" onClick={handleOpenDeleteDialog} color='error'>
                   Usuń
                 </Button>
-                <Dialog open={openDialog} onClose={handleOpenDialog} fullWidth>
+                <Dialog open={openDeleteDialog} onClose={handleOpenDeleteDialog} fullWidth>
                   <DialogTitle>Usuń ogłoszenie</DialogTitle>
                   <DialogActions>
-                    <Button onClick={handleOpenDialog}>Anuluj</Button>
+                    <Button onClick={handleOpenDeleteDialog}>Anuluj</Button>
                     <Button color='error' onClick={handleDelete} disabled={alert.disableButton}>Usuń</Button>
                   </DialogActions>
                   <Alert severity={alert.severity !== "" ? alert.severity : "error"} hidden={alert.hidden}>{alert.value}</Alert>
@@ -227,10 +269,11 @@ export default function AnnoucementMy() {
           rows.push(createData(
             element.id,
             element.title,
-            (element.category === 0 ? "Zaginięcie" : "Znalezienie"),
+            element.category,
             element.create_date,
             element.description,
-            element.image
+            element.image,
+            element.type
           ));
         });
         // console.log(rows);
@@ -253,9 +296,6 @@ export default function AnnoucementMy() {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
-  const testss = (id) => {
-    console.log(id);
-  }
   return (
     <TableContainer component={Paper}>
       <Table /*sx={{ minWidth: 650 }}*/>
@@ -271,7 +311,7 @@ export default function AnnoucementMy() {
             ? data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
             : data
           ).map((row) => (
-            <Row key={row.id} row={row} testfunc={testss} />
+            <Row key={row.id} row={row} />
           ))}
           {emptyRows > 0 && (
             <TableRow style={{ height: 53 * emptyRows }}>
