@@ -196,7 +196,7 @@ router.get('/list', (req, res) => {
         req.query.breed.split(',').forEach((e) => {parameters.push(e);});
     }    
 
-    let statement = 'SELECT id, title, category, images image, lat, lng, type FROM anons' + 
+    let statement = 'SELECT id, title, category, images image, datetime(create_date, "unixepoch", "localtime") create_date, lat, lng, type FROM anons' + 
     (filters.length > 0 ? ' WHERE ' : '') + filters.join(' AND ') + ' ORDER BY create_date DESC;'
 
     // dane odsylane do klienta
