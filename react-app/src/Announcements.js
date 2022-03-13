@@ -9,7 +9,6 @@ import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import { Alert } from '@mui/material';
-// import ImageList from '@mui/material/ImageList';
 
 
 export default function Announcements(props) {
@@ -56,7 +55,6 @@ export default function Announcements(props) {
         <Grid item xs={10} >
           <Stack spacing={2} justifyContent="center" alignItems="center">
             <Stack direction="row" spacing={8} justifyContent="center" alignItems="center" sx={{ padding: 2 }}>
-
               <Button variant="outlined" onClick={handleClickOpen}>
                 Dodaj ogłoszenie
               </Button>
