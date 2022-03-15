@@ -62,5 +62,22 @@ con.run('CREATE TABLE IF NOT EXISTS notifications(id INTEGER PRIMARY KEY, anon_i
     }
 });
 
+con.run(`CREATE TABLE IF NOT EXISTS ChatMessages (
+    anons_id,
+	user_id INT,
+	message_id INT,
+	message_date INT,
+	message_text TEXT,
+	constraint chat_messages_pk primary key (anons_id, user_id, message_id),
+	constraint chat_messages_fk_user_id foreign key (user_id) references users (id),
+	constraint chat_messages_fk_anons_id foreign key (anons_id) references anons (id)
+    )`, 
+    (err) => {
+        if(err){
+            console.log(err.name + " | " + err.message);
+            throw err;
+    }
+});
+
 
 module.exports = con;
