@@ -208,7 +208,7 @@ router.get('/list', (req, res) => {
         }
         // zdefiniowano parametry lat i lng - odfiltrowujemy zbyt oddalone ogloszenia
         if(!isNaN(parseFloat(req.query.lat)) && !isNaN(parseFloat(req.query.lng))){
-            if(!(distance({lat: req.query.lat, lng: req.query.lng}, {lat: row.lat, lng: row.lng}) > (isNaN(parseInt(req.query.rad))) ? 30000 : req.query.rad * 1000)){
+            if(distance({lat: req.query.lat, lng: req.query.lng}, {lat: row.lat, lng: row.lng}) < ((isNaN(parseInt(req.query.rad))) ? 30000 : req.query.rad * 1000)){
                 arr.push(row);
             }
         }
