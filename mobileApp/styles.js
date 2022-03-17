@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native"
+import { StyleSheet, StatusBar } from "react-native"
 
 const stylesAuth = StyleSheet.create({
     back: {
@@ -53,5 +53,28 @@ const stylesHome = StyleSheet.create({
     }
 });
 
+const stylesAnnouncements = StyleSheet.create({
+    listContainer: {
+        flex: 1,
+        //marginTop: StatusBar.currentHeight || 0,
+      },
 
-export {stylesAuth, stylesHome};
+    announcement: {
+        backgroundColor: 'white',
+        padding: 4,
+        marginVertical: 1,
+        marginHorizontal: 8,
+        borderBottomWidth: 1,
+        borderRightWidth: 1,
+        borderColor: 'lightgray',
+    },
+
+    announcementTitle: {
+        fontSize: 32,
+    },
+
+
+});
+
+
+export {stylesAuth, stylesHome, stylesAnnouncements};

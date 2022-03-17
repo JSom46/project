@@ -20,7 +20,8 @@ const AuthScreenSign = ({navigation}) => {
         //regex do sprawdzania maila
         
         if(signUp({login, email, password})){
-            navigation.navigate('Aktywacja');
+            //navigation.navigate('Aktywacja');
+            alert("Pomyślnie utworzono konto. Sprawdź e-mail w celu weryfikacji.");
         }
     }
 

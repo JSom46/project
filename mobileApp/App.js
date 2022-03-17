@@ -17,14 +17,16 @@ import {Button, StatusBar, Linking} from 'react-native';
 import AuthScreenLog from './AuthScreenLog';
 import AuthScreenSign from './AuthScreenSign';
 import SplashScreen from './SplashScreen';
-import HomeScreen from './HomeScreen';
+import Dashboard from './Dashboard';
 import AuthScreenActivate from './AuthScreenActivate';
 
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fab } from '@fortawesome/free-brands-svg-icons'
+import { fas } from '@fortawesome/free-solid-svg-icons';
 import { faCheckSquare, faCoffee } from '@fortawesome/free-solid-svg-icons'
-library.add(fab, faCheckSquare, faCoffee)
+import DrawerComponent from './DrawerComponent';
+library.add(fab, faCheckSquare, faCoffee, fas)
 
 
 const Stack = createNativeStackNavigator();
@@ -32,7 +34,7 @@ const Drawer = createDrawerNavigator();
 export const AuthContext = React.createContext();
 
 /*Ta zmienna musi byc ustawiona na adres pod ktorym dziala komputer*/
-const adresSerwera = '192.168.31.47';
+global.adresSerwera = '192.168.31.47';
 
 
 const App = () => {
@@ -236,9 +238,14 @@ const App = () => {
               component={SplashScreen}
               />
             ) : state.userToken ? (
+                // <Stack.Screen
+                //   name='Strona domowa'
+                //   component={HomeScreen}
+                // />
                 <Stack.Screen
-                  name='Strona domowa'
-                  component={HomeScreen}
+                    name='Nawigator'
+                    options={{headerShown: false}}
+                    component={DrawerComponent}
                 />
             ) : (
               <>
@@ -258,11 +265,11 @@ const App = () => {
               options={{title: 'Zarejestruj się'}}
               />
 
-              <Stack.Screen
+              {/* <Stack.Screen
               name='Aktywacja'
               component={AuthScreenActivate}
               options={{title: 'Aktywuj konto'}}
-              />
+              /> */}
               </>
             )}
           </Stack.Navigator>

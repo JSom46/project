@@ -3,7 +3,7 @@ import { View, Text} from 'react-native';
 
 const SplashScreen = () => {
     return (
-        <View>
+        <View style={{flex: 1}}>
           <Text>Trwa ładowanie...</Text>
         </View>
       );
