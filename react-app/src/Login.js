@@ -1,4 +1,4 @@
-import React, { useState, /*useEffect*/ } from 'react';
+import React, { useState /*useEffect*/ } from 'react';
 // import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 
 import FormControl from '@mui/material/FormControl';
@@ -63,14 +63,13 @@ const LoginFacebookFunc = async e => {
   window.location.assign(response.url);
 }
 export default function Login(props) {
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
+  const formData = new FormData();
 
   const handleSubmit = async e => {
     e.preventDefault();
     const response = await loginUser({
-      email,
-      password
+      'email': formData.get('email'),
+      'password': formData.get('password')
     });
     console.log(response);
     if (response.msg !== 'ok') {
@@ -81,7 +80,14 @@ export default function Login(props) {
       window.location.reload();
     }
   }
-  if (props.auth?.login)
+  if (props.auth === '') {
+    return (
+      <div>
+        <CircularProgress />
+      </div>
+    )
+  }
+  else if (props.auth?.login)
     return (
       <div>
         <Grid container spacing={2} columns={16} justifyContent="center">
@@ -95,7 +101,7 @@ export default function Login(props) {
         </Grid>
       </div>
     )
-  else if (!props.auth?.login)
+  else
     return (
       <div>
         <Grid container spacing={2} columns={16} justifyContent="center">
@@ -104,8 +110,8 @@ export default function Login(props) {
             <FormControl sx={{ width: 300 }}>
               <form onSubmit={handleSubmit}>
                 <FormGroup>
-                  <TextField type='email' id="email" label="Email" variant="standard" required onChange={e => setEmail(e.target.value)} />
-                  <TextField type='password' id="password" label="Hasło" variant="standard" required onChange={e => setPassword(e.target.value)} />
+                  <TextField type='email' id="email" label="Email" variant="standard" required onChange={e => formData.set('email', e.target.value)} />
+                  <TextField type='password' id="password" label="Hasło" variant="standard" required onChange={e => formData.set('password', e.target.value)} />
                   <br />
                   <Button variant="contained" type="submit">Zaloguj</Button>
                 </FormGroup>
@@ -118,12 +124,6 @@ export default function Login(props) {
             <p id="loginError">&nbsp;</p>
           </Grid>
         </Grid>
-      </div>
-    )
-  else
-    return (
-      <div>
-        <CircularProgress />
       </div>
     )
   function errorMessage(msg) {

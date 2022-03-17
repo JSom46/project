@@ -196,7 +196,7 @@ router.get('/list', (req, res) => {
         req.query.breed.split(',').forEach((e) => {parameters.push(e);});
     }    
 
-    let statement = 'SELECT id, title, category, images image, lat, lng, type FROM anons' + 
+    let statement = 'SELECT id, title, category, images image, datetime(create_date, "unixepoch", "localtime") create_date, lat, lng, type FROM anons' + 
     (filters.length > 0 ? ' WHERE ' : '') + filters.join(' AND ') + ' ORDER BY create_date DESC;'
 
     // dane odsylane do klienta
@@ -208,7 +208,7 @@ router.get('/list', (req, res) => {
         }
         // zdefiniowano parametry lat i lng - odfiltrowujemy zbyt oddalone ogloszenia
         if(!isNaN(parseFloat(req.query.lat)) && !isNaN(parseFloat(req.query.lng))){
-            if(!(distance({lat: req.query.lat, lng: req.query.lng}, {lat: row.lat, lng: row.lng}) > (isNaN(parseInt(req.query.rad))) ? 30000 : req.query.rad * 1000)){
+            if(distance({lat: req.query.lat, lng: req.query.lng}, {lat: row.lat, lng: row.lng}) < ((isNaN(parseInt(req.query.rad))) ? 30000 : req.query.rad * 1000)){
                 arr.push(row);
             }
         }

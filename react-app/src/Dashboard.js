@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom/cjs/react-router-dom.min';
-import AnnoucementList from './AnnoucementList';
+// import AnnoucementList from './AnnoucementList';
+import DataGridList from './DataGridList';
 
 // import Stack from '@mui/material/Stack';
 
@@ -22,7 +23,8 @@ export default function Dashboard(props) {
          <Item><MapOverview /></Item>
       </Grid>
       <Grid item xs={5}>
-        <AnnoucementList/>
+        {/* <AnnoucementList/> */}
+        <DataGridList/>
           {/* <Tooltip title={props.auth?.login ? "" : "Tylko zalogowani użytkownicy mogą dodawać ogłoszenia"}>
             <span style={{width:'fit-content'}}>
              <Button variant={checked ? "outlined" : "contained"} onClick={handleChange} disabled={props.auth?.login ? false : true} >Dodaj ogłoszenie</Button>

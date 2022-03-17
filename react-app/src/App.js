@@ -12,7 +12,6 @@ import Profile from './Profile';
 import Account from './Account';
 import Dashboard from './Dashboard';
 import Announcements from './Announcements';
-import DataGridDemo from './DataGrid';
 
 import MapTesting from './MapTesting'; //TEMP
 
@@ -30,9 +29,9 @@ function App() {
       const json = await response.json();
       console.log(json);
       setAuth(json);
+      sessionStorage.setItem('msg',json.msg);
       if(json.login !== undefined) {
         sessionStorage.setItem('login',json.login);
-        sessionStorage.setItem('msg',"ok");
       }
       else sessionStorage.removeItem('login');
       // console.log(json.login);
@@ -61,9 +60,6 @@ function App() {
           <Route exact path="/" render={() => { return (<Redirect to="/dashboard" />) }} />
           <Route path="/dashboard">
             <Dashboard auth={auth} />
-          </Route>
-          <Route path="/test">
-            <DataGridDemo />
           </Route>
           <Route path="/announcements">
             <Announcements auth={auth} />

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { BrowserRouter /*, Route, Switch*/ } from 'react-router-dom';
 
-import AnnoucementMy from './AnnoucementMy';
+// import AnnoucementMy from './AnnoucementMy';
+import DataGridMy from './DataGridMy';
 import AddAnnouncement from './AddAnnouncement';
 
 import { Grid, Stack, Typography } from '@mui/material';
@@ -9,7 +10,6 @@ import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import { Alert } from '@mui/material';
-// import ImageList from '@mui/material/ImageList';
 
 
 export default function Announcements(props) {
@@ -49,14 +49,13 @@ export default function Announcements(props) {
       });
     }
   }
-  if(sessionStorage.getItem('login') !== null && sessionStorage.getItem('msg') === "ok")
+  if(sessionStorage.getItem('login') !== null)
   return (
     <BrowserRouter>
       <Grid container spacing={0} columns={16} justifyContent="center">
         <Grid item xs={10} >
           <Stack spacing={2} justifyContent="center" alignItems="center">
             <Stack direction="row" spacing={8} justifyContent="center" alignItems="center" sx={{ padding: 2 }}>
-
               <Button variant="outlined" onClick={handleClickOpen}>
                 Dodaj ogłoszenie
               </Button>
@@ -67,7 +66,7 @@ export default function Announcements(props) {
               </Dialog>
             </Stack>
             <Typography variant="h3" gutterBottom>Twoje ogłoszenia</Typography>
-            <AnnoucementMy />
+            <DataGridMy />
           </Stack>
         </Grid>
       </Grid>
