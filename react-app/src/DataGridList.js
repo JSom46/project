@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { DataGrid, plPL } from '@mui/x-data-grid';
+import { DataGrid, GridFooterContainer, gridPageCountSelector, gridPageSelector, useGridApiContext, useGridSelector, plPL } from '@mui/x-data-grid';
+import { Pagination, IconButton} from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, CircularProgress, Button } from '@mui/material';
 import { Stack } from '@mui/material';
@@ -10,11 +12,11 @@ const theme = createTheme(
   plPL,
 );
 const columns = [
-  {
-    field: 'id',
-    headerName: 'ID',
-    width: 10,
-  },
+  // {
+  //   field: 'id',
+  //   headerName: 'ID',
+  //   width: 10,
+  // },
   {
     field: 'title',
     headerName: 'Tytuł',
@@ -30,16 +32,15 @@ const columns = [
     headerName: 'Typ',
     flex: 0.2,
   },
-  // {
-  //   field: 'time',
-  //   headerName: 'Data dodania',
-  //   type: 'dateTime',
-  //   width: 170,
-  //   editable: false,
-  // },
+  {
+    field: 'createDate',
+    headerName: 'Data dodania',
+    type: 'dateTime',
+    flex: 0.5,
+  },
 ];
-function createData(id, title, category, type) {
-  return { id, title, category, type };
+function createData(id, title, category, type, createDate) {
+  return { id, title, category, type, createDate };
 }
 
 
@@ -47,8 +48,10 @@ export default function DataGridList() {
   const [announcementData, setAnnouncementData] = useState([]);
   const [open, setOpen] = useState(false);
   const [data, setData] = useState([]);
+  const [reload, setReload] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
+      setData([]);
       let url = 'http://localhost:2400/anons/list';
       try {
         const response = await fetch(url, {
@@ -62,7 +65,8 @@ export default function DataGridList() {
             element.id,
             element.title,
             (element.category === 0 ? "Zaginięcie" : "Znalezienie"),
-            element.type
+            element.type,
+            element.create_date
           ));
         });
         setData(rows);
@@ -71,7 +75,7 @@ export default function DataGridList() {
       }
     };
     fetchData();
-  }, []);
+  }, [reload]);
   const fetchAnnouncementData = async (id) => {
     let url = 'http://localhost:2400/anons?id=' + id;
     try {
@@ -90,7 +94,28 @@ export default function DataGridList() {
     setOpen(true);
     fetchAnnouncementData(row.id);
   }
+  function CustomPagination() {
+    const apiRef = useGridApiContext();
+    const page = useGridSelector(apiRef, gridPageSelector);
+    const pageCount = useGridSelector(apiRef, gridPageCountSelector);
 
+    return (
+      <Pagination
+        color="primary"
+        count={pageCount}
+        page={page + 1}
+        onChange={(event, value) => apiRef.current.setPage(value - 1)}
+      />
+    );
+  }
+  function CustomFooter() {
+    return (
+      <GridFooterContainer>
+        <IconButton sx={{ float: 'left' }} onClick={() => (setReload((prev) => !(prev)))}><RefreshIcon /></IconButton>
+        <CustomPagination />
+      </GridFooterContainer>
+    );
+  }
   return (
     <div style={{ height: '100%', width: '100%' }}>
       <ThemeProvider theme={theme}>
@@ -102,6 +127,10 @@ export default function DataGridList() {
           onRowClick={handleRowClick}
           disableSelectionOnClick
           loading={data.length === 0}
+          components={{
+            // Toolbar: CustomToolbar,
+            Footer: CustomFooter,
+        }}
         />
       </ThemeProvider>
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth={true}>

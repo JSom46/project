@@ -12,7 +12,6 @@ import Profile from './Profile';
 import Account from './Account';
 import Dashboard from './Dashboard';
 import Announcements from './Announcements';
-import DataGridList from './DataGridList';
 
 import MapTesting from './MapTesting'; //TEMP
 
@@ -61,9 +60,6 @@ function App() {
           <Route exact path="/" render={() => { return (<Redirect to="/dashboard" />) }} />
           <Route path="/dashboard">
             <Dashboard auth={auth} />
-          </Route>
-          <Route path="/test">
-            <DataGridList />
           </Route>
           <Route path="/announcements">
             <Announcements auth={auth} />

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { BrowserRouter /*, Route, Switch*/ } from 'react-router-dom';
 
-import AnnoucementMy from './AnnoucementMy';
+// import AnnoucementMy from './AnnoucementMy';
+import DataGridMy from './DataGridMy';
 import AddAnnouncement from './AddAnnouncement';
 
 import { Grid, Stack, Typography } from '@mui/material';
@@ -48,7 +49,7 @@ export default function Announcements(props) {
       });
     }
   }
-  if(sessionStorage.getItem('login') !== null && sessionStorage.getItem('msg') === "ok")
+  if(sessionStorage.getItem('login') !== null)
   return (
     <BrowserRouter>
       <Grid container spacing={0} columns={16} justifyContent="center">
@@ -65,7 +66,7 @@ export default function Announcements(props) {
               </Dialog>
             </Stack>
             <Typography variant="h3" gutterBottom>Twoje ogłoszenia</Typography>
-            <AnnoucementMy />
+            <DataGridMy />
           </Stack>
         </Grid>
       </Grid>

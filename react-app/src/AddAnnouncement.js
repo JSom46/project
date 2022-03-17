@@ -149,7 +149,7 @@ export default function AddAnnoucment(props) {
               <MenuItem value={1}>Znalezienie</MenuItem>
             </Select>
           </FormControl>
-          <TextField fullWidth type='text' id="description" label="Opis" variant="standard" multiline minRows={4} required onChange={handleDescriptionChange} />
+          <TextField fullWidth type='text' id="description" label="Opis" variant="standard" multiline minRows={4} required onBlur={handleDescriptionChange} />
           <FormControl variant="standard">
             <InputLabel id="type" required>Typ</InputLabel>
             <Select value={type} labelId="type" id="type" onChange={handleTypeChange}>
