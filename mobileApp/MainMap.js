@@ -90,7 +90,7 @@ class MainMap extends React.Component {
                     <Marker
                     key={announcement.id}
                     coordinate={announcement.coordinate}
-                    pinColor="#00F"
+                    pinColor={announcement.category === "Zaginięcie" ? "#F00" : "#0F0"}
                     >
                         <Callout
                             style={stylesMap.callout}

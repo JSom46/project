@@ -16,25 +16,10 @@ const Dashboard = ({navigation}) => {
     const {logOut} = React.useContext(AuthContext);
 
     return(
-        
         <MapAnnouncementsStack.Navigator style={{flex: 1}} screenOptions={{headerShown: false}}>
             <MapAnnouncementsStack.Screen name="Mapa" component={MainMap} navigation={navigation}/>
             <MapAnnouncementsStack.Screen name="Ogloszenie" component={AnnouncementView}/>
         </MapAnnouncementsStack.Navigator>
-
-
-
-        
-        // <View style={stylesHome.dashboard}>
-        //     {/* <Text style={{fontSize: 32}}>
-        //         Witaj!
-        //     </Text>
-        //     <Button
-        //         title='Wyloguj się'
-        //         onPress={logOut}
-        //     /> */}
-
-        // </View>
     )
 }
 

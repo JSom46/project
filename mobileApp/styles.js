@@ -51,7 +51,14 @@ const stylesHome = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-    }
+    },
+
+    title: {
+        fontSize: 32,
+        textAlign: "center",
+        color: "black",
+        marginBottom: 4,
+    },
 });
 
 const stylesMap = StyleSheet.create({

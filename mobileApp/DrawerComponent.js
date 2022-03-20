@@ -9,6 +9,9 @@ import Dashboard from './Dashboard';
 import NotificationsScreen from './NotificationsScreen';
 import { View, Text } from 'react-native';
 import AnnouncementsScreen from './AnnouncementsScreen';
+import MyProfileScreen from './MyProfileScreen';
+import MyAnnouncementsScreen from './MyAnnouncementsScreen';
+import AnnouncementView from './AnnouncementView';
 
 const Drawer = createDrawerNavigator();
 
@@ -49,7 +52,7 @@ Być może dać pobieranie ogłoszeń w Memo*/
 
 
 
-const DrawerComponent = ({navigation}) => {
+const DrawerComponent = ({navigation, route}) => {
     const {logOut} = React.useContext(AuthContext);
 
 
@@ -63,6 +66,7 @@ const DrawerComponent = ({navigation}) => {
 
     return(
     //<NavigationContainer>
+        //Customizowanie DrawerNavigatora przez dodanie DrawerItem - przycisku do wylogowania
         <Drawer.Navigator drawerContent={props => {
             return (
               <DrawerContentScrollView {...props}>
@@ -86,6 +90,15 @@ const DrawerComponent = ({navigation}) => {
             <Drawer.Screen
                 name='Ogłoszenia'
                 component={AnnouncementsScreen}
+            />
+            <Drawer.Screen
+                name='Profil'
+                component={MyProfileScreen}
+                initialParams={{login: route.params.login}}
+            />
+            <Drawer.Screen
+            name='Moje Ogłoszenia'
+            component={MyAnnouncementsScreen}
             />
             <Drawer.Screen
                 name='Powiadomienia'

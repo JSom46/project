@@ -88,10 +88,11 @@ const App = () => {
         }).then(data => data.json())
 
         alert(response.login);
+        let login = response.login;
         console.log(response.msg);
 
         if(response.msg === 'ok'){
-          dispatch({type: 'LOG_IN', token: 'dummy-token'});
+          dispatch({type: 'LOG_IN', token: login});
         }
         
       },
@@ -246,6 +247,7 @@ const App = () => {
                     name='Nawigator'
                     options={{headerShown: false}}
                     component={DrawerComponent}
+                    initialParams={{ login: state.userToken }}
                 />
             ) : (
               <>
