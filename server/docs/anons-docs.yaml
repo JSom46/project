@@ -59,6 +59,12 @@ paths:
               breed:
                 type: string
                 description: "gatunek zwierzęcia - undefined, jeśli autor nie podał"
+              is_active:
+                type: integer
+                description: "czy ogłoszenie jest aktywne. 0 - niekatywne, 1 - aktywne"
+                enum:
+                - 0
+                - 1
         '404':
           description: Ogłoszenie o podanym id nie istnieje
         '500':
@@ -408,6 +414,12 @@ paths:
                     type:
                       type: string
                       description: kategoria, do której należy zwierzę
+                    is_active:
+                      type: integer
+                      description: "czy ogłoszenie jest aktywne. 0 - niekatywne, 1 - aktywne"
+                      enum:
+                      - 0
+                      - 1
         '500':
           description: Błąd po stronie serwera
 
@@ -497,6 +509,9 @@ paths:
                   type: number
                   fomat: float
                   description: "szerokość geograficzna w stopniach punktu, w którym umieszczono notyfikację"
+                create_date:
+                  type: string
+                  description: "data dodania notyfikacji"
         '500':
           description: Błąd po stronie serwera
     
@@ -553,5 +568,29 @@ paths:
               count:
                 type: integer
                 description: ilość nieodczytanych notyfikacji
+        '500':
+          description: Błąd po stronie serwera
+
+/activate:
+    post:
+      tags:
+       - /anons - ogłoszenia
+      summary: Aktywuje ogłoszenie o podanym id
+      parameters:
+        - in: body
+          name: id
+          type: integer
+          description: id ogłoszenia do aktywacji
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Ogłoszenie zostało aktywowane lub już było aktywne
+        '401':
+          description: Klient nie jest zalogowany
+        '403':
+          description: Klient nie jest właścicielem ogłoszenia
+        '404':
+          description: Nie znaleziono ogłoszenia o podanym id
         '500':
           description: Błąd po stronie serwera

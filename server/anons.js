@@ -14,30 +14,58 @@ const getFilename = (file) => {
     return ++date + path.extname(file.originalname);
 };
 
+// przyjmuje wiele plikow
 const upload = multer({
     storage: multer.diskStorage({
+        // sciezka do miejsca zapisu plikow
         destination: (req, file, cb) => {
             cb(null, 'pictures/');
         },
+        // funkcja nadajaca plikom nazwy
         filename: function (req, file, cb) {
             cb(null, getFilename(file));
         }
     }),
+    // akceptowane sa tylko zdjecia
+    fileFilter: function (req, file, cb) {
+        let regexp = /image*/;
+        if(!regexp.test(file.mimetype)) {
+            cb(null, false);
+        }
+        else{
+            cb(null, true);
+        }              
+    },
+    // limit ilosci i rozmiaru plikow
     limits: {
         fileSize: 4 * 1024 * 1024,
         files: 8
     }
 });
 
+// przyjmuje pojedynczy plik
 const singleUpload = multer({
     storage: multer.diskStorage({
+        // sciezka do miejsca zapisu plikow
         destination: (req, file, cb) => {
             cb(null, 'pictures/');
         },
+        // funkcja nadajaca plikom nazwy
         filename: function (req, file, cb) {
             cb(null, getFilename(file));
         }
     }),
+    // akceptowane sa tylko zdjecia
+    fileFilter: function (req, file, cb) {
+        let regexp = /image*/;
+        if(!regexp.test(file.mimetype)) {
+            cb(null, false);
+        }
+        else{       
+            cb(null, true);
+        }
+    },
+    // limit ilosci i rozmiaru plikow
     limits: {
         fileSize: 4 * 1024 * 1024,
         files: 1
@@ -61,6 +89,7 @@ router.delete('/', authorize);
 router.get('/my', authorize);
 router.get('/notifications', authorize);
 router.get('/notifications/count', authorize);
+router.get('/activate', authorize);
 
 
 //dodanie nowego ogloszenia o zaginionym zwierzeciu
@@ -151,7 +180,8 @@ router.get('/', (req, res) => {
             type: row.type,
             coat: (row.coat == null ? undefined : row.coat),
             color: (row.color == null ? undefined : row.color),
-            breed: (row.breed == null ? undefined : row.breed)
+            breed: (row.breed == null ? undefined : row.breed),
+            is_active: row.is_active
         });
     });
 });
@@ -348,7 +378,7 @@ router.delete('/', (req, res) => {
 
 // zwraca liste ogloszen utworzonych przez uzytkownika sortowana po dacie utworzenia malejaco i liczbe przeslanych ogloszen
 router.get('/my', (req, res) => {
-    con.all('SELECT id, category, title, datetime(create_date, "unixepoch", "localtime") create_date, images image, type FROM anons WHERE author_id = ?', req.session.user_id, (err, rows) => {
+    con.all('SELECT id, category, title, datetime(create_date, "unixepoch", "localtime") create_date, images image, type, is_active FROM anons WHERE author_id = ?', req.session.user_id, (err, rows) => {
         if(err){
             return res.sendStatus(500);
         }
@@ -373,7 +403,7 @@ router.get('/types', (req, res) => {
 
 // zwraca listę notyfikacji zalogowanego klienta
 router.get('/notifications', (req, res) => {
-    con.all('SELECT id, anon_id, image, lat, lng FROM notifications WHERE anon_id IN (SELECT id FROM anons WHERE author_id = ?);', req.session.user_id, (err, rows) => {
+    con.all('SELECT id, anon_id, image, lat, lng, datetime(create_date, "unixepoch", "localtime") create_date FROM notifications WHERE anon_id IN (SELECT id FROM anons WHERE author_id = ?);', req.session.user_id, (err, rows) => {
         if(err){
             console.log(err);
             return res.sendStatus(500);
@@ -415,8 +445,9 @@ router.get('/notifications/count', (req, res) => {
 // lat - szerokosc geograficzna w stopniach
 // picture - zdjecie
 router.post('/notifications', singleUpload.single('picture'), (req, res) => {
-    //brakuje ktoregos z niezbednych pol lub ktores z pol zawiera niepoprawne dane - notyfikacja nie moze zostac dodana
+    // brakuje ktoregos z niezbednych pol lub ktores z pol zawiera niepoprawne dane - notyfikacja nie moze zostac dodana
     if(!req.body.anon_id || !req.file || isNaN(parseFloat(req.body.lat)) || isNaN(parseFloat(req.body.lng))){
+        // usuwanie przslanych zdjec, jesli istnieja
         if(req.file){
             fs.unlink('./pictures/' + req.file.filename, (err) => {
                 if(err){
@@ -426,10 +457,13 @@ router.post('/notifications', singleUpload.single('picture'), (req, res) => {
         }       
         return res.status(400).json({msg: 'required field is empty/contain invalid data'});
     }
+
+    // dodanie notyfikacji
     con.run('INSERT INTO notifications(anon_id, image, lat, lng, is_new, create_date) VALUES(?, ?, ?, ?, 1, (SELECT strftime ("%s", "now")));', 
     req.body.anon_id, req.file.filename, req.body.lat, req.body.lng, (err) => {
         if(err){
             console.log(err);
+            // dodanie notyfikacji sie nie udalo - usuwanie przeslanych zdjec
             fs.unlink('./pictures/' + req.file.filename, (err) => {
                 if(err){
                     console.log(err);
@@ -437,6 +471,49 @@ router.post('/notifications', singleUpload.single('picture'), (req, res) => {
             });
             return res.sendStatus(500);
         }
+        return res.sendStatus(200);
+    });
+});
+
+
+// aktywuje nieaktywne ogloszenie (wymagane zalogowanie)
+// req = {id : integer}
+// id - id aktywowanego ogloszenia
+router.post('/activate', (req, res) => {
+    // nie podano id ogloszenia
+    if(!req.body.id){
+        return res.sendStatus(400);
+    }
+
+    // wyszukaj ogloszenie w bazie danych
+    con.get('SELECT author_id, is_active FROM anons WHERE id = ?;', req.body.id, (err, row) => {
+        if(err){
+            console.log(err);
+            return res.sendStatus(500);
+        }
+
+        // nie znaleziono ogloszenia o podanym id
+        if(!row){
+            return res.sendStatus(404);
+        }
+
+        // klient nie jest autorem ogloszenia
+        if(row.author_id != req.session.user_id){
+            return res.sendStatus(403);
+        }
+
+        // ogłoszenie już jest aktywne
+        if(row.is_active != 0){
+            return res.sendStatus(200);
+        }
+
+        // aktywuj ogloszenie
+        con.run('UPDATE anons SET is_active = 1, create_date = (SELECT strftime ("%s", "now")) WHERE id = ?;', req.body.id, (err) => {
+            if(err){
+                console.log(err);
+                return res.sendStatus(500);
+            }
+        });
         return res.sendStatus(200);
     });
 });

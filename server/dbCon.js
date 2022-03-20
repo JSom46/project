@@ -40,7 +40,6 @@ con.serialize(() => {
                     }
                 });
             });
-            
         }
     });
 });
@@ -55,12 +54,41 @@ con.run('CREATE TABLE IF NOT EXISTS anons(id INTEGER PRIMARY KEY, title TEXT NOT
 });
 
 
+//utworzenie tabeli notyfikacji, jesli nie istnieje
 con.run('CREATE TABLE IF NOT EXISTS notifications(id INTEGER PRIMARY KEY, anon_id INTEGER NOT NULL, image TEXT, lat REAL NOT NULL, lng REAL NOT NULL, is_new INTEGER, create_date INTEGER NOT NULL)', (err) => {
     if(err){
         console.log(err.name + " | " + err.message);
         throw err;
     }
 });
+
+
+//usuwanie przedawnionych notyfikacji i dezaktywowanie przeterminowanych ogłoszeni w okreslonym interwale
+setInterval(() => {
+    //usuniecie przedawnionych notyfikacji
+    con.run('DELETE FROM notifications WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.NOTIFICATION_TTL), (err) => {
+        if(err){
+            console.log(err.name + " | " + err.message);
+            throw err;
+        }
+    });
+
+    //dezaktywacja przeterminowanych ogloszen
+    con.run('UPDATE anons SET is_active = 0 WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.ANON_TTL), (err) => {
+        if(err){
+            console.log(err.name + " | " + err.message);
+            throw err;
+        }
+    });
+
+    //usuniecie zbyt dlugo nieaktywnych ogloszen
+    con.run('DELETE FROM anons WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.INACTIVE_ANON_TTL), (err) => {
+        if(err){
+            console.log(err.name + " | " + err.message);
+            throw err;
+        }
+    });
+}, parseInt(process.env.INTERVAL));
 
 
 module.exports = con;
