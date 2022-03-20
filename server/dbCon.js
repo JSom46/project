@@ -62,6 +62,11 @@ con.run('CREATE TABLE IF NOT EXISTS notifications(id INTEGER PRIMARY KEY, anon_i
     }
 });
 
+
+// Tabele dla LIVE CHAT
+// ChatMessages - wiadomości live chat
+// Images - obrazy przesyłane w sesjaach live chat
+
 con.run(`CREATE TABLE IF NOT EXISTS ChatMessages (
     message_id INT,
     anons_id INT,

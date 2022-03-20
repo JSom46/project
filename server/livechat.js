@@ -1,32 +1,31 @@
 require('dotenv').config();
 
 const express = require('express');
-const sqliteStoreFactory = require('express-session-sqlite').default;
-const session = require('express-session');
-const SqliteStore = sqliteStoreFactory(session);
-const sqlite3 = require('sqlite3');
-const fs = require('fs');
+const app = express();
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {});
+const fs = require('fs');
+
+
+const con = require('./dbCon.js');
 
 let lastMessage, lastImage;
 
 con.run('SELECT MAX(message_id) from ChatMessages', (err, result) => {
-    if(err){
+    if (err) {
         console.log(err.name + " | " + err.message);
         throw err;
-    }
-    else{
+    } else {
         lastMessage = result;
     }
 });
 con.run('SELECT MAX(image_id) from Images', (err, result) => {
-    if(err){
+    if (err) {
         console.log(err.name + " | " + err.message);
         throw err;
-    }
-    else{
+    } else { 
         lastImage = result;
     }
 });
@@ -77,6 +76,8 @@ io.on("connection", (socket) => {
 
 });
 
+
+module.exports = httpServer;
 
 
 // przesyłanie obrazów od klienta

@@ -15,9 +15,6 @@ const session = require('express-session');
 const SqliteStore = sqliteStoreFactory(session);
 const cookieParser = require('cookie-parser');
 const sqlite3 = require('sqlite3');
-const fs = require('fs');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
 const app = express();
 
 app.use(cookieParser(process.env.SESSION_SECRET));
@@ -47,8 +44,7 @@ app.use('/auth', authRoute);
 app.use('/anons', anonsRoute);
 app.use('/api-docs', apiDocs);
 
-const httpServer = createServer(app);
-const io = new Server(httpServer, {});
+const httpServer = require('./livechat.js');
 
 httpServer.listen(2400, () => {
 	console.log("Server started\nport: 2400");
