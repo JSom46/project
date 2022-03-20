@@ -1,10 +1,13 @@
 import React from 'react';
-import MapView, { Marker, ProviderPropType } from 'react-native-maps';
+import MapView, { Marker, ProviderPropType, Callout, CalloutSubview} from 'react-native-maps';
 import { UrlTile, PROVIDER_DEFAULT, MAP_TYPES } from 'react-native-maps';
-import { StyleSheet } from "react-native"
+import { StyleSheet, Text, View, Image} from "react-native"
+import { useNavigation } from '@react-navigation/native';
+import {Svg, Image as ImageSvg} from 'react-native-svg';
+import { stylesMap } from './styles';
 
-function createData(id, title, category, image, lat, lng, type) {
-    return { id, title, category, image, lat, lng, type, "coordinate": {"latitude": lat, "longitude": lng}};
+function createData(id, title, category, image, lat, lng, type, create_date) {
+    return { id, title, category, image, lat, lng, type, "coordinate": {"latitude": lat, "longitude": lng}, create_date};
 }
 async function getAnnouncements(){
     try {
@@ -22,6 +25,7 @@ async function getAnnouncements(){
                 element.lat,
                 element.lng,
                 element.type,
+                element.create_date,
             ));
         });
         //console.log(rows);
@@ -34,8 +38,6 @@ async function getAnnouncements(){
 
 class MainMap extends React.Component {
     state = {
-        markers: [{"color": "#F00", "coordinate": {"latitude": 53.01666249150373, "longitude": 18.595575392246246}, "key": 0}], //do usuniecia
-        count: 0,
         isLoading: true,
         announcements: [],
     }
@@ -59,9 +61,10 @@ class MainMap extends React.Component {
     }
 
     render(){
+        const { navigation } = this.props;
 
-        console.log(this.state.markers);
-        console.log(this.state.announcements);
+        //console.log(this.state.announcements);
+
         return(
             <MapView
                 initialRegion={{
@@ -73,22 +76,43 @@ class MainMap extends React.Component {
                 style={{
                     ...StyleSheet.absoluteFillObject,
                 }}
-                //onPress={e => this.onMapPress(e)}
                 //mapType={MAP_TYPES.NONE}
             >
-                {this.state.markers.map(marker => (//do usuniecia
-                    <Marker
-                    key={marker.key}
-                    coordinate={marker.coordinate}
+                
+                {/*do usuniecia - testowy znacznik z wpisanymi na sztywno danymi*/}
+                {/* <Marker
+                    key={0}
+                    coordinate={{"latitude": 53.01666249150373, "longitude": 18.595575392246246}}
                     pinColor="#F00"
-                    />
-                ))}
+                /> */}
+
                 {this.state.announcements.map(announcement => (
                     <Marker
                     key={announcement.id}
                     coordinate={announcement.coordinate}
                     pinColor="#00F"
-                    />
+                    >
+                        <Callout
+                            style={stylesMap.callout}
+                            onPress={() => navigation.navigate('Ogloszenie', {announcement: announcement})}
+                        >
+                            <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                                <Text style={stylesMap.calloutTitle}>{announcement.title}</Text>
+                                {/* <Text style={{height: 150, position: 'relative', bottom: 20, textAlign: 'center'}}>
+                                    <Image style={{width: 80, height: 80,}} source={{uri: 'http://'+adresSerwera+':2400/anons/photo?name=' + announcement.image}}/>
+                                    <Image style={{width: 80, height: 80,}} source={{uri: 'https://reactnative.dev/img/tiny_logo.png'}}/>
+                                </Text> */}
+                                <Svg width={120} height={120}>
+                                    <ImageSvg
+                                        width={'100%'} 
+                                        height={'100%'}
+                                        preserveAspectRatio="xMidYMid slice"
+                                        href={{ uri: 'http://'+adresSerwera+':2400/anons/photo?name=' + announcement.image}}
+                                    />
+                                </Svg>
+                            </View>
+                        </Callout>
+                    </Marker>
                 ))}
                     
                 <UrlTile
@@ -106,3 +130,6 @@ class MainMap extends React.Component {
 }
 
 export default MainMap;
+
+
+// 'http://'+adresSerwera+':2400/anons/photo?name=' + announcement.image

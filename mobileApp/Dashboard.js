@@ -6,35 +6,21 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import MapView from 'react-native-maps';
 import { UrlTile, PROVIDER_DEFAULT, MAP_TYPES } from 'react-native-maps';
 import { StyleSheet } from "react-native"
+import { createNativeStackNavigator} from '@react-navigation/native-stack';
 import MainMap from './MainMap';
+import AnnouncementView from './AnnouncementView';
 
+const MapAnnouncementsStack = createNativeStackNavigator();
 
 const Dashboard = ({navigation}) => {
     const {logOut} = React.useContext(AuthContext);
 
     return(
-
-        // <View style={{
-        //     flex: 1
-        //   }}>
-        //     <MapView
-        //         style={{
-        //             ...StyleSheet.absoluteFillObject,
-        //           }}
-        //         initialRegion={{
-        //             latitude: 53.022222,
-        //             longitude: 18.611111,
-        //             latitudeDelta: 0.0922,
-        //             longitudeDelta: 0.0421,
-        //         }}
-        //     />
-        // </View>
         
-
-        <View style={{flex: 1}}>
-            <MainMap/>  
-        </View>
-
+        <MapAnnouncementsStack.Navigator style={{flex: 1}} screenOptions={{headerShown: false}}>
+            <MapAnnouncementsStack.Screen name="Mapa" component={MainMap} navigation={navigation}/>
+            <MapAnnouncementsStack.Screen name="Ogloszenie" component={AnnouncementView}/>
+        </MapAnnouncementsStack.Navigator>
 
 
 

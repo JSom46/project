@@ -1,4 +1,5 @@
 import { StyleSheet, StatusBar } from "react-native"
+import { withOrientation } from "react-navigation";
 
 const stylesAuth = StyleSheet.create({
     back: {
@@ -53,28 +54,67 @@ const stylesHome = StyleSheet.create({
     }
 });
 
+const stylesMap = StyleSheet.create({
+    callout: {
+        width: 150,
+        height: 150,
+        paddingBottom: 10,
+    },
+
+    calloutTitle: {
+        fontSize: 16,
+        color: "black",
+        textAlign: "center",
+        marginBottom: 4,
+    },
+});
+
 const stylesAnnouncements = StyleSheet.create({
     listContainer: {
         flex: 1,
         //marginTop: StatusBar.currentHeight || 0,
-      },
+    },
 
-    announcement: {
+    announcementListItem: {
         backgroundColor: 'white',
         padding: 4,
+        paddingVertical: 8,
         marginVertical: 1,
         marginHorizontal: 8,
         borderBottomWidth: 1,
-        borderRightWidth: 1,
+        borderRightWidth: 2,
         borderColor: 'lightgray',
+        flex: 1,
+        flexDirection: "row"
+    },
+
+    announcementListItemTitle: {
+        fontSize: 24,
+    },
+
+    announcementListItemPhoto: {
+        width: 100,
+        height: 100,
+        marginRight: 8,
+    },
+
+    announcementContainer: {
+        flex: 1,
     },
 
     announcementTitle: {
         fontSize: 32,
+        textAlign: "center",
+        color: "black",
     },
 
-
+    announcementPhoto: {
+        width: 300,
+        height: 300,
+        alignSelf: 'center',
+        marginVertical: 8,
+    }
 });
 
 
-export {stylesAuth, stylesHome, stylesAnnouncements};
+export {stylesAuth, stylesHome, stylesAnnouncements, stylesMap};

@@ -68,13 +68,13 @@ const AuthScreenLog = ({navigation}) => {
                 </View>
                 
                 {/* Przycisk przekierowujacy do aktywacji konta */}
-                <TouchableHighlight
+                {/* <TouchableHighlight
                     style={stylesAuth.button}
                     onPress={() => navigation.navigate('Aktywacja')}
                     underlayColor={'#2670ab'}
                 >
                     <Text style={stylesAuth.buttonText}>Aktywuj konto</Text>
-                </TouchableHighlight>
+                </TouchableHighlight> */}
                 
                 {/* Napis i przycisk do rejestracji */}
                 <View style={{marginTop: 20, alignItems: 'center'}}>
