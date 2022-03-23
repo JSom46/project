@@ -28,7 +28,7 @@ con.serialize(() => {
         }
         //jesli w tabeli users nie ma zadnych rekordow, tworzone jest konto admin z uprawnieniami administratora
         if(result.num == 0){
-            bcrypt.hash('admin', 10, (err, hash) => {
+            bcrypt.hash(process.env.ADMIN_PASSWD, 10, (err, hash) => {
                 if(err){
                     console.log(err.name + " | " + err.message);
                     throw err;

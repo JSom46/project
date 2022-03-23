@@ -5,12 +5,12 @@ const schema = new passwordValidator();
 
 //wymagana zlozonosc hasla
 schema
-.is().min(8)
-.is().max(50)
-.has().uppercase()
-.has().lowercase()
-.has().digits(2)
-.has().not().spaces();
+.is().min(8)            //min 8 znakow
+.is().max(50)           //max 50 znakow
+.has().uppercase()      //min 1 wielka litera
+.has().lowercase()      //min 1 mala litera
+.has().digits(2)        //min 2 cyfry
+.has().not().spaces();  //brak bialych znakow
 
 
 module.exports = function(passwd){
