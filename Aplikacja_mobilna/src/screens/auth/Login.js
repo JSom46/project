@@ -28,15 +28,24 @@ import {
 } from "../../components/styles";
 import { StatusBar } from "expo-status-bar";
 
+//import {AuthContext} from "../../navigations/RootStack";
+
 const { brand, darkLight, black, primary, facebook } = Colors;
 
 //API client
 import axios from "axios";
 
-const Login = ({ navigation }) => {
+const Login = ({ parentCallback, navigation }) => {
   const [hidePassword, setHidedPassword] = useState(true);
   const [message, setMessage] = useState();
   const [messageType, setMessageType] = useState();
+
+  // const {handleLogin} = React.useContext(AuthContext);
+  // const {LoginGoogleFunc} = React.useContext(AuthContext);
+  // const {LoginFacebookFunc} = React.useContext(AuthContext);
+  // const {handleLogout} = React.useContext(AuthContext);
+  //const {handleMessage} = React.useContext(AuthContext);
+  
 
   async function LoginGoogle() {
     const data = await fetch("http://" + serwer + "/auth/google/url", {
@@ -77,8 +86,10 @@ const Login = ({ navigation }) => {
   const handleLogin = (credentials) => {
     handleMessage(null);
     var data = JSON.stringify({
-      email: "matmar@loremipsummail.com",
-      password: "noweHaslo12",
+      //email: "matmar@loremipsummail.com",
+      //password: "noweHaslo12",
+      email: "admin@trash-mail.com",
+      password: "admin",
     });
     var config = {
       method: "post",
@@ -98,7 +109,7 @@ const Login = ({ navigation }) => {
           // console.log(response.status);
           if (response.status == "200") {
             console.log("zalogowano");
-            navigation.navigate("Welcome");
+            navigation.replace("Nawigator");
           } else {
             console.log("nie zalogowano");
           }

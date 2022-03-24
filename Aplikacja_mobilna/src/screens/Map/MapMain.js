@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Label, Text } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, Callout } from "react-native-maps";
 import * as Location from "expo-location";
 import {
   AddingIcon,
@@ -17,9 +17,13 @@ import { Octicons, Ionicons, Fontisto } from "@expo/vector-icons";
 import { DistanceFilter } from "./../../components/Map/DistanceFilter";
 import { TypeFilter } from "../../components/Map/TypeFilter";
 import { CategoryFilter } from "../../components/Map/CategoryFilter";
+
+import {Svg, Image as ImageSvg} from 'react-native-svg';
+import { stylesMap } from "../../components/styles";
+
 const { brand, darkLight, black, primary } = Colors;
 
-const MapMain = () => {
+const MapMain = ({navigation}) => {
   const [mapRegion, setRegion] = useState(null);
   const [hasLocationPermissions, setLocationPermission] = useState(false);
   //dane do filtrowania
@@ -102,7 +106,8 @@ const MapMain = () => {
             element.description,
             element.type,
             element.lat,
-            element.lng
+            element.lng,
+            element.image,
           );
           tabData.push(rows);
         });
@@ -134,14 +139,39 @@ const MapMain = () => {
     <View style={styles.body}>
       <MapView style={styles.map} initialRegion={mapRegion}>
         {/* Do Poprawy - Wyswietlanie pinezek */}
-        {tableData.map((marker, index) => (
+        {/* {tableData.map((marker, index) => (
           <Marker
             draggable
             key={index}
             coordinate={{ latitude: marker[5], longitude: marker[6] }}
             pinColor={marker[2] == 1 ? "green" : "red"}
           />
-        ))}
+        ))} */}
+
+        {tableData.map(marker => (
+                    <Marker
+                    key={marker[0]}
+                    coordinate={{ latitude: marker[5], longitude: marker[6] }}
+                    pinColor={marker[2] == 1 ? "#0F0" : "#F00"}
+                    >
+                        <Callout
+                            style={stylesMap.callout}
+                            onPress={() => navigation.navigate('Ogloszenie', {announcement: marker})}
+                        >
+                            <View style={{justifyContent: 'center', alignItems: 'center'}}>
+                                <Text style={stylesMap.calloutTitle}>{marker[1]}</Text>
+                                <Svg width={120} height={120}>
+                                    <ImageSvg
+                                        width={'100%'} 
+                                        height={'100%'}
+                                        preserveAspectRatio="xMidYMid slice"
+                                        href={{ uri: 'http://' + serwer + '/anons/photo?name=' + marker[7]}}
+                                    />
+                                </Svg>
+                            </View>
+                        </Callout>
+                    </Marker>
+                ))}
       </MapView>
       <AddingIcon>
         <Octicons name={"ellipsis"} size={30} color={black} />
