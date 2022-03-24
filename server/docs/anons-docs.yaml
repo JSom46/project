@@ -81,9 +81,9 @@ paths:
         - in: formData
           name: pictures
           type: array
+          description: Zdjęcia do ogłoszenia - maksymalnie 8 zdjęć po 4MB każde
           items:
             type: file
-            description: Zdjęcia do ogłoszenia
         - in: formData
           name: title
           type: string
@@ -176,9 +176,9 @@ paths:
           name: pictures
           type: array
           required: false
+          description: Zdjęcia do ogłoszenia - maksymalnie 8 zdjęć, każde po 4MB
           items:
             type: file
-            description: Zdjęcia do ogłoszenia
         - in: formData
           name: title
           type: string
@@ -530,7 +530,7 @@ paths:
         - in: formData
           name: picture
           type: file
-          description: Zdjęcie do notyfikacji
+          description: Zdjęcie do notyfikacji - maksymalny rozmiar - 4MB
           required: true
         - in: formData
           name: lat

@@ -273,7 +273,9 @@ export default function DataGridMy() {
                             <Button onClick={() => (setOpen(false))}>Wróć</Button>
                             <Button color='warning' onClick={() => (setOpenEditDialog(true))}>Edytuj</Button>
                             <Button color='error' onClick={() => (setOpenDeleteDialog(true))}>Usuń</Button>
-                            <Button onClick={() => (console.log(announcementData.id))}>Pokaż na mapie</Button>
+                            <Button onClick={() => (
+                                window.location.href="/dashboard"+"?lat="+announcementData.lat+"&lng="+announcementData.lng
+                            )}>Pokaż na mapie</Button>
                         </DialogActions>
                     </div>
                 )}

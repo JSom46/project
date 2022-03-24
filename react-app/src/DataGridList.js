@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
+//import { useState, useEffect } from 'react';
 import { DataGrid, GridFooterContainer, gridPageCountSelector, gridPageSelector, useGridApiContext, useGridSelector, plPL } from '@mui/x-data-grid';
 import { Pagination, IconButton} from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, CircularProgress, Button } from '@mui/material';
+/*import { Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, CircularProgress, Button } from '@mui/material';
 import { Stack } from '@mui/material';
 import { Typography } from '@mui/material';
 import { Divider } from '@mui/material';
+import AnnouncementDialog from './AnnouncementDialog';*/
+
 const theme = createTheme(
   {},
   plPL,
@@ -44,12 +46,12 @@ function createData(id, title, category, type, createDate) {
 }
 
 
-export default function DataGridList() {
-  const [announcementData, setAnnouncementData] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [data, setData] = useState([]);
-  const [reload, setReload] = useState(false);
-  useEffect(() => {
+export default function DataGridList(props) {
+  //const [announcementData, setAnnouncementData] = useState([]);
+  //const [open, setOpen] = useState(false);
+  //const [data, setData] = useState([]);
+  //const [reload, setReload] = useState(false);
+  /*useEffect(() => {
     const fetchData = async () => {
       setData([]);
       let url = 'http://localhost:2400/anons/list';
@@ -75,8 +77,8 @@ export default function DataGridList() {
       }
     };
     fetchData();
-  }, [reload]);
-  const fetchAnnouncementData = async (id) => {
+  }, [reload]);*/
+  /*const fetchAnnouncementData = async (id) => {
     let url = 'http://localhost:2400/anons?id=' + id;
     try {
       const response = await fetch(url, {
@@ -88,11 +90,15 @@ export default function DataGridList() {
     } catch (error) {
       console.log("error", error);
     }
-  };
+  };*/
   const handleRowClick = (row) => {
-    setAnnouncementData([]);
+    /*setAnnouncementData([]);
     setOpen(true);
-    fetchAnnouncementData(row.id);
+    fetchAnnouncementData(row.id);*/
+    props.handleRowClick(row.id);
+  }
+  const handleReload = () => {
+    props.reload();
   }
   function CustomPagination() {
     const apiRef = useGridApiContext();
@@ -108,10 +114,10 @@ export default function DataGridList() {
       />
     );
   }
-  function CustomFooter() {
+  function CustomFooter(props) {
     return (
       <GridFooterContainer>
-        <IconButton sx={{ float: 'left' }} onClick={() => (setReload((prev) => !(prev)))}><RefreshIcon /></IconButton>
+        <IconButton sx={{ float: 'left' }} onClick={handleReload}><RefreshIcon /></IconButton>
         <CustomPagination />
       </GridFooterContainer>
     );
@@ -120,20 +126,21 @@ export default function DataGridList() {
     <div style={{ height: '100%', width: '100%' }}>
       <ThemeProvider theme={theme}>
         <DataGrid
-          rows={data}
+          rows={props.data}
           columns={columns}
           pageSize={15}
           rowsPerPageOptions={[15]}
           onRowClick={handleRowClick}
           disableSelectionOnClick
-          loading={data.length === 0}
+          loading={props.data === undefined || props.data.length === 0}
           components={{
             // Toolbar: CustomToolbar,
             Footer: CustomFooter,
         }}
         />
       </ThemeProvider>
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth={true}>
+      {/*<AnnouncementDialog open={open} announcementData={announcementData} setOpen={setOpen} />*/}
+      {/*<Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth={true}>
         {announcementData.length === 0 ? (
           <Stack alignItems="center" m={3}>
             <CircularProgress />
@@ -187,7 +194,8 @@ export default function DataGridList() {
             </DialogActions>
           </div>
         )}
-      </Dialog>
+              </Dialog>*/}
+      
     </div>
   );
 }

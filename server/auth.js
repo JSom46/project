@@ -25,9 +25,27 @@ const transporter = nodemailer.createTransport({
 
 const con = require('./dbCon.js');
 
+const authorize = (req, res, next) => {
+    if(!req.session.user_id){
+        return res.sendStatus(401);
+    }
+    next();
+}
+
+// klient musi być zalogowany, by móc korzystać z poniższych endpointow
+router.patch('/user/password', authorize);
+router.patch('/user', authorize);
 
 //rejestracja req = {login : string, password : string, email : string}
 router.post('/signup', (req, res) => {
+    if(!(req.body.login && req.body.password && req.body.email)){
+        //nie podano wymaganych danych
+        return res.status(400).json({msg: 'required fields empty'});
+    }
+    if(req.body.login.length > 50){
+        //login jest za dlugi
+        return res.status(400).json({msg: 'login too long'});
+    }
     //sprawdzenie, czy mail nie jest już w uzyciu
     con.get(`SELECT "x" FROM users WHERE email = ?;`, req.body.email, (err, row) => {
         if(err){
@@ -38,8 +56,9 @@ router.post('/signup', (req, res) => {
             return res.status(400).json({msg: 'email already in use'});
         }
         //email jest wolny, sprawdz zlozonosc hasla
-        const passwdValidation = passwordValidator(req.body.password);
-        if(!passwdValidation.isValid){
+        //const passwdValidation = passwordValidator(req.body.password);
+        //if(!passwdValidation.isValid){
+        if(!passwordValidator(req.body.password).isValid){
             return res.status(400).json({msg: 'password too weak', err: passwdValidation.errors});
         }
         //haslo jest dostatecznie silne, zaszyfruj je
@@ -93,32 +112,27 @@ router.post('/signup', (req, res) => {
 
 //aktywacja konta req = {code : string}
 router.post('/activate', (req, res) => {
-    // sprawdz, czy istnieje nieaktywowane konto z podanym kodem
-    con.get(`SELECT * FROM users WHERE is_activated = 0 AND activation_code = ?`, req.body.code, (err, row) => {
+    if(!req.body.code){
+        //nie podano kodu
+        return res.sendStatus(400);
+    }
+    //aktywuj konto
+    con.run(`UPDATE users SET is_activated = 1 WHERE is_activated = 0 AND activation_code = ?`, req.body.code, (err, info) => {
         if(err){
             return res.sendStatus(500);
         }
-        // brak takiego konta, zwroc informacje o niewlasciwym kodzie
-        if(!row){           
-            return res.status(400).json({msg: 'invalid code'});
-        }
-        // konto istnieje, aktywuj je
-        con.run(`UPDATE users SET is_activated = 1 WHERE is_activated = 0 AND activation_code = ?`, req.body.code, (err, info) => {
-            if(err){
-                return res.sendStatus(500);
-            }
-            res.status(200).json({msg: 'account activated'});
-        });
+        res.sendStatus(200);
     });
 });
 
 
 //logowanie req = {email : string, password : string}
 router.post('/login', (req, res) => {
-    //pobranie informacji o koncie z bazy danych
     if(req.session.login){
+        //klient jest juz zalogowany
         return res.status(400).json({msg: 'already logged in'});
     }
+    //pobranie informacji o koncie z bazy danych
     con.get(`SELECT * FROM users WHERE email = ?;`, req.body.email, (err, row) => {
         if(err){
             return res.sendStatus(500);
@@ -307,8 +321,74 @@ router.get('/user', (req, res) => {
         //nie podano id, ale klient jest zalogowany
         return res.status(200).json({user_id: req.session.user_id, email: req.session.email, login: req.session.login, is_admin: req.session.is_admin});
     }
-    //nie podano id i klient nie jest zalogowany
-    return res.sendStatus(403);
+    else{
+        //nie podano id i klient nie jest zalogowany
+        return res.sendStatus(403);
+    }
+});
+
+
+//aktualizuje haslo uzytkownika, na ktorego zalogowany jest klient - wymaga zalogowania
+//req.body = {password : string, new_password : string}
+//password - aktualne haslo uzytkownika
+//new_password - nowe haslo uzytkownika
+router.patch('/user/password', (req, res) => {
+    if(!(req.body.password && req.body.new_password)){
+        //nie podano wymaganych danych
+        return res.status(400).json({msg: 'required fields empty'});
+    }
+    if(!passwordValidator(req.body.new_password).isValid){
+        //nowe haslo jest za slabe
+        return res.status(400).json({msg: 'password too weak', err: passwdValidation.errors});
+    }
+    //pobranie hasla uzytkowanika z bazy danych
+    con.get('SELECT password FROM users WHERE id = ?;', req.session.user_id, (err, row) => {
+        if(err){
+            return res.sendStatus(500);
+        }      
+        bcrypt.compare(req.body.password, row.password, (err, match) => {
+            if(err){
+                return res.sendStatus(500);
+            }
+            if(!match){
+                //niepoprawne haslo
+                return res.status(400).json({msg: 'invalid password'});
+            }
+            bcrypt.hash(req.body.new_password, 10, (err, hash) => {
+                if(err){
+                    return res.sendStatus(500);
+                }
+                con.run('UPDATE users SET password = ? WHERE id = ?', hash, req.session.user_id, (err) => {
+                    if(err){
+                        return res.sendStatus(500);
+                    }
+                    return res.sendStatus(200);
+                });
+            });   
+        });
+    });
+});
+
+
+//aktualizuje dane, inne niz haslo, uzytkownika, na ktorego zalogowany jest klient - wymaga zalogowania
+//req.body = {new_login : string}
+//new_login - nowy login uzytkownika
+router.patch('/user', (req, res) => {
+    if(!req.body.new_login){
+        //nie podano wymaganych danych
+        return res.sendStatus(400);
+    }
+    if(req.body.new_login.length > 50){
+        //login jest za dlugi
+        return res.status(400).json({msg: 'login too long'});
+    }
+    con.run('UPDATE users SET login = ? WHERE id = ?;', req.body.new_login, req.session.user_id, (err) => {
+        if(err){
+            return res.sendStatus(500);
+        }
+        req.session.login = req.body.new_login;
+        return res.sendStatus(200);
+    });
 });
 
 

@@ -36,9 +36,9 @@ export default function EditAnnoucment(props) {
         colors: '',
         breeds: ''
     });
-    const [lat, setLat] = useState(); //Dane z mapy
-    const [lng, setLng] = useState(); //Dane z mapy
-    const [location, setLocation] = useState(null);
+    const [lat, setLat] = useState(props.row.lat); //Dane z mapy
+    const [lng, setLng] = useState(props.row.lng); //Dane z mapy
+    const [location, setLocation] = useState([props.row.lat, props.row.lng]);
 
     function handleLocationChange(loc) {
         setLat(loc.lat);

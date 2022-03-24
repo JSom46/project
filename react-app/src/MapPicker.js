@@ -1,12 +1,14 @@
 //import 'leaflet/dist/leaflet.css';
 import './map.css';
 
-import React from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import React, { useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 
 function LocationMarker(props) {
-    //const [location, setLocation] = useState(null);
     const location = props.location;
+    const map = useMap();
+
+    const alwaysLocate = true; //set to true to always ask for location
 
     function handleLocationChange(loc) {
         props.onLocationChange(loc);
@@ -15,19 +17,19 @@ function LocationMarker(props) {
     const mapEvents = useMapEvents({
         click(e) {
             console.log(e.latlng);
-            //setLocation(e.latlng);
-            //handleLocationChange(e.latlng.wrap());
             handleLocationChange(e.latlng);
         }
     });
-    if (location == null) {
-        return null;
-    }
-    else {
-        return (
-            <Marker position = {location}></Marker>
-        )
-    }
+
+    useEffect(() => {
+        if (alwaysLocate || props.autoLocate || (props.locateMe !== undefined && props.locateMe > 0)) {
+            map.locate({setView: true});
+        }
+    }, [props.locateMe]);
+
+    return (
+        (location == null) ? null : <Marker position={location} />
+    );
 }
 
 //const mapBounds = [[90, -180], [-90, 180]];
@@ -46,7 +48,7 @@ export default function MapPicker(props) {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <LocationMarker location={location} onLocationChange={handleLocationChange} />
+            <LocationMarker location={location} onLocationChange={handleLocationChange} locateMe={props.locateMe}/>
         </MapContainer >
     )
 }
