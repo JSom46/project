@@ -207,7 +207,55 @@ paths:
                 - 0
                 - 1  
         '403':
-          description: użytkownik nie jest zalogowany      
+          description: użytkownik nie jest zalogowany 
+    patch:
+      tags:
+       - /auth - autentyfikacja
+      summary: edytuje dane użytkownika inne niż hasło - wymaga zalogowania
+      consumes:
+      - "application/json"
+      parameters:
+        - in: body
+          name: new_login
+          type: string
+          description: nowy login użytkownika - max 50 znaków
+      responses:
+        '200':
+          description: dane zostały zmienione
+        '400':
+          description: nieprawidłowe dane
+        '401':
+          description: użytkownik nie zalogowany
+        '500':
+          description: błąd po stronie serwera
+
+/user/password:
+    patch:
+      tags:
+        - /auth - autentyfikacja
+      summary: zmienia hasło użytkownika - wymaga zalogowania
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+        - in: body
+          name: password
+          type: string
+          description: aktualne hasło uzytkownika
+        - in: body
+          name: new_password
+          type: string
+          description: nowe hasło
+      responses:
+        '200':
+          description: hasło zostało zmienione
+        '400':
+          description: nieprawidłowe dane
+        '401':
+          description: użytkownik nie zalogowany
+        '500':
+          description: błąd po stronie serwera
 
 /logout:
     get:
@@ -302,22 +350,8 @@ paths:
       responses:
         '200':
           description: konto aktywowane
-          schema:
-            type: object
-            properties:
-              msg:
-                type: string
-                enum:
-                - 'account activated'
         '400':
-          description: nieprawidłowy kod
-          schema:
-            type: object
-            properties:
-              msg:
-                type: string
-                enum:
-                - 'invalid code'
+          description: nie podano kodu
         '500':
           description: Błąd po stronie serwera
 
