@@ -14,7 +14,7 @@ const con = new sqlite3.Database('./db/serverdb.db', (err) => {
 
 con.serialize(() => {
     //utworzenie tabeli users, jeśli jeszcze nie istnieje
-    con.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL, email TEXT UNIQUE NOT NULL, activation_code TEXT, is_activated INTEGER, is_native INTEGER, is_admin INTEGER);', (err) => {
+    con.run('CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY, login TEXT NOT NULL, password TEXT NOT NULL, email TEXT UNIQUE NOT NULL, activation_code TEXT, is_activated INTEGER, is_native INTEGER, is_admin INTEGER, last_active_time INTEGER);', (err) => {
         if(err){
             console.log(err.name + " | " + err.message);
             throw err;
@@ -70,6 +70,7 @@ con.run('CREATE TABLE IF NOT EXISTS notifications(id INTEGER PRIMARY KEY, anon_i
 con.run(`CREATE TABLE IF NOT EXISTS ChatMessages (
     message_id INT,
     anons_id INT,
+    chat_id INT, -- user_id użytkownika pytającego /nie wlaściciela anonsu/
 	user_id INT,
 	message_date INT,
 	message_text TEXT, 
@@ -77,6 +78,18 @@ con.run(`CREATE TABLE IF NOT EXISTS ChatMessages (
 	constraint chat_messages_fk_user_id foreign key (user_id) references users (id),
 	constraint chat_messages_fk_anons_id foreign key (anons_id) references anons (id)
     )`, 
+    (err) => {
+        if(err){
+            console.log(err.name + " | " + err.message);
+            throw err;
+    }
+});
+
+con.run(`CREATE IF NOT EXISTS ChatUsers (
+    anons_id INT,
+    chat_id INT,
+    user_id INT,
+    PRIMARY KEY (anons_id, chat_id, user_id))`, 
     (err) => {
         if(err){
             console.log(err.name + " | " + err.message);

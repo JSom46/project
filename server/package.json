@@ -24,7 +24,7 @@
     "nodemailer": "^6.7.2",
     "password-validator": "^5.2.1",
     "socket.io": "^4.4.1",
-    "sqlite3": "^4.2.0",
+    "sqlite3": "^5.0.2",
     "swagger-jsdoc": "^6.1.0",
     "swagger-ui-express": "^4.3.0"
   }
