@@ -8,7 +8,10 @@ import { Button } from '@mui/material';
 import { Select, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box';
 import ImageListItem from '@mui/material/ImageListItem';
+import Tooltip from '@mui/material/Tooltip';
 import { Stack } from '@mui/material';
+import { Collapse, Alert, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 import MapPicker from './MapPicker';
 
@@ -16,12 +19,11 @@ function createTypes(name, coats, colors, breeds) {
   return { name, coats, colors, breeds };
 }
 export default function AddAnnoucment(props) {
-  console.log('xd');
   const [title, setTitle] = useState();
   const [description, setDescription] = useState();
   const [category, setCategory] = useState('');
-  const [pictures, setPictures] = useState();
-  const [picturesPreview, setPicturesPreview] = useState();
+  const [pictures, setPictures] = useState(new FormData());
+  const [picturesPreview, setPicturesPreview] = useState([]);
   const [type, setType] = useState('');
   const [coat, setCoat] = useState('');
   const [color, setColor] = useState('');
@@ -33,6 +35,12 @@ export default function AddAnnoucment(props) {
   const [lat, setLat] = useState(); //Dane z mapy
   const [lng, setLng] = useState(); //Dane z mapy
   const [location, setLocation] = useState(null);
+  const [alertData, setAlertData] = useState({
+    open: false,
+    variant: 'filled',
+    severity: 'error',
+    text: ''
+  });
 
   function handleLocationChange(loc) {
     setLat(loc.lat);
@@ -68,15 +76,27 @@ export default function AddAnnoucment(props) {
     setBreed(event.target.value);
   };
   const handlePictures = (event) => {
-    const formData = new FormData();
-    const picturesPreviewArray = [];
-    for (let i = 0; i < event.target.files.length; i++) {
-      picturesPreviewArray.push(URL.createObjectURL(event.target.files[i]));
-      formData.append('pictures', event.target.files[i]);
+    if (event.target.files.length > 8 || Array.from(event.target.files).filter((file) => { return file.size > 4 * 1024 * 1024 }).length > 0 ) {
+      setAlertData({
+        open: true,
+        variant: 'filled',
+        severity: 'error',
+        text: 'Zdjęcia nie spełniają wymogów'
+      })
+      setPictures(null);
+      setPicturesPreview([]);
     }
-    setPictures(formData);
-    setPicturesPreview(picturesPreviewArray);
-    // console.log(picturesPreview);
+    else {
+      setAlertData({open: false});
+      const formData = new FormData();
+      const picturesPreviewArray = [];
+      for (let i = 0; i < event.target.files.length; i++) {
+        picturesPreviewArray.push(URL.createObjectURL(event.target.files[i]));
+        formData.append('pictures', event.target.files[i]);
+      }
+      setPictures(formData);
+      setPicturesPreview(picturesPreviewArray);
+    }
   };
   async function postAnnoucement() {
     const formData = new FormData();
@@ -88,10 +108,10 @@ export default function AddAnnoucment(props) {
     }
     formData.append('lat', lat); //Dane z mapy
     formData.append('lng', (((lng + 180) % 360 + 360) % 360) - 180); //Dane z mapy, znormalizowana dlugosc geog.
-    formData.append('type', type); 
-    formData.append('coat', coat); 
-    formData.append('color', color); 
-    formData.append('breed', breed); 
+    formData.append('type', type);
+    formData.append('coat', coat);
+    formData.append('color', color);
+    formData.append('breed', breed);
     try {
       const response = await fetch('http://localhost:2400/anons/', {
         method: 'POST',
@@ -187,12 +207,14 @@ export default function AddAnnoucment(props) {
           <br />
           <MapPicker location={location} onLocationChange={handleLocationChange} />
           <br />
-          <Button variant="contained" component="label">Dodaj zdjęcia
-            <input type="file" accept='.jpg, .png' onChange={handlePictures} hidden multiple />
-          </Button>
+          <Tooltip title="Maksymalnie 8 zdjęć. Maksymalnie 4MB na zdjęcie">
+            <Button aria-describedby="imageUploadButton" variant="contained" component="label">Dodaj zdjęcia
+              <input id="imageUploadButton" type="file" accept="image/*" onChange={handlePictures} hidden multiple />
+            </Button>
+          </Tooltip>
         </FormGroup>
-        <Box sx={{ border: (picturesPreview ? "1px solid" : ""), marginTop: 1, marginBottom: 1 }}>
-          {picturesPreview && picturesPreview.map((item) => (
+        <Box sx={{ border: (picturesPreview.length !== 0 ? "1px solid" : ""), marginTop: 1, marginBottom: 1 }}>
+          {(picturesPreview.length !== 0 && picturesPreview.map((item) => (
             <ImageListItem key={Math.random()} sx={{ margin: 1 }}>
               <img
                 style={{ width: "100px", height: "100px", objectFit: "cover" }}
@@ -201,7 +223,20 @@ export default function AddAnnoucment(props) {
                 loading="lazy"
               />
             </ImageListItem>
-          ))}
+          ))) ||
+            <Collapse in={alertData.open}>
+              <Alert
+                variant={alertData.variant}
+                severity={alertData.severity}
+                action={
+                  <IconButton color="inherit" size="small" onClick={() => { setAlertData({ open: false }); }}>
+                    <CloseIcon fontSize="inherit" />
+                  </IconButton>
+                } sx={{ mb: 2 }}>
+                {alertData.text}
+              </Alert>
+            </Collapse>
+          }
         </Box>
         <Button variant="contained" type="submit" onClick={handleSubmit} disabled={!props.disableSubmit}>Zgłoś</Button>
       </form>

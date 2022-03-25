@@ -12,6 +12,8 @@ import { Select, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box';
 import ImageListItem from '@mui/material/ImageListItem';
 import { Stack } from '@mui/material';
+import { Collapse, Alert, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 import MapPicker from './MapPicker';
 
@@ -25,7 +27,7 @@ export default function EditAnnoucment(props) {
     const [description, setDescription] = useState(props.row.description);
     const [category, setCategory] = useState(props.row.category);
     const [pictures, setPictures] = useState(new FormData());
-    const [picturesPreview, setPicturesPreview] = useState();
+    const [picturesPreview, setPicturesPreview] = useState([]);
     const [type, setType] = useState(props.row.type ? props.row.type : '');
     const [coat, setCoat] = useState(props.row.coat ? props.row.coat : '');
     const [color, setColor] = useState(props.row.color ? props.row.color : '');
@@ -35,6 +37,12 @@ export default function EditAnnoucment(props) {
         coats: '',
         colors: '',
         breeds: ''
+    });
+    const [alertData, setAlertData] = useState({
+        open: false,
+        variant: 'filled',
+        severity: 'error',
+        text: ''
     });
     const [lat, setLat] = useState(props.row.lat); //Dane z mapy
     const [lng, setLng] = useState(props.row.lng); //Dane z mapy
@@ -78,14 +86,27 @@ export default function EditAnnoucment(props) {
         setBreed(event.target.value);
     };
     const handlePictures = (event) => {
-        const kformData = new FormData();
-        const picturesPreviewArray = [];
-        for (let i = 0; i < event.target.files.length; i++) {
-            picturesPreviewArray.push(URL.createObjectURL(event.target.files[i]));
-            kformData.append('pictures', event.target.files[i]);
+        if (event.target.files.length > 8 || Array.from(event.target.files).filter((file) => { return file.size > 4 * 1024 * 1024 }).length > 0) {
+            setAlertData({
+                open: true,
+                variant: 'filled',
+                severity: 'error',
+                text: 'Zdjęcia nie spełniają wymogów'
+            })
+            setPictures(null);
+            setPicturesPreview([]);
         }
-        setPictures(kformData);
-        setPicturesPreview(picturesPreviewArray);
+        else {
+            setAlertData({ open: false });
+            const kformData = new FormData();
+            const picturesPreviewArray = [];
+            for (let i = 0; i < event.target.files.length; i++) {
+                picturesPreviewArray.push(URL.createObjectURL(event.target.files[i]));
+                kformData.append('pictures', event.target.files[i]);
+            }
+            setPictures(kformData);
+            setPicturesPreview(picturesPreviewArray);
+        }
         // console.log(picturesPreview);
     };
 
@@ -217,8 +238,8 @@ export default function EditAnnoucment(props) {
                         <input type="file" accept='.jpg, .png' onChange={handlePictures} hidden multiple />
                     </Button>
                 </FormGroup>
-                <Box sx={{ border: (picturesPreview ? "1px solid" : ""), marginTop: 1, marginBottom: 1 }}>
-                    {picturesPreview && picturesPreview.map((item) => (
+                <Box sx={{ border: (picturesPreview.length !== 0 ? "1px solid" : ""), marginTop: 1, marginBottom: 1 }}>
+                    {(picturesPreview.length !== 0 && picturesPreview.map((item) => (
                         <ImageListItem key={Math.random()} sx={{ margin: 1 }}>
                             <img
                                 style={{ width: "100px", height: "100px", objectFit: "cover" }}
@@ -227,7 +248,20 @@ export default function EditAnnoucment(props) {
                                 loading="lazy"
                             />
                         </ImageListItem>
-                    ))}
+                    ))) ||
+                        <Collapse in={alertData.open}>
+                            <Alert
+                                variant={alertData.variant}
+                                severity={alertData.severity}
+                                action={
+                                    <IconButton color="inherit" size="small" onClick={() => { setAlertData({ open: false }); }}>
+                                        <CloseIcon fontSize="inherit" />
+                                    </IconButton>
+                                } sx={{ mb: 2 }}>
+                                {alertData.text}
+                            </Alert>
+                        </Collapse>
+                    }
                 </Box>
                 <Button variant="contained" type="submit" onClick={handleSubmit}>Zapisz</Button>
             </form>

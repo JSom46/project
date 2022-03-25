@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DataGrid, GridFooterContainer, gridPageCountSelector, gridPageSelector, useGridApiContext, useGridSelector, plPL } from '@mui/x-data-grid';
 import { Pagination } from '@mui/material';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 import { Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, CircularProgress, LinearProgress, Collapse, Alert, IconButton, Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -14,6 +14,14 @@ const theme = createTheme(
     {},
     plPL,
 );
+const StyledDataGrid = styled(DataGrid)(() => ({
+    '& .MuiDataGrid-cell:focus': {
+        outline: 'none'
+    },
+    '& .MuiDataGrid-cell:hover': {
+        cursor: 'pointer'
+      }
+}));
 const columns = [
     // {
     //   field: 'id',
@@ -51,6 +59,7 @@ export default function DataGridMy() {
     const [open, setOpen] = useState(false);
     const [openEditDialog, setOpenEditDialog] = useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [openImageDialog, setOpenImageDialog] = useState({ open: false });
     const [alertData, setAlertData] = useState({
         open: false,
         variant: 'filled',
@@ -104,6 +113,12 @@ export default function DataGridMy() {
         setAnnouncementData([]);
         setOpen(true);
         fetchAnnouncementData(row.id);
+    }
+    const handleImageClick = (image) => {
+        setOpenImageDialog({
+            open: true,
+            src: image.target.src
+        })
     }
     async function deleteAnnouncement(announcementData) {
         try {
@@ -206,7 +221,7 @@ export default function DataGridMy() {
                         {alertData.text}
                     </Alert>
                 </Collapse>
-                <DataGrid
+                <StyledDataGrid
                     autoHeight
                     rows={data}
                     columns={columns}
@@ -238,7 +253,7 @@ export default function DataGridMy() {
                             <Typography variant="subtitle1">Zdjęcia</Typography>
                             {announcementData.images && announcementData.images.map((element) => (
                                 <img style={{ width: "100px", height: "100px", objectFit: "cover", margin: 4 }} src={'http://localhost:2400/anons/photo?name=' + element}
-                                    alt={announcementData.title} key={announcementData.id} />
+                                    alt={announcementData.title} key={announcementData.id} onClick={handleImageClick} />
                             ))}
                             <Divider />
                             <Stack justifyContent="space-between" direction="row" alignContent="center" spacing={2}>
@@ -274,7 +289,7 @@ export default function DataGridMy() {
                             <Button color='warning' onClick={() => (setOpenEditDialog(true))}>Edytuj</Button>
                             <Button color='error' onClick={() => (setOpenDeleteDialog(true))}>Usuń</Button>
                             <Button onClick={() => (
-                                window.location.href="/dashboard"+"?lat="+announcementData.lat+"&lng="+announcementData.lng
+                                window.location.href = "/dashboard" + "?lat=" + announcementData.lat + "&lng=" + announcementData.lng
                             )}>Pokaż na mapie</Button>
                         </DialogActions>
                     </div>
@@ -296,6 +311,9 @@ export default function DataGridMy() {
             <Dialog open={openEditDialog} onClose={() => (setOpenEditDialog(false))} fullWidth>
                 <DialogTitle>Edytuj ogłoszenie</DialogTitle>
                 <EditAnnouncement row={announcementData} parentCallback={handleCallback} />
+            </Dialog>
+            <Dialog open={openImageDialog.open} onClose={() => (setOpenImageDialog((prev) => ({ open: false, src: prev.src })))} fullWidth>
+                <img src={openImageDialog.src} alt={announcementData.title} />
             </Dialog>
         </div>
     );

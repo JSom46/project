@@ -1,18 +1,28 @@
 //import { useState, useEffect } from 'react';
 import { DataGrid, GridFooterContainer, gridPageCountSelector, gridPageSelector, useGridApiContext, useGridSelector, plPL } from '@mui/x-data-grid';
-import { Pagination, IconButton} from '@mui/material';
+import { Pagination, IconButton } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 /*import { Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, CircularProgress, Button } from '@mui/material';
 import { Stack } from '@mui/material';
 import { Typography } from '@mui/material';
 import { Divider } from '@mui/material';
 import AnnouncementDialog from './AnnouncementDialog';*/
 
-const theme = createTheme(
-  {},
+const theme = createTheme({
+},
   plPL,
 );
+
+const StyledDataGrid = styled(DataGrid)(() => ({
+  '& .MuiDataGrid-cell:focus': {
+    outline: 'none'
+  },
+  '& .MuiDataGrid-cell:hover': {
+    cursor: 'pointer'
+  }
+}));
+
 const columns = [
   // {
   //   field: 'id',
@@ -35,7 +45,7 @@ const columns = [
     flex: 0.2,
   },
   {
-    field: 'createDate',
+    field: 'create_date',
     headerName: 'Data dodania',
     type: 'dateTime',
     flex: 0.5,
@@ -125,7 +135,7 @@ export default function DataGridList(props) {
   return (
     <div style={{ height: '100%', width: '100%' }}>
       <ThemeProvider theme={theme}>
-        <DataGrid
+        <StyledDataGrid
           rows={props.data}
           columns={columns}
           pageSize={15}
@@ -136,7 +146,7 @@ export default function DataGridList(props) {
           components={{
             // Toolbar: CustomToolbar,
             Footer: CustomFooter,
-        }}
+          }}
         />
       </ThemeProvider>
       {/*<AnnouncementDialog open={open} announcementData={announcementData} setOpen={setOpen} />*/}
@@ -195,7 +205,7 @@ export default function DataGridList(props) {
           </div>
         )}
               </Dialog>*/}
-      
+
     </div>
   );
 }
