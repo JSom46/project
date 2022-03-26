@@ -32,7 +32,7 @@ con.serialize(() => {
                 if(err){
                     console.log(err.name + " | " + err.message);
                     throw err;
-                }
+``                }
                 con.run(`INSERT INTO users(login, password, email, is_activated, is_native, is_admin) VALUES("admin", "${hash}", "${process.env.ADMIN_EMAIL}", 1, 1, 1)`, (err) => {
                     if(err){
                         console.log(err.name + " | " + err.message);
@@ -85,7 +85,7 @@ con.run(`CREATE TABLE IF NOT EXISTS ChatMessages (
     }
 });
 
-con.run(`CREATE IF NOT EXISTS ChatUsers (
+con.run(`CREATE TABLE IF NOT EXISTS ChatUsers (
     anons_id INT,
     chat_id INT,
     user_id INT,
