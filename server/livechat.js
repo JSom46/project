@@ -12,6 +12,7 @@ const fs = require('fs');
 const con = require('./dbCon.js');
 const { SocketAddress } = require('net');
 
+
 let lastMessage, lastImage;
 
 con.get('SELECT MAX(message_id) msgID from ChatMessages', (err, result) => {
@@ -58,21 +59,23 @@ io.on("connection", function (socket) {
     });
 
 
-    // zwrócić listę chat-ów z informacją ile jest wiadomości oraz ile nowych wiadomości
-
+    // zwrócić listę chat-ów z informacją ile jest wszystkich i nowych wiadomości
     socket.on('get-user-chats', (userid) => {
         con.all(
-        `WITH Chats (anons_id, chat_id) AS (SELECT anons_id, chat_id FROM UserChats WHERE user_id = ?)
-            SELECT cm.anons_id, cm.chat_id, count(*) All,
-                (SELECT count(*) FROM ChatMessages 
-                    WHERE anons_id = cm.anons_id AND chat_id = cm.chat_id
-                        AND message_date > users.last_active_time) New
-            FROM ChatMessages cm 
-                JOIN Chats uc ON cm.anons_id = uc.anons_id AND cm.chat_id = uc.chat_id
-                JOIN users ON cm.user_id = users.id
-            WHERE cm.user_id <> ? 
-            GROUP BY cm.anons_id, cm.chat_id`
-        , userid, userid, (err, result) => {
+        `WITH Chats (anons_id, chat_id, user_id) AS (
+            SELECT anons_id, chat_id, user_id FROM ChatUsers WHERE user_id = 3
+            )
+            SELECT c.anons_id, c.chat_id,
+                (SELECT count(*) FROM ChatMessages cm
+                    WHERE cm.anons_id = c.anons_id AND cm.chat_id = c.chat_id
+                ) AllMsgs,
+                (SELECT count(*) FROM ChatMessages cm 
+                    WHERE cm.anons_id = c.anons_id AND cm.chat_id = c.chat_id
+                        AND cm.user_id <> c.user_id AND cm.message_date > 
+                            (SELECT last_active_time FROM users WHERE id = c.user_id)
+                ) NewMsgs			
+            FROM Chats c`
+        , userid, (err, result) => {
             if (err) {
                 socket.emit('error', err);
             } else {
@@ -90,12 +93,14 @@ io.on("connection", function (socket) {
                     socket.emit('error', err);
                 } else {
                     socket.emit('chat-messages', result);
-                }                        
-            });
+                }
+        });
+        
+
     });
 
 
-    socket.on('auth-req', ({userid}) => {
+    socket.on('auth-request', ({userid}) => {
             // tutaj uwierzytelniamy(?) użytkownika 
             // i wysyłamu mu status, czyli informacje o jego 
             // czatach i wiadomościach na nich
@@ -110,7 +115,7 @@ io.on("connection", function (socket) {
 
             //con.all('select message from charMessage where userid = ?', userid); // ZMIENIĆ!!!
 
-            socket.emit('auth-res', {status: 1});
+            socket.emit('auth-response', {status: 1});
             
     });
 
@@ -134,31 +139,36 @@ io.on("connection", function (socket) {
     socket.on("join-chat", ({anonsid, chatid, userid}) => {
         let chatroom = anonsid + ':' + chatid;
         socket.join(chatroom);
-        io.to(chatroom).broadcast('user-join', {anons: anonsid, chat: chatid, user: userid });
+        io.to(chatroom).broadcast('user-join', {anonsid, chatid, userid});
 
         //userSocketMap.get(userid).emit('new-message', {anons: anonsid, chat: chatid, user: userid});
     });
 
-    socket.on("leave-chat", ({anonsid, chatid, userid}) => {
+
+    socket.on("leave-chat", ({ anonsid, chatid, userid }) => {
         let chatroom = anonsid + ':' + chatid;
         socket.leave(chatroom);
-        io.to(chatroom).broadcast('user-leave', {anons: anonsid, chat: chatid, user: userid });
+        io.to(chatroom).broadcast('user-leave', {anonsid, chatid, userid });
     });
 
-    socket.on("message", ({anonsid, chatid, userid, text}) => {
+
+    socket.on("chat-message", ({ anonsid, chatid, userid, msgtext }) => {
         let curDate = Date.now();
         lastMessage++;
         con.run(`INSERT INTO ChatMessages (message_id, anons_id, user_id, message_date, message_text) VALUES
-                 (${lastMessage}, ${anonsid}, ${userid}, ${curDate}, "${text}")`);
+                 (${lastMessage}, ${anonsid}, ${userid}, ${curDate}, "${msgtext}")`);
 
 
         // wiadomość do użytkowników podłączonych do pokoju 
         let chatroom = anonsid + ':' + chatid;
-        io.to(chatroom).brodcast.emit('message', {anonsid, userid, text});  // zmienić grupę na właściwą dla użytkownika i anonsu
+        io.to(chatroom).broadcast.emit('chat-message', {anonsid, userid, msgtext});  // zmienić grupę na właściwą dla użytkownika i anonsu
 
         // dodatkowo powinniśmy powiadomić wszystkich użytkowników (u nas jednego), których to dotyczy,
         // tj. podłączonych do serwera/aplikacji ale nie będących aktualnie w pokoju czatowym,
         // że na czasie pojawiła się nowa wiadomość
+
+        // tabelę ChatUsers można wczytać do pamięci operacyjnej przy uruchamianiu serwera
+        // żeby nie robić zapytań SQL przy każdej wiadomośc chat-owej
         con.run('SELECT user_id FROM ChatUsers WHERE anons_id = ? AND chat_id = ?', anonsid, chatid, (err, result) => {
             for (let user in result) {
                 let sockid = userSocketMap.get(user.user_id);
@@ -167,6 +177,7 @@ io.on("connection", function (socket) {
                     // jeśli nie to wyślij mu powiadomienie o nowej wiadomości 
                     // w pokoju czatowym
 
+                    io.to(sockid).emit('new-chat-message', {anonsid, chatid, userid, msgtext})
                 }
             }
         });
@@ -174,7 +185,7 @@ io.on("connection", function (socket) {
     });
 
 
-    socket.on("message_image", ({anonsid, userid, image}) => {
+    socket.on("chat-image", ({anonsid, userid, image}) => {
 
         socket.broadcast.emit('message_image', {anonsid, userid, image}); // zmienić grupę na właściwą dla użytkownika i anonsu
 
