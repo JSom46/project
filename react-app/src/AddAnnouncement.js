@@ -41,6 +41,7 @@ export default function AddAnnoucment(props) {
     severity: 'error',
     text: ''
   });
+  const [loading, setLoading] = useState(false);
 
   function handleLocationChange(loc) {
     setLat(loc.lat);
@@ -76,7 +77,7 @@ export default function AddAnnoucment(props) {
     setBreed(event.target.value);
   };
   const handlePictures = (event) => {
-    if (event.target.files.length > 8 || Array.from(event.target.files).filter((file) => { return file.size > 4 * 1024 * 1024 }).length > 0 ) {
+    if (event.target.files.length > 8 || Array.from(event.target.files).filter((file) => { return file.size > 4 * 1024 * 1024 }).length > 0) {
       setAlertData({
         open: true,
         variant: 'filled',
@@ -87,7 +88,7 @@ export default function AddAnnoucment(props) {
       setPicturesPreview([]);
     }
     else {
-      setAlertData({open: false});
+      setAlertData({ open: false });
       const formData = new FormData();
       const picturesPreviewArray = [];
       for (let i = 0; i < event.target.files.length; i++) {
@@ -126,8 +127,9 @@ export default function AddAnnoucment(props) {
   }
   const handleSubmit = async e => {
     e.preventDefault();
-    const response = await postAnnoucement();
-    console.log(response);
+    setLoading(true);
+    await postAnnoucement();
+    setLoading(false);
   }
   useEffect(() => {
     const fetchTypes = async () => {
@@ -147,8 +149,6 @@ export default function AddAnnoucment(props) {
             element.breeds
           ));
         });
-        // const psycolors = rows.filter((type) => {return type.name === "Psy"});
-        // console.log(psycolors[0].colors);
         setTypes(rows);
       } catch (error) {
         console.log("error", error);
@@ -158,88 +158,86 @@ export default function AddAnnoucment(props) {
   }, []);
 
   return (
-    <FormControl style={{ width: '100%' }} sx={{ padding: 2 }}>
-      <form autoComplete='off'>
-        <FormGroup>
-          <TextField fullWidth={true} type='text' id="title" label="Tytuł" variant="standard" required onChange={handleTitleChange} />
-          <FormControl variant="standard">
-            <InputLabel id="category" required>Rodzaj zgłoszenia</InputLabel>
-            <Select value={category} labelId="category" id="category" label="Kategoria" onChange={handleCategoryChange}>
-              <MenuItem value={0}>Zaginięcie</MenuItem>
-              <MenuItem value={1}>Znalezienie</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField fullWidth type='text' id="description" label="Opis" variant="standard" multiline minRows={4} required onBlur={handleDescriptionChange} />
-          <FormControl variant="standard">
-            <InputLabel id="type" required>Typ</InputLabel>
-            <Select value={type} labelId="type" id="type" onChange={handleTypeChange}>
-              {types && types.map((item) => (
-                <MenuItem key={item.name} value={item.name}>{item.name}</MenuItem>
+    <Box component="form" autoComplete="off" sx={{ padding: 2, width: '100%' }}>
+      <FormGroup>
+        <TextField fullWidth type='text' id="title" label="Tytuł" variant="standard" required onBlur={handleTitleChange} />
+        <FormControl variant="standard">
+          <InputLabel id="category" required>Rodzaj zgłoszenia</InputLabel>
+          <Select value={category} labelId="category" id="category" label="Kategoria" onChange={handleCategoryChange}>
+            <MenuItem value={0}>Zaginięcie</MenuItem>
+            <MenuItem value={1}>Znalezienie</MenuItem>
+          </Select>
+        </FormControl>
+        <TextField fullWidth type='text' id="description" label="Opis" variant="standard" multiline minRows={4} required onBlur={handleDescriptionChange} />
+        <FormControl variant="standard">
+          <InputLabel id="type" required>Typ</InputLabel>
+          <Select value={type} labelId="type" id="type" onChange={handleTypeChange}>
+            {types && types.map((item) => (
+              <MenuItem key={item.name} value={item.name}>{item.name}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Stack justifyContent="space-evenly" direction="row" alignItems="center" spacing={2}>
+          <FormControl variant="standard" style={{ width: '100%' }}>
+            <InputLabel id="coat">Owłosienie</InputLabel>
+            <Select value={coat} labelId="coat" id="coat" onChange={handleCoatChange} disabled={coats.length === 0}>
+              {coats && coats.map((item) => (
+                <MenuItem key={item} value={item}>{item}</MenuItem>
               ))}
             </Select>
           </FormControl>
-          <Stack justifyContent="space-evenly" direction="row" alignItems="center" spacing={2}>
-            <FormControl variant="standard" style={{ width: '100%' }}>
-              <InputLabel id="coat">Owłosienie</InputLabel>
-              <Select value={coat} labelId="coat" id="coat" onChange={handleCoatChange} disabled={coats.length === 0}>
-                {coats && coats.map((item) => (
-                  <MenuItem key={item} value={item}>{item}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl variant="standard" style={{ width: '100%' }}>
-              <InputLabel id="colors">Umaszczenie</InputLabel>
-              <Select value={color} labelId="colors" id="colors" onChange={handleColorChange} disabled={colors.length === 0}>
-                {colors && colors.map((item) => (
-                  <MenuItem key={item} value={item}>{item}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl variant="standard" style={{ width: '100%' }}>
-              <InputLabel id="breeds">Rasa</InputLabel>
-              <Select value={breed} labelId="breeds" id="breeds" onChange={handleBreedChange} disabled={breeds.length === 0}>
-                {breeds && breeds.map((item) => (
-                  <MenuItem key={item} value={item}>{item}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Stack>
-          <br />
-          <MapPicker location={location} onLocationChange={handleLocationChange} />
-          <br />
-          <Tooltip title="Maksymalnie 8 zdjęć. Maksymalnie 4MB na zdjęcie">
-            <Button aria-describedby="imageUploadButton" variant="contained" component="label">Dodaj zdjęcia
-              <input id="imageUploadButton" type="file" accept="image/*" onChange={handlePictures} hidden multiple />
-            </Button>
-          </Tooltip>
-        </FormGroup>
-        <Box sx={{ border: (picturesPreview.length !== 0 ? "1px solid" : ""), marginTop: 1, marginBottom: 1 }}>
-          {(picturesPreview.length !== 0 && picturesPreview.map((item) => (
-            <ImageListItem key={Math.random()} sx={{ margin: 1 }}>
-              <img
-                style={{ width: "100px", height: "100px", objectFit: "cover" }}
-                src={item}
-                alt={item}
-                loading="lazy"
-              />
-            </ImageListItem>
-          ))) ||
-            <Collapse in={alertData.open}>
-              <Alert
-                variant={alertData.variant}
-                severity={alertData.severity}
-                action={
-                  <IconButton color="inherit" size="small" onClick={() => { setAlertData({ open: false }); }}>
-                    <CloseIcon fontSize="inherit" />
-                  </IconButton>
-                } sx={{ mb: 2 }}>
-                {alertData.text}
-              </Alert>
-            </Collapse>
-          }
-        </Box>
-        <Button variant="contained" type="submit" onClick={handleSubmit} disabled={!props.disableSubmit}>Zgłoś</Button>
-      </form>
-    </FormControl>
+          <FormControl variant="standard" style={{ width: '100%' }}>
+            <InputLabel id="colors">Umaszczenie</InputLabel>
+            <Select value={color} labelId="colors" id="colors" onChange={handleColorChange} disabled={colors.length === 0}>
+              {colors && colors.map((item) => (
+                <MenuItem key={item} value={item}>{item}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl variant="standard" style={{ width: '100%' }}>
+            <InputLabel id="breeds">Rasa</InputLabel>
+            <Select value={breed} labelId="breeds" id="breeds" onChange={handleBreedChange} disabled={breeds.length === 0}>
+              {breeds && breeds.map((item) => (
+                <MenuItem key={item} value={item}>{item}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Stack>
+        <br />
+        <MapPicker location={location} onLocationChange={handleLocationChange} />
+        <br />
+        <Tooltip title="Maksymalnie 8 zdjęć. Maksymalnie 4MB na zdjęcie">
+          <Button aria-describedby="imageUploadButton" variant="contained" component="label">Dodaj zdjęcia
+            <input id="imageUploadButton" type="file" accept="image/*" onChange={handlePictures} hidden multiple />
+          </Button>
+        </Tooltip>
+      </FormGroup>
+      <Box sx={{ border: (picturesPreview.length !== 0 ? "1px solid" : ""), marginTop: 1, marginBottom: 1 }}>
+        {(picturesPreview.length !== 0 && picturesPreview.map((item) => (
+          <ImageListItem key={Math.random()} sx={{ margin: 1 }}>
+            <img
+              style={{ width: "100px", height: "100px", objectFit: "cover" }}
+              src={item}
+              alt={item}
+              loading="lazy"
+            />
+          </ImageListItem>
+        ))) ||
+          <Collapse in={alertData.open}>
+            <Alert
+              variant={alertData.variant}
+              severity={alertData.severity}
+              action={
+                <IconButton color="inherit" size="small" onClick={() => { setAlertData({ open: false }); }}>
+                  <CloseIcon fontSize="inherit" />
+                </IconButton>
+              } sx={{ mb: 2 }}>
+              {alertData.text}
+            </Alert>
+          </Collapse>
+        }
+      </Box>
+      <Button variant="contained" type="submit" onClick={handleSubmit} disabled={loading}>Zgłoś</Button>
+    </Box>
   )
 }

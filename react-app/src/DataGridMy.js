@@ -5,7 +5,7 @@ import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 import { Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, CircularProgress, LinearProgress, Collapse, Alert, IconButton, Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { Stack } from '@mui/material';
+import { Stack, Box } from '@mui/material';
 import { Typography } from '@mui/material';
 import { Divider } from '@mui/material';
 import EditAnnouncement from './EditAnnouncement';
@@ -20,7 +20,7 @@ const StyledDataGrid = styled(DataGrid)(() => ({
     },
     '& .MuiDataGrid-cell:hover': {
         cursor: 'pointer'
-      }
+    }
 }));
 const columns = [
     // {
@@ -57,6 +57,7 @@ function createData(id, title, category, type, createDate) {
 export default function DataGridMy() {
     const [announcementData, setAnnouncementData] = useState([]);
     const [open, setOpen] = useState(false);
+    const [fetchError, setFetchError] = useState(false);
     const [openEditDialog, setOpenEditDialog] = useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [openImageDialog, setOpenImageDialog] = useState({ open: false });
@@ -91,6 +92,7 @@ export default function DataGridMy() {
                 });
                 setData(rows);
             } catch (error) {
+                setFetchError(true);
                 console.log("error", error);
             }
         };
@@ -221,20 +223,31 @@ export default function DataGridMy() {
                         {alertData.text}
                     </Alert>
                 </Collapse>
-                <StyledDataGrid
-                    autoHeight
-                    rows={data}
-                    columns={columns}
-                    pageSize={10}
-                    rowsPerPageOptions={[10]}
-                    onRowClick={handleRowClick}
-                    disableSelectionOnClick
-                    loading={data.length === 0}
-                    components={{
-                        // Toolbar: CustomToolbar,
-                        Footer: CustomFooter,
-                    }}
-                />
+                {(fetchError &&
+                    <Box>
+                        <Typography variant='caption'>Błąd serwera</Typography>
+                        <IconButton onClick={() => { setFetchError(false); setReload((prev) => !(prev)) }}>
+                            <RefreshIcon />
+                        </IconButton>
+                    </Box>
+                ) || 
+                (!fetchError &&
+                    <StyledDataGrid
+                        autoHeight
+                        rows={data}
+                        columns={columns}
+                        pageSize={10}
+                        rowsPerPageOptions={[10]}
+                        onRowClick={handleRowClick}
+                        disableSelectionOnClick
+                        loading={data.length === 0}
+                        components={{
+                            // Toolbar: CustomToolbar,
+                            Footer: CustomFooter,
+                        }}
+                    />
+                )}
+                
             </ThemeProvider>
             <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth={true}>
                 {announcementData.length === 0 ? (
@@ -250,12 +263,16 @@ export default function DataGridMy() {
                                 {announcementData.description}
                             </DialogContentText>
                             <Divider />
-                            <Typography variant="subtitle1">Zdjęcia</Typography>
-                            {announcementData.images && announcementData.images.map((element) => (
-                                <img style={{ width: "100px", height: "100px", objectFit: "cover", margin: 4 }} src={'http://localhost:2400/anons/photo?name=' + element}
-                                    alt={announcementData.title} key={announcementData.id} onClick={handleImageClick} />
-                            ))}
-                            <Divider />
+                            {(announcementData.images[0] !== '' && announcementData.images.length !== 0) &&
+                                <span>
+                                    <Typography variant="subtitle1">Zdjęcia</Typography>
+                                    {announcementData.images && announcementData.images.map((element) => (
+                                        <img style={{ width: "100px", height: "100px", objectFit: "cover", margin: 4 }} src={'http://localhost:2400/anons/photo?name=' + element}
+                                            alt={announcementData.title} key={announcementData.id} onClick={handleImageClick} />
+                                    ))}
+                                    <Divider />
+                                </span>
+                            }
                             <Stack justifyContent="space-between" direction="row" alignContent="center" spacing={2}>
                                 <span>
                                     <Typography variant="subtitle1">Typ</Typography>

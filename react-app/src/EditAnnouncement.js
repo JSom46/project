@@ -179,7 +179,7 @@ export default function EditAnnoucment(props) {
         <FormControl style={{ width: '100%' }} sx={{ padding: 2 }}>
             <form autoComplete='off'>
                 <FormGroup>
-                    <TextField value={title} fullWidth={true} type='text' id="title" label="Tytuł" variant="standard" required onBlur={handleTitleChange} />
+                    <TextField defaultValue={title} fullWidth={true} type='text' id="title" label="Tytuł" variant="standard" required onBlur={handleTitleChange} />
                     <FormControl variant="standard">
                         <InputLabel id="category" required>Rodzaj zgłoszenia</InputLabel>
                         <Select value={category} labelId="category" id="category" label="Kategoria" onChange={handleCategoryChange}>
@@ -187,7 +187,7 @@ export default function EditAnnoucment(props) {
                             <MenuItem value={1}>Znalezienie</MenuItem>
                         </Select>
                     </FormControl>
-                    <TextField value={description} type='text' id="description" label="Opis" variant="standard" multiline minRows={4} required onBlur={handleDescriptionChange} />
+                    <TextField defaultValue={description} type='text' id="description" label="Opis" variant="standard" multiline minRows={4} required onBlur={handleDescriptionChange} />
                     <FormControl variant="standard">
                         <InputLabel id="type" required>Typ</InputLabel>
                         <Select value={typesData.types ? type : ''} labelId="type" id="type" onChange={handleTypeChange} >

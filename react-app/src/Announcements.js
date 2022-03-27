@@ -30,52 +30,53 @@ export default function Announcements(props) {
 
 
   const handleCallback = (childData) => {
-    if(childData?.id){
+    if (childData?.id) {
       setAlert({
-        "value":"Pomyślnie dodano ogłoszenie.",
-        "severity":"success",
-        "hidden":false
+        "value": "Pomyślnie dodano ogłoszenie.",
+        "severity": "success",
+        "hidden": false
       })
       setTimeout(() => {
-        setAlert({"hidden":true});
+        setAlert({ "hidden": true });
         setOpen(false);
-      },3000);
+      }, 3000);
     }
     else {
       setAlert({
-        "value":"Pomyślnie dodano ogłoszenie.",
-        "severity":"success",
-        "hidden":false
+        "value": "Pomyślnie dodano ogłoszenie.",
+        "severity": "success",
+        "hidden": false
       });
     }
   }
-  if(sessionStorage.getItem('login') !== null)
-  return (
-    <BrowserRouter>
-      <Grid container spacing={0} columns={16} justifyContent="center">
-        <Grid item xs={10} >
-          <Stack spacing={2} justifyContent="center" alignItems="center">
-            <Stack direction="row" spacing={8} justifyContent="center" alignItems="center" sx={{ padding: 2 }}>
-              <Button variant="outlined" onClick={handleClickOpen}>
-                Dodaj ogłoszenie
-              </Button>
-              <Dialog open={open} onClose={handleClose} fullWidth>
-                <DialogTitle>Dodaj ogłoszenie</DialogTitle>
-                <AddAnnouncement parentCallback={handleCallback} disableSubmit={alert.hidden}/>
-                <Alert severity={alert.severity !== "" ? alert.severity : "error"} hidden={alert.hidden}>{alert.value}</Alert>
-              </Dialog>
+  if (sessionStorage.getItem('login') !== null)
+    return (
+      <BrowserRouter>
+        <Grid container spacing={0} columns={16} justifyContent="center">
+          <Grid item xs={10} >
+            <Stack spacing={2} justifyContent="center" alignItems="center">
+              <Stack direction="row" spacing={8} justifyContent="center" alignItems="center" sx={{ padding: 2 }}>
+                <Button variant="outlined" onClick={handleClickOpen}>
+                  Dodaj ogłoszenie
+                </Button>
+                <Dialog open={open} onClose={handleClose} fullWidth>
+                  <DialogTitle>Dodaj ogłoszenie</DialogTitle>
+                  <AddAnnouncement parentCallback={handleCallback} disableSubmit={alert.hidden} />
+                  <Alert severity={alert.severity !== "" ? alert.severity : "error"} hidden={alert.hidden}>{alert.value}</Alert>
+                </Dialog>
+              </Stack>
+              <Typography variant="h3" gutterBottom>Twoje ogłoszenia</Typography>
+              <DataGridMy />
+              
             </Stack>
-            <Typography variant="h3" gutterBottom>Twoje ogłoszenia</Typography>
-            <DataGridMy />
-          </Stack>
+          </Grid>
         </Grid>
-      </Grid>
-    </BrowserRouter>
-  );
+      </BrowserRouter>
+    );
   else
-  return (
-    <div style={{margin:'auto'}}>
-      <h4>Ta sekcja jest przeznaczona wyłącznie dla zalogowanych użytkowników.</h4>
-    </div>
-  );
+    return (
+      <div style={{ margin: 'auto' }}>
+        <h4>Ta sekcja jest przeznaczona wyłącznie dla zalogowanych użytkowników.</h4>
+      </div>
+    );
 }
