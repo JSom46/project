@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import Register from './Register';
 import Login from './Login';
-import Activate  from './Activate';
+import Activate from './Activate';
 import MenuAppBar from './Topbar';
 import Profile from './Profile';
 import Account from './Account';
@@ -22,36 +22,42 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:2400/auth/loggedin', {
-        method: 'GET',
-        credentials: 'include'
-      });
-      const json = await response.json();
-      console.log(json);
-      setAuth(json);
-      sessionStorage.setItem('msg',json.msg);
-      if(json.login !== undefined) {
-        sessionStorage.setItem('login',json.login);
+        await fetch('http://localhost:2400/auth/user', {
+          method: 'GET',
+          credentials: 'include'
+        }).then(response => {
+          if (response.status === 200) {
+            response.json().then(data => {
+              sessionStorage.removeItem('msg');
+              sessionStorage.setItem('login', data.login);
+              setAuth(data);
+            });
+          }
+          else {
+            if (response.status === 403) {
+              sessionStorage.setItem('msg', 'not logged in');
+              sessionStorage.removeItem('login');
+            };
+            throw new Error('Response not ok')
+          }
+        })
+      } catch (error) {
+        console.log("error", error);
       }
-      else sessionStorage.removeItem('login');
-      // console.log(json.login);
-    } catch (error) {
-      console.log("error", error);
+    };
+    if (sessionStorage.getItem('msg') === "logged in" || sessionStorage.getItem('msg') === "logged with other" || sessionStorage.getItem('msg') === null
+      || (sessionStorage.getItem('msg') === "ok" && sessionStorage.getItem('login') === null)) fetchData();
+    else if (sessionStorage.getItem('login') !== null) {
+      setAuth({
+        "login": sessionStorage.getItem('login'),
+      });
     }
-  };
-  if(sessionStorage.getItem('msg') === "logged in" || sessionStorage.getItem('msg') === "logged with other" || sessionStorage.getItem('msg') === null
-  || (sessionStorage.getItem('msg') === "ok" && sessionStorage.getItem('login') === null)) fetchData();
-  else if(sessionStorage.getItem('login') !== null){
-    setAuth({
-      "login": sessionStorage.getItem('login'),
-    });
-  }
-  else {
-    setAuth({
-      "msg": "not logged in"
-    });
-  }
-}, []);
+    else {
+      setAuth({
+        "msg": "not logged in"
+      });
+    }
+  }, []);
   return (
     <div>
       <BrowserRouter>
@@ -79,6 +85,6 @@ function App() {
         </Switch>
       </BrowserRouter>
     </div>
-);
+  );
 }
 export default App;

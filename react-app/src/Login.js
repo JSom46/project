@@ -80,14 +80,7 @@ export default function Login(props) {
       window.location.reload();
     }
   }
-  if (props.auth === '') {
-    return (
-      <div>
-        <CircularProgress />
-      </div>
-    )
-  }
-  else if (props.auth?.login)
+  if (sessionStorage.getItem('login') !== null)
     return (
       <div>
         <Grid container spacing={2} columns={16} justifyContent="center">
