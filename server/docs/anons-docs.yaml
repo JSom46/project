@@ -420,6 +420,9 @@ paths:
                       enum:
                       - 0
                       - 1
+                    notifications_count:
+                      type: integer
+                      description: 'liczba nieodczytanych notyfikacji dotyczących ogłoszenia'
         '500':
           description: Błąd po stronie serwera
 
@@ -484,7 +487,78 @@ paths:
     get:
       tags:
         - /anons - ogłoszenia
-      summary: Zwraca listę notyfikacji dotyczących ogłoszeń umiszczonych przez klienta (wymagane zalogowanie)
+      summary: Zwraca listę notyfikacji dotyczących ogłoszeń umieszczonych przez klienta (wymagane zalogowanie)
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Zwraca listę
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                anon_id:
+                  type: integer
+                  description: "id ogłoszenia powiązanego z notyfikacją"
+                image: 
+                  type: string
+                  description: "nazwa zdjęcia powiązanego z notyfikacją. pusta, jeśli zdjęcia brak"
+                lat:
+                  type: number
+                  format: float
+                  description: "szerokość geograficzna w stopniach punktu, w którym umieszczono notyfikację"
+                lng: 
+                  type: number
+                  fomat: float
+                  description: "szerokość geograficzna w stopniach punktu, w którym umieszczono notyfikację"
+                create_date:
+                  type: string
+                  description: "data dodania notyfikacji"
+        '500':
+          description: Błąd po stronie serwera
+    post:
+      tags:
+        - /anons - ogłoszenia
+      summary: Dodanie notyfikacji do ogłoszenia
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: formData
+          name: anon_id
+          type: integer
+          description: id powiązanego ogłosznia
+          required: true
+        - in: formData
+          name: picture
+          type: file
+          description: Zdjęcie do notyfikacji - maksymalny rozmiar - 4MB
+          required: false
+        - in: formData
+          name: lat
+          type: number
+          format: float
+          required: true
+          description: szerokość geograficzna
+        - in: formData
+          name: lng
+          type: number
+          format: float 
+          required: true
+          description: długość geograficzna       
+      responses:
+        '200':
+          description: Notyfikacja dodana
+        '400':
+          description: Podano nieprawidłowe dane
+        '500':
+          description: Błąd po stronie serwera
+
+/notifications/{id}:
+    get:
+      tags:
+       - /anons - ogłoszenia
+      summary: Zwraca listę notyfikacji dotyczących ogłoszenia (umieszczonego przez klienta) o id równym parametrowi id (wymagane zalogowanie)
       produces:
       - application/json
       responses:
@@ -512,43 +586,10 @@ paths:
                 create_date:
                   type: string
                   description: "data dodania notyfikacji"
-        '500':
-          description: Błąd po stronie serwera
-    
-    post:
-      tags:
-        - /anons - ogłoszenia
-      summary: Dodanie notyfikacji do ogłoszenia
-      consumes:
-        - multipart/form-data
-      parameters:
-        - in: formData
-          name: anon_id
-          type: integer
-          description: id powiązanego ogłosznia
-          required: true
-        - in: formData
-          name: picture
-          type: file
-          description: Zdjęcie do notyfikacji - maksymalny rozmiar - 4MB
-          required: true
-        - in: formData
-          name: lat
-          type: number
-          format: float
-          required: true
-          description: szerokość geograficzna
-        - in: formData
-          name: lng
-          type: number
-          format: float 
-          required: true
-          description: długość geograficzna       
-      responses:
-        '200':
-          description: Notyfikacja dodana
-        '400':
-          description: Podano nieprawidłowe dane
+        '403':
+          description: Klient nie jest autorem ogłoszenia
+        '404':
+          description: Ogłoszenie o podanym id nie istnieje
         '500':
           description: Błąd po stronie serwera
 
