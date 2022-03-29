@@ -11,6 +11,7 @@ import Item from '@mui/material/ListItem';
 import MapOverview from './MapOverview';
 import AnnouncementDialog from './AnnouncementDialog';
 import FiltersDialog from './FiltersDialog';
+import { Stack } from '@mui/material';
 
 function createData(list) {
   let rows = [];
@@ -32,6 +33,7 @@ function createData(list) {
 function createFilters() {
   return {
     category: -1,
+    anonTitle: '',
     type: '',
     coat: '',
     color: '',
@@ -49,7 +51,7 @@ export default function Dashboard(props) {
 
   const [listData, setListData] = useState([]);
   const [updateListData, setUpdateListData] = useState(0);
-  
+
   //const [filterData, setFilterData] = useState(false);
   const [filters, setFilters] = useState(createFilters());
   const [filtersDialogOpen, setFiltersDialogOpen] = useState(false);
@@ -66,7 +68,7 @@ export default function Dashboard(props) {
   const [updateMap, setUpdateMap] = useState(0);
 
   const urldata = useLocation();
-  
+
   //get map position from url params
   useEffect(() => {
     const params = new URLSearchParams(urldata.search);
@@ -100,7 +102,7 @@ export default function Dashboard(props) {
     const fetchData = async () => {
       //console.log("FetchData");
       let url = 'http://localhost:2400/anons/list';
-      
+
       //apply filters
       let params = 0;
       //console.log(filters);
@@ -198,23 +200,31 @@ export default function Dashboard(props) {
     <BrowserRouter>
       <Grid container spacing={2} columns={16}>
         <Grid item xs={11}>
-          <Item>
-            <MapOverview
-              data={listData}
-              center={mapCenter}
-              zoom={mapZoom}
-              handleMarkerClick={openAnnouncementDialog}
-              goToPos={goToPos}
-              updateMap={updateMap}
-            />
-          </Item>
-        </Grid>
-        <Grid item xs={5}>
-          <DataGridList
+          <MapOverview
             data={listData}
-            handleRowClick={openAnnouncementDialog}
-            reload={refreshData}
+            center={mapCenter}
+            zoom={mapZoom}
+            handleMarkerClick={openAnnouncementDialog}
+            goToPos={goToPos}
+            updateMap={updateMap}
           />
+        </Grid>
+        <Grid container item xs={5}>
+          <Stack spacing={0} sx={{width: "100%"}}>
+            <FiltersDialog
+              open={filtersDialogOpen}
+              filters={filters}
+              setOpen={setFiltersDialogOpen}
+              handleAccept={updateFilters}
+              showOnMap={showOnMap}
+            />
+            <DataGridList
+              data={listData}
+              handleRowClick={openAnnouncementDialog}
+              reload={refreshData}
+            />
+
+          </Stack>
           {/* <Tooltip title={props.auth?.login ? "" : "Tylko zalogowani użytkownicy mogą dodawać ogłoszenia"}>
             <span style={{width:'fit-content'}}>
              <Button variant={checked ? "outlined" : "contained"} onClick={handleChange} disabled={props.auth?.login ? false : true} >Dodaj ogłoszenie</Button>
@@ -229,13 +239,8 @@ export default function Dashboard(props) {
         setOpen={setAnnouncementDialogOpen}
         showOnMap={showOnMap}
       />
-      <FiltersDialog
-        open={filtersDialogOpen}
-        filters={filters}
-        setOpen={setFiltersDialogOpen}
-        handleAccept={updateFilters}
-      />
-      <button onClick={openFiltersDialog} >Filtry</button>
+
+      {/*<button onClick={openFiltersDialog} >Filtry</button>*/}
     </BrowserRouter>
   );
 }

@@ -12,8 +12,10 @@ import Profile from './Profile';
 import Account from './Account';
 import Dashboard from './Dashboard';
 import Announcements from './Announcements';
+import Footer from './Footer';
 
 import MapTesting from './MapTesting'; //TEMP
+import { Box } from '@mui/material';
 
 
 
@@ -60,30 +62,33 @@ function App() {
   }, []);
   return (
     <div>
-      <BrowserRouter>
-        <MenuAppBar auth={auth} />
-        <Switch>
-          <Route exact path="/" render={() => { return (<Redirect to="/dashboard" />) }} />
-          <Route path="/dashboard">
-            <Dashboard auth={auth} />
-          </Route>
-          <Route path="/announcements">
-            <Announcements auth={auth} />
-          </Route>
-          <Route path="/register">
-            <Register auth={auth} />
-          </Route>
-          <Route path="/login">
-            <Login auth={auth} />
-          </Route>
-          <Route path="/maptest">
-            <MapTesting />
-          </Route>
-          <Route path="/activate" children={<Activate />} />
-          <Route path="/profile" children={<Profile auth={auth} />} />
-          <Route path="/account" children={<Account auth={auth} />} />
-        </Switch>
-      </BrowserRouter>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <BrowserRouter>
+          <MenuAppBar auth={auth} />
+          <Switch>
+            <Route exact path="/" render={() => { return (<Redirect to="/dashboard" />) }} />
+            <Route path="/dashboard">
+              <Dashboard auth={auth} />
+            </Route>
+            <Route path="/announcements">
+              <Announcements auth={auth} />
+            </Route>
+            <Route path="/register">
+              <Register auth={auth} />
+            </Route>
+            <Route path="/login">
+              <Login auth={auth} />
+            </Route>
+            <Route path="/maptest">
+              <MapTesting />
+            </Route>
+            <Route path="/activate" children={<Activate />} />
+            <Route path="/profile" children={<Profile auth={auth} />} />
+            <Route path="/account" children={<Account auth={auth} />} />
+          </Switch>
+        </BrowserRouter>
+      </Box>
+      <Footer />
     </div>
   );
 }

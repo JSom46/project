@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Dialog, DialogTitle, Button, FormControl, FormGroup, InputLabel, Select, MenuItem, TextField} from '@mui/material';
+import { Dialog, DialogTitle, Button, FormControl, FormGroup, InputLabel, Select, MenuItem, TextField, Box } from '@mui/material';
 import { Stack } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import Item from '@mui/material/ListItem';
 
 import MapPicker from './MapPicker';
 
@@ -8,7 +10,7 @@ import MapPicker from './MapPicker';
     TODO better way to clear single filter, without clearing all of them
 */
 
-function createFilters(_category, _type, _coat, _color, _breed, _location, _rad) {
+function createFilters(_category, _title, _type, _coat, _color, _breed, _location, _rad) {
     if (_location === null ||
         _location === undefined ||
         _location.lat === undefined ||
@@ -19,9 +21,10 @@ function createFilters(_category, _type, _coat, _color, _breed, _location, _rad)
     }
     if (isNaN(_rad) || _rad <= 0) {
         _rad = -1;
-    } 
+    }
     return {
         category: _category,
+        anonTitle: _title,
         type: _type,
         coat: _coat,
         color: _color,
@@ -38,6 +41,7 @@ function createTypes(name, coats, colors, breeds) {
 export default function FiltersDialog(props) {
     const [filters, setFilters] = useState(props.filters);
     const [category, setCategory] = useState(filters.category);
+    const [anonTitle, setAnonTitle] = useState(filters.anonTitle);
     const [type, setType] = useState(filters.type);
     const [coat, setCoat] = useState(filters.coat);
     const [color, setColor] = useState(filters.color);
@@ -52,8 +56,12 @@ export default function FiltersDialog(props) {
     const [colorsData, setColorsData] = useState([]);
     const [breedsData, setBreedsData] = useState([]);
 
+    const [advancedOpen, setAdvancedOpen] = useState(false);
+    const [locationOpen, setLocationOpen] = useState(false);
+
     /*
     category
+    title
     type
     coat
     color
@@ -62,16 +70,41 @@ export default function FiltersDialog(props) {
     rad
     */
 
+    function openLocationDialog() {
+        setLocationOpen(true);
+    }
+
+    function openAdvancedDialog() {
+        setAdvancedOpen(true);
+    }
+
     function handleSubmit() {
-        const newFilters = createFilters(category, type, coat, color, breed, location, rad);
+        const newFilters = createFilters(category, anonTitle, type, coat, color, breed, location, rad);
+        if (newFilters.location !== null && (filters.location === null || newFilters.location.lat != location.lat || newFilters.location.lng != location.lng)) {
+            props.showOnMap(newFilters.location.lat, newFilters.location.lng);
+        }
         setFilters(newFilters);
         console.log(newFilters);
         props.handleAccept(newFilters);
         props.setOpen(false);
     }
 
+    function handleLocationSubmit() {
+        setLocationOpen(false);
+        handleSubmit();
+    }
+
+    function handleAdvancedSubmit() {
+        setAdvancedOpen(false);
+        handleSubmit();
+    }
+
     const handleCategoryChange = (event) => {
         setCategory(event.target.value);
+    };
+
+    const handleTitleChange = (event) => {
+        setAnonTitle(event.target.value);
     };
 
     const handleTypeChange = (event) => {
@@ -111,6 +144,10 @@ export default function FiltersDialog(props) {
         setCategory(-1);
     }
 
+    function clearAnonTitle() {
+        setAnonTitle('');
+    }
+
     function clearType() {
         setType('');
     }
@@ -129,20 +166,31 @@ export default function FiltersDialog(props) {
 
     function clearLocation() {
         setLocation(null);
+        setRad(-1);
     }
 
-    function clearRad() {
+    /*function clearRad() {
         setRad(-1);
+    }*/
+
+    function clearAdvanced() {
+        clearType();
+        clearCoat();
+        clearColor();
+        clearBreed();
     }
 
     function clearAll() {
         clearCategory();
+        clearAnonTitle();
         clearType();
         clearCoat();
         clearColor();
         clearBreed();
         clearLocation();
-        clearRad();
+        //clearRad();
+
+        //handleSubmit();
     }
 
     useEffect(() => {
@@ -171,11 +219,10 @@ export default function FiltersDialog(props) {
         fetchTypes();
     }, [0]);
 
-    return (
+    /*return (
         <div>
-            <Dialog open={props.open} onClose={() => props.setOpen(false)} fullWidth={true}>
-                <DialogTitle>Filtruj ogłoszenia</DialogTitle>
-                <FormControl style={{ width: '100%' }} sx={{ padding: 2 }}>
+            <FormControl style={{ width: '100%' }} sx={{ padding: 2 }}>
+                <FormGroup row={true} sx={{ spacing: 2 }}>
                     <FormGroup>
                         <FormControl variant="standard">
                             <InputLabel id="category">Rodzaj zgłoszenia</InputLabel>
@@ -184,51 +231,158 @@ export default function FiltersDialog(props) {
                                 <MenuItem value={1}>Znalezienie</MenuItem>
                             </Select>
                         </FormControl>
-                        <FormControl variant="standard">
-                            <InputLabel id="type">Typ</InputLabel>
-                            <Select value={type} labelId="type" id="type" onChange={handleTypeChange} >
-                                {(typesData.map((item) => (
-                                    <MenuItem key={item.name} value={item.name}>{item.name}</MenuItem>
-                                )))}
+                        <Dialog open={advancedOpen} onClose={() => setAdvancedOpen(false)} fullWidth={true}>
+                            <FormControl style={{ width: '100%' }} sx={{ padding: 2 }}>
+                                <DialogTitle>Zaawansowane Wyszukiwanie</DialogTitle>
+                                <FormControl variant="standard">
+                                    <TextField value={anonTitle} fullWidth type='text' id="title" label="Tytuł" variant="standard" onChange={handleTitleChange} />
+                                </FormControl>
+                                <FormControl variant="standard">
+                                    <InputLabel id="type">Typ</InputLabel>
+                                    <Select value={type} labelId="type" id="type" onChange={handleTypeChange} >
+                                        {(typesData.map((item) => (
+                                            <MenuItem key={item.name} value={item.name}>{item.name}</MenuItem>
+                                        )))}
+                                    </Select>
+                                </FormControl>
+                                <Stack justifyContent="space-evenly" direction="row" alignItems="center" spacing={2}>
+                                    <FormControl variant="standard" style={{ width: '100%' }}>
+                                        <InputLabel id="coat">Owłosienie</InputLabel>
+                                        <Select value={coat} labelId="coat" id="coat" onChange={handleCoatChange} disabled={coatsData.length === 0}>
+                                            {coatsData.map((item) => (
+                                                <MenuItem key={item} value={item}>{item}</MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                    <FormControl variant="standard" style={{ width: '100%' }}>
+                                        <InputLabel id="colors">Umaszczenie</InputLabel>
+                                        <Select value={color} labelId="colors" id="colors" onChange={handleColorChange} disabled={colorsData.length === 0}>
+                                            {colorsData.map((item) => (
+                                                <MenuItem key={item} value={item}>{item}</MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                    <FormControl variant="standard" style={{ width: '100%' }}>
+                                        <InputLabel id="breeds">Rasa</InputLabel>
+                                        <Select value={breed} labelId="breeds" id="breeds" onChange={handleBreedChange} disabled={breedsData.length === 0}>
+                                            {breedsData.map((item) => (
+                                                <MenuItem key={item} value={item}>{item}</MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Stack>
+                                <Button variant="contained" type="submit" onClick={clearAll}>Wyczyść</Button>
+                                <Button variant="contained" type="submit" onClick={handleAdvancedSubmit}>Zapisz</Button>
+                            </FormControl>
+                        </Dialog>
+                        <Dialog open={locationOpen} onClose={() => setLocationOpen(false)} fullWidth={true}>
+                            <DialogTitle>Wyszukiwanie po Lokacji</DialogTitle>
+                            <FormControl style={{ width: '100%' }} sx={{ padding: 2 }}>
+                                <MapPicker autoLocate={true} location={location} onLocationChange={handleLocationChange} locateMe={locateMe} />
+                                <TextField value={(rad > 0) ? rad : 30} fullWidth={true} type='number' id="rad" label="Odległość (km)" variant="standard" onChange={handleRadChange} />
+                                <Button variant="contained" type="submit" onClick={handleLocationSubmit}>Zapisz</Button>
+                            </FormControl>
+                        </Dialog>
+
+                        <FormGroup row={true}>
+                            <Button variant="contained" type="submit" onClick={openAdvancedDialog}>Zaawansowane</Button>
+                            <Button variant="contained" type="submit" onClick={openLocationDialog}>Lokacja</Button>
+                        </FormGroup>
+                    </FormGroup>
+                    <FormGroup row={true}>
+                        <Button variant="contained" type="submit" onClick={clearAll}>Wyczyść</Button>
+                        <Button variant="contained" type="submit" onClick={handleSubmit}>Filtruj</Button>
+                    </FormGroup>
+                </FormGroup>
+            </FormControl>
+        </div>
+    );*/
+    return (
+        <div>
+            <Grid container spacing={1} columns={16} alignItems="center" justifyContent="center">
+                <Grid container item direction="column" xs={10}>
+                    <Grid item>
+                        <FormControl variant="standard" style={{ width: '100%' }}>
+                            <InputLabel id="category">Rodzaj zgłoszenia</InputLabel>
+                            <Select value={(category != -1) ? category : ''} labelId="category" id="category" label="Kategoria" onChange={handleCategoryChange}>
+                                <MenuItem value={0}>Zaginięcie</MenuItem>
+                                <MenuItem value={1}>Znalezienie</MenuItem>
                             </Select>
                         </FormControl>
-                        <Stack justifyContent="space-evenly" direction="row" alignItems="center" spacing={2}>
-                            <FormControl variant="standard" style={{ width: '100%' }}>
-                                <InputLabel id="coat">Owłosienie</InputLabel>
-                                <Select value={coat} labelId="coat" id="coat" onChange={handleCoatChange} disabled={coatsData.length === 0}>
-                                    {coatsData.map((item) => (
-                                        <MenuItem key={item} value={item}>{item}</MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                            <FormControl variant="standard" style={{ width: '100%' }}>
-                                <InputLabel id="colors">Umaszczenie</InputLabel>
-                                <Select value={color} labelId="colors" id="colors" onChange={handleColorChange} disabled={colorsData.length === 0}>
-                                    {colorsData.map((item) => (
-                                        <MenuItem key={item} value={item}>{item}</MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                            <FormControl variant="standard" style={{ width: '100%' }}>
-                                <InputLabel id="breeds">Rasa</InputLabel>
-                                <Select value={breed} labelId="breeds" id="breeds" onChange={handleBreedChange} disabled={breedsData.length === 0}>
-                                    {breedsData.map((item) => (
-                                        <MenuItem key={item} value={item}>{item}</MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
+                        
+                    </Grid>
+                    <Grid item>
+                        <Stack direction="row" spacing={1}>
+                            <Button variant="text" type="submit" onClick={openLocationDialog}>Lokacja</Button>
+                            <Button variant="text" type="submit" onClick={openAdvancedDialog}>Zaawansowane</Button>
                         </Stack>
-                        <MapPicker location={location} onLocationChange={handleLocationChange} locateMe={locateMe} />
-                        <TextField value={(rad > 0) ? rad : ''} fullWidth={true} type='number' id="rad" label="Odległość (km), domyślnie 30km" variant="standard" onChange={handleRadChange} />
 
-                    </FormGroup>
-                    <br /><br />
-                    <FormGroup>
-                        <Button variant="contained" type="submit" onClick={clearAll}>Wyczyść</Button>
-                        <Button variant="contained" type="submit" onClick={handleSubmit}>Zapisz</Button>
-                    </FormGroup>
+                    </Grid>
+                </Grid>
+                <Grid container item xs={3}>
+                    <Button variant="contained" type="submit" onClick={clearAll}>Wyczyść</Button>
+                </Grid>
+                <Grid container item xs={3}>
+                    <Button variant="contained" type="submit" onClick={handleSubmit}>Filtruj</Button>
+                </Grid>
+            </Grid>
+            <Dialog open={advancedOpen} onClose={() => setAdvancedOpen(false)} fullWidth={true}>
+                <FormControl style={{ width: '100%' }} sx={{ padding: 2 }}>
+                    <DialogTitle>Zaawansowane Wyszukiwanie</DialogTitle>
+                    <FormControl variant="standard">
+                        <TextField value={anonTitle} fullWidth type='text' id="title" label="Tytuł" variant="standard" onChange={handleTitleChange} />
+                    </FormControl>
+                    <FormControl variant="standard">
+                        <InputLabel id="type">Typ</InputLabel>
+                        <Select value={type} labelId="type" id="type" onChange={handleTypeChange} >
+                            {(typesData.map((item) => (
+                                <MenuItem key={item.name} value={item.name}>{item.name}</MenuItem>
+                            )))}
+                        </Select>
+                    </FormControl>
+                    <Stack justifyContent="space-evenly" direction="row" alignItems="center" spacing={2}>
+                        <FormControl variant="standard" style={{ width: '100%' }}>
+                            <InputLabel id="coat">Owłosienie</InputLabel>
+                            <Select value={coat} labelId="coat" id="coat" onChange={handleCoatChange} disabled={coatsData.length === 0}>
+                                {coatsData.map((item) => (
+                                    <MenuItem key={item} value={item}>{item}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <FormControl variant="standard" style={{ width: '100%' }}>
+                            <InputLabel id="colors">Umaszczenie</InputLabel>
+                            <Select value={color} labelId="colors" id="colors" onChange={handleColorChange} disabled={colorsData.length === 0}>
+                                {colorsData.map((item) => (
+                                    <MenuItem key={item} value={item}>{item}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <FormControl variant="standard" style={{ width: '100%' }}>
+                            <InputLabel id="breeds">Rasa</InputLabel>
+                            <Select value={breed} labelId="breeds" id="breeds" onChange={handleBreedChange} disabled={breedsData.length === 0}>
+                                {breedsData.map((item) => (
+                                    <MenuItem key={item} value={item}>{item}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    </Stack>
+                    <Stack direction="row" justifyContent="flex-end" spacing={2} sx={{ paddingTop: 2 }}>
+                        <Button variant="contained" type="submit" onClick={clearAdvanced}>Wyczyść</Button>
+                        <Button variant="contained" type="submit" onClick={handleAdvancedSubmit}>Zapisz</Button>
+                    </Stack>
                 </FormControl>
             </Dialog>
-        </div>
+            <Dialog open={locationOpen} onClose={() => setLocationOpen(false)} fullWidth={true}>
+                <DialogTitle>Wyszukiwanie po Lokacji</DialogTitle>
+                <FormControl style={{ width: '100%' }} sx={{ padding: 2 }}>
+                    <MapPicker autoLocate={true} location={location} onLocationChange={handleLocationChange} locateMe={locateMe} />
+                    <TextField value={(rad > 0) ? rad : 30} fullWidth={true} type='number' id="rad" label="Odległość (km)" variant="standard" onChange={handleRadChange} />
+                    <Stack direction="row" justifyContent="flex-end" spacing={2} sx={{ paddingTop: 2 }}>
+                        <Button variant="contained" type="submit" onClick={clearLocation}>Wyczyść</Button>
+                        <Button variant="contained" type="submit" onClick={handleLocationSubmit}>Zapisz</Button>
+                    </Stack>
+                </FormControl>
+            </Dialog>
+        </div >
     );
 }

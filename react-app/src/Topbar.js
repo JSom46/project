@@ -101,7 +101,7 @@ export default function MenuAppBar(props) {
     setOpenAddAnnouncementDialog(false);
   }
   return (
-    <AppBar position="static" sx={{ flexGrow: 1 }}>
+    <AppBar position="static" sx={{ maxHeight:'60px', flexGrow: 1 }}>
       <Toolbar>
         <Box sx={{ flexGrow: 1, display:"flex" }}>
           <Button variant="text" sx={{ color: "white" }} href='/'>

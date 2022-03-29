@@ -34,7 +34,7 @@ function MapController(props) {
 
     useEffect(() => {
         if (props.updateMap !== undefined && props.updateMap > 0 && props.goToPos !== undefined) {
-            goToPos(props.goToPos, 14);
+            goToPos(props.goToPos, 13);
         }
     }, [props.updateMap]);
     
@@ -48,7 +48,7 @@ function MapController(props) {
     );
     //icon={(anon.category == 1) ? {url: './marker-icon-found.png'} : {}}
     return (
-        <MarkerClusterGroup>
+        <MarkerClusterGroup maxClusterRadius={50}>
             {markers}
         </MarkerClusterGroup>
     )
