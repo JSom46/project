@@ -10,7 +10,7 @@ const MyProfileScreen = ({navigation, route}) => {
             
             <Text style={{fontSize: 32}}>
                 Profil użytkownika:{"\n"}
-                {/* {route.params.login} */}
+                {route.params.userData.login}
             </Text>
 
         </View>

@@ -8,7 +8,6 @@ import {
   Colors,
   StyledButton,
 } from "../../components/styles";
-
 import {
   ButtonViewMap,
   StyledContainerMap,
@@ -20,10 +19,11 @@ import { CategoryFilter } from "../../components/Map/CategoryFilter";
 
 import {Svg, Image as ImageSvg} from 'react-native-svg';
 import { stylesMap } from "../../components/styles";
+import { Button } from "react-native-paper";
 
 const { brand, darkLight, black, primary } = Colors;
 
-const MapMain = ({navigation}) => {
+const MapMain = ({navigation, route}) => {
   const [mapRegion, setRegion] = useState(null);
   const [hasLocationPermissions, setLocationPermission] = useState(false);
   //dane do filtrowania
@@ -68,6 +68,10 @@ const MapMain = ({navigation}) => {
     getLocationAsync();
   }, [status]);
 
+  function createData(id, title, category, description, type, lat, lng, image) {
+    return { id, title, category, description, type, lat, lng, image};
+  }
+
   useEffect(() => {
     const fetchData = async (data) => {
       setTableData();
@@ -98,18 +102,16 @@ const MapMain = ({navigation}) => {
         const json = await response.json();
         const tabData = [];
         json.list.forEach((element) => {
-          const rows = [];
-          rows.push(
+          tabData.push(createData(
             element.id,
             element.title,
-            element.category,
+            (element.category === 0 ? "Zaginięcie" : "Znalezienie"),
             element.description,
             element.type,
             element.lat,
             element.lng,
-            element.image,
-          );
-          tabData.push(rows);
+            element.image
+            ));
         });
         setTableData(tabData);
       } catch (error) {
@@ -138,34 +140,24 @@ const MapMain = ({navigation}) => {
   return (
     <View style={styles.body}>
       <MapView style={styles.map} initialRegion={mapRegion}>
-        {/* Do Poprawy - Wyswietlanie pinezek */}
-        {/* {tableData.map((marker, index) => (
-          <Marker
-            draggable
-            key={index}
-            coordinate={{ latitude: marker[5], longitude: marker[6] }}
-            pinColor={marker[2] == 1 ? "green" : "red"}
-          />
-        ))} */}
-
         {tableData.map(marker => (
                     <Marker
-                    key={marker[0]}
-                    coordinate={{ latitude: marker[5], longitude: marker[6] }}
-                    pinColor={marker[2] == 1 ? "#0F0" : "#F00"}
+                    key={marker.id}
+                    coordinate={{ latitude: marker.lat, longitude: marker.lng }}
+                    pinColor={marker.category == "Znalezienie" ? "#0F0" : "#F00"}
                     >
                         <Callout
                             style={stylesMap.callout}
                             onPress={() => navigation.navigate('Ogloszenie', {announcement: marker})}
                         >
                             <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                                <Text style={stylesMap.calloutTitle}>{marker[1]}</Text>
+                                <Text style={stylesMap.calloutTitle}>{marker.title}</Text>
                                 <Svg width={120} height={120}>
                                     <ImageSvg
                                         width={'100%'} 
                                         height={'100%'}
                                         preserveAspectRatio="xMidYMid slice"
-                                        href={{ uri: 'http://' + serwer + '/anons/photo?name=' + marker[7]}}
+                                        href={{ uri: 'http://' + serwer + '/anons/photo?name=' + marker.image}}
                                     />
                                 </Svg>
                             </View>

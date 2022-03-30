@@ -2,7 +2,8 @@ import React, {useState} from 'react';
 import { SafeAreaView, View, FlatList, StyleSheet, Text, StatusBar, TouchableOpacity, Image } from 'react-native';
 import SplashScreen from './SplashScreen';
 import {stylesHome, stylesAnnouncements} from '../components/styles';
-
+import axios from "axios";
+import { Button } from 'react-native-paper';
 
 function createData(id, title, category, image, lat, lng, type, create_date) {
     return { id, title, category, image, lat, lng, type, create_date };
@@ -14,6 +15,7 @@ async function getAnnouncements(){
             method: 'GET',
             credentials: 'include'
           });
+          console.log(response);
         let json = await response.json();
 
         let rows = [];
@@ -69,6 +71,23 @@ const MyAnnouncementsScreen = ({navigation}) => {
 
     return(
         <View style={{flex: 1}}>
+            <TouchableOpacity
+                onPress={() => navigation.navigate('Dodaj Ogłoszenie')}
+                style={{
+                    backgroundColor: 'white',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 5,
+                    borderRadius: 10,
+                    borderWidth: 1,
+                    borderColor: 'black',
+                    marginHorizontal: 20,
+                    marginVertical: 5,
+                }}
+            >
+                <Text style={{fontSize: 20, fontWeight: "600"}}>Dodaj ogłoszenie</Text>
+            </TouchableOpacity>
+            
             <Text style={stylesHome.title}>
                 Moje ogłoszenia:
             </Text>

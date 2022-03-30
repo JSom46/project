@@ -37,7 +37,7 @@ const {
   add,
   black,
 } = Colors;
-export const StyledContainer = styled.View`
+export const StyledContainer = styled.ScrollView`
   flex: 1;
   padding: 25px;
   padding-top: ${StatusBarHeight + 40}px;
@@ -320,7 +320,7 @@ export const WelcomeContainer = styled(InnerContainer)`
 
 
 //---------
-const stylesAuth = StyleSheet.create({
+export const stylesAuth = StyleSheet.create({
   back: {
       flex: 1,
       justifyContent: 'center',
@@ -365,7 +365,7 @@ const stylesAuth = StyleSheet.create({
   },
 });
 
-const stylesHome = StyleSheet.create({
+export const stylesHome = StyleSheet.create({
   dashboard: {
       flex: 1,
       justifyContent: 'center',
@@ -380,7 +380,7 @@ const stylesHome = StyleSheet.create({
   },
 });
 
-const stylesMap = StyleSheet.create({
+export const stylesMap = StyleSheet.create({
   callout: {
       width: 150,
       height: 150,
@@ -395,7 +395,7 @@ const stylesMap = StyleSheet.create({
   },
 });
 
-const stylesAnnouncements = StyleSheet.create({
+export const stylesAnnouncements = StyleSheet.create({
   listContainer: {
       flex: 1,
       //marginTop: StatusBar.currentHeight || 0,
@@ -428,6 +428,16 @@ const stylesAnnouncements = StyleSheet.create({
       flex: 1,
   },
 
+  announcementDescriptionContainer: {
+    flex: 1,
+    marginHorizontal: 20,
+    marginBottom: 10,
+  },
+
+  announcementDescriptionText: {
+    fontSize: 16,
+  },
+
   announcementTitle: {
       fontSize: 32,
       textAlign: "center",
@@ -441,6 +451,3 @@ const stylesAnnouncements = StyleSheet.create({
       marginVertical: 8,
   }
 });
-
-
-export {stylesAuth, stylesHome, stylesAnnouncements, stylesMap};

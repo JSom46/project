@@ -41,7 +41,8 @@
     "@react-navigation/drawer": "^6.3.0",
     "@react-navigation/native-stack": "^6.3.0",
     "react-native-svg": "^12.3.0",
-    "react-navigation": "^4.4.4"
+    "react-navigation": "^4.4.4",
+    "@expo/ngrok": "4.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"

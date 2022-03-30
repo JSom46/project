@@ -35,7 +35,7 @@ const { brand, darkLight, black, primary, facebook } = Colors;
 //API client
 import axios from "axios";
 
-const Login = ({ parentCallback, navigation }) => {
+const Login = ({ navigation }) => {
   const [hidePassword, setHidedPassword] = useState(true);
   const [message, setMessage] = useState();
   const [messageType, setMessageType] = useState();
@@ -46,6 +46,30 @@ const Login = ({ parentCallback, navigation }) => {
   // const {handleLogout} = React.useContext(AuthContext);
   //const {handleMessage} = React.useContext(AuthContext);
   
+  //sprawdzanie po wlaczeniu aplikacji czy uzytkownik jest zalogowany
+  React.useEffect(() => {
+    const handleLoggedIn = () => {
+    const url = "http://" + serwer + "/auth/loggedin";
+    axios
+      .get(url)
+      .then((response) => {
+        const result = response.data;
+        console.log(result);
+        const { message, status, data } = result;
+        if (response.status == "200") {
+          console.log(result.email)
+          navigation.replace('Nawigator', {userData: result});
+        }
+        })
+
+      .catch((error) => {
+        //console.log(error);
+        console.log("Nie jesteś zalogowany");
+      });
+    };
+      handleLoggedIn();
+  }, []);
+
 
   async function LoginGoogle() {
     const data = await fetch("http://" + serwer + "/auth/google/url", {
@@ -86,10 +110,10 @@ const Login = ({ parentCallback, navigation }) => {
   const handleLogin = (credentials) => {
     handleMessage(null);
     var data = JSON.stringify({
-      //email: "matmar@loremipsummail.com",
-      //password: "noweHaslo12",
-      email: "admin@trash-mail.com",
-      password: "admin",
+      email: "matmar@loremipsummail.com",
+      password: "noweHaslo12",
+      // email: "admin@trash-mail.com",
+      // password: "admin",
     });
     var config = {
       method: "post",
@@ -98,7 +122,9 @@ const Login = ({ parentCallback, navigation }) => {
         "Content-Type": "application/json",
       },
       data: data,
+      credentials: 'same-origin',
     };
+    console.log(config);
     console.log(data);
     axios(config)
       .then((response) => {
@@ -106,10 +132,12 @@ const Login = ({ parentCallback, navigation }) => {
           const result = response.data;
           const { message, status, data } = result;
           console.log("dostalem");
+          console.log(result);
           // console.log(response.status);
           if (response.status == "200") {
             console.log("zalogowano");
-            navigation.replace("Nawigator");
+            console.log(result);
+            navigation.replace('Nawigator', {userData: result});
           } else {
             console.log("nie zalogowano");
           }
