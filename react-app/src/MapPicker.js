@@ -8,7 +8,7 @@ function LocationMarker(props) {
     const location = props.location;
     const map = useMap();
 
-    const alwaysLocate = true; //set to true to always ask for location
+    const alwaysLocate = false; //set to true to always ask for location
 
     function handleLocationChange(loc) {
         props.onLocationChange(loc);
@@ -20,6 +20,12 @@ function LocationMarker(props) {
             handleLocationChange(e.latlng);
         }
     });
+
+    useEffect(() => {
+        if (props.location !== undefined && props.location !== null) {
+            map.setView(props.location, 13);
+        }
+    }, []);
 
     useEffect(() => {
         if (alwaysLocate || props.autoLocate || (props.locateMe !== undefined && props.locateMe > 0)) {
@@ -48,7 +54,12 @@ export default function MapPicker(props) {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <LocationMarker location={location} onLocationChange={handleLocationChange} locateMe={props.locateMe}/>
+            <LocationMarker 
+                location={location} 
+                onLocationChange={handleLocationChange} 
+                locateMe={props.locateMe} 
+                autoLocate={props.autoLocate}
+            />
         </MapContainer >
     )
 }

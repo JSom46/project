@@ -126,8 +126,10 @@ router.post('/', upload.array('pictures'), (req, res) => {
     });
 
     //dodanie ogloszenia
-    con.run('INSERT INTO anons(title, description, category, images, author_id, create_date, lat, lng, type, coat, color, breed, is_active) VALUES(?, ?, ?, ?, ?, (SELECT strftime ("%s", "now")), ?, ?, ?, ?, ?, ?, 1);', 
-    req.body.title, req.body.description, req.body.category, pictures, req.session.user_id, req.body.lat, req.body.lng, req.body.type, req.body.coat, req.body.color, req.body.breed, function(err){
+    con.run(`INSERT INTO anons(title, description, category, images, author_id, create_date, lat, lng, type, coat, color, breed, is_active) 
+    VALUES(?, ?, ?, ?, ?, (SELECT strftime ("%s", "now")), ?, ?, ?, ?, ?, ?, 1);`, 
+    req.body.title, req.body.description, req.body.category, pictures, req.session.user_id, req.body.lat, req.body.lng, req.body.type, req.body.coat, 
+    req.body.color, req.body.breed, function(err){
         if(err){
             console.log(err);
             //dodanie ogloszenia sie nie powiodlo - kasujemy powiazane z nim zdjecia
@@ -310,7 +312,8 @@ router.put('/', upload.array('pictures'), (req, res) => {
 
         //dodanie ogloszenia
         con.run('UPDATE anons SET title = ?, description = ?, category = ?, images = ?, lat = ?, lng = ?, type = ?, coat = ?, color = ?, breed = ? WHERE id = ?;', 
-        req.body.title, req.body.description, req.body.category, pictures, req.body.lat, req.body.lng, req.body.type, req.body.coat, req.body.color, req.body.breed, req.body.id, function(err){
+        req.body.title, req.body.description, req.body.category, pictures, req.body.lat, req.body.lng, req.body.type, req.body.coat, req.body.color, req.body.breed, req.body.id, 
+        function(err){
             if(err){
                 //aktualizacja ogloszenia sie nie powiodlo - kasujemy powiazane z nim zdjecia
                 req.files.filename.forEach((e) => {
@@ -376,9 +379,12 @@ router.delete('/', (req, res) => {
 });
 
 
-// zwraca liste ogloszen utworzonych przez uzytkownika sortowana po dacie utworzenia malejaco i liczbe przeslanych ogloszen
+// zwraca liste ogloszen utworzonych przez uzytkownika sortowana po dacie utworzenia malejaco 
+// wraz z iloscia nieodczytanych notyfikacji dla kazdego z ogloszen i liczbe przeslanych ogloszen
 router.get('/my', (req, res) => {
-    con.all('SELECT id, category, title, datetime(create_date, "unixepoch", "localtime") create_date, images image, type, is_active FROM anons WHERE author_id = ?', req.session.user_id, (err, rows) => {
+    con.all('SELECT id, category, title, datetime(create_date, "unixepoch", "localtime") create_date, images image, type, is_active,' +
+    ' (SELECT COUNT(*) FROM notifications WHERE anons.id = notifications.anon_id AND notifications.is_new = 1) notifications_count FROM anons WHERE author_id = ?', 
+    req.session.user_id, (err, rows) => {
         if(err){
             return res.sendStatus(500);
         }
@@ -401,39 +407,82 @@ router.get('/types', (req, res) => {
 });
 
 
-// zwraca listę notyfikacji zalogowanego klienta
+// zwraca listę notyfikacji zalogowanego klienta - wymagane zalogowanie
+// parametry: id : integer - id ogloszenia, ktorego dotyczyc maja notyfikacje (nieobowiazkowy)
 router.get('/notifications', (req, res) => {
-    con.all('SELECT id, anon_id, image, lat, lng, datetime(create_date, "unixepoch", "localtime") create_date FROM notifications WHERE anon_id IN (SELECT id FROM anons WHERE author_id = ?);', req.session.user_id, (err, rows) => {
-        if(err){
-            console.log(err);
-            return res.sendStatus(500);
-        }
-        if(rows.length > 0){
-            let query = 'UPDATE notifications SET is_new = 0 WHERE id IN(' + Array(rows.length).fill('?').join(', ') + ')';
-            let params = [];
-            rows.forEach((e, i) => {
-                params.push(e.id);
-                rows[i].id = undefined;
-            });
-            con.run(query, params, (err) => {
+    if(req.query.id){
+        con.get('SELECT author_id FROM anons WHERE id = ?;', req.query.id, (err, row) => {
+            if(err){
+                console.log(err);
+                return res.sendStatus(500);
+            }
+            //brak ogloszenia o podanym id
+            if(!row){
+                return res.sendStatus(404);
+            }
+            //klient nie jest autorem ogloszenia
+            if(row.author_id != req.session.user_id){
+                return res.sendStatus(403);
+            }
+            con.all('SELECT id, anon_id, image, lat, lng, datetime(create_date, "unixepoch", "localtime") create_date FROM notifications WHERE anon_id = ?;', 
+            req.query.id, (err, rows) => {
                 if(err){
                     console.log(err);
+                    return res.sendStatus(500);
                 }
+                if(rows.length > 0){
+                    //oznaczenie wyslanych notyfikacji jako odczytanych
+                    let query = 'UPDATE notifications SET is_new = 0 WHERE id IN(' + Array(rows.length).fill('?').join(', ') + ')';
+                    let params = [];
+                    rows.forEach((e, i) => {
+                        params.push(e.id);
+                        rows[i].id = undefined;
+                    });
+                    con.run(query, params, (err) => {
+                        if(err){
+                            console.log(err);
+                        }
+                    });
+                }
+                return res.status(200).json(rows);
             });
-        }
-        return res.status(200).json(rows);
-    });
+        });
+    }
+    // nie podano id
+    else{
+        con.all('SELECT id, anon_id, image, lat, lng, datetime(create_date, "unixepoch", "localtime") create_date FROM notifications ' + 
+        'WHERE anon_id IN (SELECT id FROM anons WHERE author_id = ?)', req.session.user_id, (err, rows) => {
+            if(err){
+                console.log(err);
+                return res.sendStatus(500);
+            }
+            if(rows.length > 0){
+                let query = 'UPDATE notifications SET is_new = 0 WHERE id IN(' + Array(rows.length).fill('?').join(', ') + ')';
+                let params = [];
+                rows.forEach((e, i) => {
+                    params.push(e.id);
+                    rows[i].id = undefined;
+                });
+                con.run(query, params, (err) => {
+                    if(err){
+                        console.log(err);
+                    }
+                });
+            }
+            return res.status(200).json(rows);
+        });
+    }
 });
 
 
-// zwraca liczbe nieodczytanych notyfikacji odnosnie ogloszen zalogowanego klienta
+// zwraca liczbe nieodczytanych notyfikacji odnosnie ogloszen zalogowanego klienta (wymagane zalogowanie)
 router.get('/notifications/count', (req, res) => {
-    con.get('SELECT COUNT(*) num FROM notifications WHERE is_new = 1 AND anon_id IN (SELECT id FROM anons WHERE author_id = ?);', req.session.user_id, (err, row) => {
+    con.get('SELECT COUNT(*) count FROM notifications WHERE is_new = 1 AND anon_id IN (SELECT id FROM anons WHERE author_id = ?);', req.session.user_id, (err, row) => {
         if(err){
             console.log(err);
             return res.sendStatus(500);
         }
-        return res.status(200).json({count: row.num});
+        return res.status(200).json({count: row.count});
     });
 });
 
@@ -446,8 +495,8 @@ router.get('/notifications/count', (req, res) => {
 // picture - zdjecie
 router.post('/notifications', singleUpload.single('picture'), (req, res) => {
     // brakuje ktoregos z niezbednych pol lub ktores z pol zawiera niepoprawne dane - notyfikacja nie moze zostac dodana
-    if(!req.body.anon_id || !req.file || isNaN(parseFloat(req.body.lat)) || isNaN(parseFloat(req.body.lng))){
-        // usuwanie przslanych zdjec, jesli istnieja
+    if(!req.body.anon_id || isNaN(parseFloat(req.body.lat)) || isNaN(parseFloat(req.body.lng))){
+        // usuwanie przeslanych zdjec, jesli istnieja
         if(req.file){
             fs.unlink('./pictures/' + req.file.filename, (err) => {
                 if(err){
@@ -460,15 +509,17 @@ router.post('/notifications', singleUpload.single('picture'), (req, res) => {
 
     // dodanie notyfikacji
     con.run('INSERT INTO notifications(anon_id, image, lat, lng, is_new, create_date) VALUES(?, ?, ?, ?, 1, (SELECT strftime ("%s", "now")));', 
-    req.body.anon_id, req.file.filename, req.body.lat, req.body.lng, (err) => {
+    req.body.anon_id, (req.file ? req.file.filename : ''), req.body.lat, req.body.lng, (err) => {
         if(err){
             console.log(err);
             // dodanie notyfikacji sie nie udalo - usuwanie przeslanych zdjec
-            fs.unlink('./pictures/' + req.file.filename, (err) => {
-                if(err){
-                    console.log(err);
-                }
-            });
+            if(req.file){
+                fs.unlink('./pictures/' + req.file.filename, (err) => {
+                    if(err){
+                        console.log(err);
+                    }
+                });
+            }
             return res.sendStatus(500);
         }
         return res.sendStatus(200);

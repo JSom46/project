@@ -8,7 +8,10 @@ import { Button } from '@mui/material';
 import { Select, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box';
 import ImageListItem from '@mui/material/ImageListItem';
+import Tooltip from '@mui/material/Tooltip';
 import { Stack } from '@mui/material';
+import { Collapse, Alert, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 import MapPicker from './MapPicker';
 
@@ -16,12 +19,11 @@ function createTypes(name, coats, colors, breeds) {
   return { name, coats, colors, breeds };
 }
 export default function AddAnnoucment(props) {
-  console.log('xd');
   const [title, setTitle] = useState();
   const [description, setDescription] = useState();
   const [category, setCategory] = useState('');
-  const [pictures, setPictures] = useState();
-  const [picturesPreview, setPicturesPreview] = useState();
+  const [pictures, setPictures] = useState(new FormData());
+  const [picturesPreview, setPicturesPreview] = useState([]);
   const [type, setType] = useState('');
   const [coat, setCoat] = useState('');
   const [color, setColor] = useState('');
@@ -33,6 +35,13 @@ export default function AddAnnoucment(props) {
   const [lat, setLat] = useState(); //Dane z mapy
   const [lng, setLng] = useState(); //Dane z mapy
   const [location, setLocation] = useState(null);
+  const [alertData, setAlertData] = useState({
+    open: false,
+    variant: 'filled',
+    severity: 'error',
+    text: ''
+  });
+  const [loading, setLoading] = useState(false);
 
   function handleLocationChange(loc) {
     setLat(loc.lat);
@@ -68,15 +77,27 @@ export default function AddAnnoucment(props) {
     setBreed(event.target.value);
   };
   const handlePictures = (event) => {
-    const formData = new FormData();
-    const picturesPreviewArray = [];
-    for (let i = 0; i < event.target.files.length; i++) {
-      picturesPreviewArray.push(URL.createObjectURL(event.target.files[i]));
-      formData.append('pictures', event.target.files[i]);
+    if (event.target.files.length > 8 || Array.from(event.target.files).filter((file) => { return file.size > 4 * 1024 * 1024 }).length > 0) {
+      setAlertData({
+        open: true,
+        variant: 'filled',
+        severity: 'error',
+        text: 'Zdjęcia nie spełniają wymogów'
+      })
+      setPictures(null);
+      setPicturesPreview([]);
     }
-    setPictures(formData);
-    setPicturesPreview(picturesPreviewArray);
-    // console.log(picturesPreview);
+    else {
+      setAlertData({ open: false });
+      const formData = new FormData();
+      const picturesPreviewArray = [];
+      for (let i = 0; i < event.target.files.length; i++) {
+        picturesPreviewArray.push(URL.createObjectURL(event.target.files[i]));
+        formData.append('pictures', event.target.files[i]);
+      }
+      setPictures(formData);
+      setPicturesPreview(picturesPreviewArray);
+    }
   };
   async function postAnnoucement() {
     const formData = new FormData();
@@ -88,10 +109,10 @@ export default function AddAnnoucment(props) {
     }
     formData.append('lat', lat); //Dane z mapy
     formData.append('lng', (((lng + 180) % 360 + 360) % 360) - 180); //Dane z mapy, znormalizowana dlugosc geog.
-    formData.append('type', type); 
-    formData.append('coat', coat); 
-    formData.append('color', color); 
-    formData.append('breed', breed); 
+    formData.append('type', type);
+    formData.append('coat', coat);
+    formData.append('color', color);
+    formData.append('breed', breed);
     try {
       const response = await fetch('http://localhost:2400/anons/', {
         method: 'POST',
@@ -106,8 +127,9 @@ export default function AddAnnoucment(props) {
   }
   const handleSubmit = async e => {
     e.preventDefault();
-    const response = await postAnnoucement();
-    console.log(response);
+    setLoading(true);
+    await postAnnoucement();
+    setLoading(false);
   }
   useEffect(() => {
     const fetchTypes = async () => {
@@ -127,8 +149,6 @@ export default function AddAnnoucment(props) {
             element.breeds
           ));
         });
-        // const psycolors = rows.filter((type) => {return type.name === "Psy"});
-        // console.log(psycolors[0].colors);
         setTypes(rows);
       } catch (error) {
         console.log("error", error);
@@ -138,73 +158,86 @@ export default function AddAnnoucment(props) {
   }, []);
 
   return (
-    <FormControl style={{ width: '100%' }} sx={{ padding: 2 }}>
-      <form autoComplete='off'>
-        <FormGroup>
-          <TextField fullWidth={true} type='text' id="title" label="Tytuł" variant="standard" required onChange={handleTitleChange} />
-          <FormControl variant="standard">
-            <InputLabel id="category" required>Rodzaj zgłoszenia</InputLabel>
-            <Select value={category} labelId="category" id="category" label="Kategoria" onChange={handleCategoryChange}>
-              <MenuItem value={0}>Zaginięcie</MenuItem>
-              <MenuItem value={1}>Znalezienie</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField fullWidth type='text' id="description" label="Opis" variant="standard" multiline minRows={4} required onBlur={handleDescriptionChange} />
-          <FormControl variant="standard">
-            <InputLabel id="type" required>Typ</InputLabel>
-            <Select value={type} labelId="type" id="type" onChange={handleTypeChange}>
-              {types && types.map((item) => (
-                <MenuItem key={item.name} value={item.name}>{item.name}</MenuItem>
+    <Box component="form" autoComplete="off" sx={{ padding: 2, width: '100%' }}>
+      <FormGroup>
+        <TextField fullWidth type='text' id="title" label="Tytuł" variant="standard" required onBlur={handleTitleChange} />
+        <FormControl variant="standard">
+          <InputLabel id="category" required>Rodzaj zgłoszenia</InputLabel>
+          <Select value={category} labelId="category" id="category" label="Kategoria" onChange={handleCategoryChange}>
+            <MenuItem value={0}>Zaginięcie</MenuItem>
+            <MenuItem value={1}>Znalezienie</MenuItem>
+          </Select>
+        </FormControl>
+        <TextField fullWidth type='text' id="description" label="Opis" variant="standard" multiline minRows={4} required onBlur={handleDescriptionChange} />
+        <FormControl variant="standard">
+          <InputLabel id="type" required>Typ</InputLabel>
+          <Select value={type} labelId="type" id="type" onChange={handleTypeChange}>
+            {types && types.map((item) => (
+              <MenuItem key={item.name} value={item.name}>{item.name}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Stack justifyContent="space-evenly" direction="row" alignItems="center" spacing={2}>
+          <FormControl variant="standard" style={{ width: '100%' }}>
+            <InputLabel id="coat">Owłosienie</InputLabel>
+            <Select value={coat} labelId="coat" id="coat" onChange={handleCoatChange} disabled={coats.length === 0}>
+              {coats && coats.map((item) => (
+                <MenuItem key={item} value={item}>{item}</MenuItem>
               ))}
             </Select>
           </FormControl>
-          <Stack justifyContent="space-evenly" direction="row" alignItems="center" spacing={2}>
-            <FormControl variant="standard" style={{ width: '100%' }}>
-              <InputLabel id="coat">Owłosienie</InputLabel>
-              <Select value={coat} labelId="coat" id="coat" onChange={handleCoatChange} disabled={coats.length === 0}>
-                {coats && coats.map((item) => (
-                  <MenuItem key={item} value={item}>{item}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl variant="standard" style={{ width: '100%' }}>
-              <InputLabel id="colors">Umaszczenie</InputLabel>
-              <Select value={color} labelId="colors" id="colors" onChange={handleColorChange} disabled={colors.length === 0}>
-                {colors && colors.map((item) => (
-                  <MenuItem key={item} value={item}>{item}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl variant="standard" style={{ width: '100%' }}>
-              <InputLabel id="breeds">Rasa</InputLabel>
-              <Select value={breed} labelId="breeds" id="breeds" onChange={handleBreedChange} disabled={breeds.length === 0}>
-                {breeds && breeds.map((item) => (
-                  <MenuItem key={item} value={item}>{item}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Stack>
-          <br />
-          <MapPicker location={location} onLocationChange={handleLocationChange} />
-          <br />
-          <Button variant="contained" component="label">Dodaj zdjęcia
-            <input type="file" accept='.jpg, .png' onChange={handlePictures} hidden multiple />
+          <FormControl variant="standard" style={{ width: '100%' }}>
+            <InputLabel id="colors">Umaszczenie</InputLabel>
+            <Select value={color} labelId="colors" id="colors" onChange={handleColorChange} disabled={colors.length === 0}>
+              {colors && colors.map((item) => (
+                <MenuItem key={item} value={item}>{item}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl variant="standard" style={{ width: '100%' }}>
+            <InputLabel id="breeds">Rasa</InputLabel>
+            <Select value={breed} labelId="breeds" id="breeds" onChange={handleBreedChange} disabled={breeds.length === 0}>
+              {breeds && breeds.map((item) => (
+                <MenuItem key={item} value={item}>{item}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Stack>
+        <br />
+        <MapPicker autoLocate={true} location={location} onLocationChange={handleLocationChange} />
+        <br />
+        <Tooltip title="Maksymalnie 8 zdjęć. Maksymalnie 4MB na zdjęcie">
+          <Button aria-describedby="imageUploadButton" variant="contained" component="label">Dodaj zdjęcia
+            <input id="imageUploadButton" type="file" accept="image/*" onChange={handlePictures} hidden multiple />
           </Button>
-        </FormGroup>
-        <Box sx={{ border: (picturesPreview ? "1px solid" : ""), marginTop: 1, marginBottom: 1 }}>
-          {picturesPreview && picturesPreview.map((item) => (
-            <ImageListItem key={Math.random()} sx={{ margin: 1 }}>
-              <img
-                style={{ width: "100px", height: "100px", objectFit: "cover" }}
-                src={item}
-                alt={item}
-                loading="lazy"
-              />
-            </ImageListItem>
-          ))}
-        </Box>
-        <Button variant="contained" type="submit" onClick={handleSubmit} disabled={!props.disableSubmit}>Zgłoś</Button>
-      </form>
-    </FormControl>
+        </Tooltip>
+      </FormGroup>
+      <Box sx={{ border: (picturesPreview.length !== 0 ? "1px solid" : ""), marginTop: 1, marginBottom: 1 }}>
+        {(picturesPreview.length !== 0 && picturesPreview.map((item) => (
+          <ImageListItem key={Math.random()} sx={{ margin: 1 }}>
+            <img
+              style={{ width: "100px", height: "100px", objectFit: "cover" }}
+              src={item}
+              alt={item}
+              loading="lazy"
+            />
+          </ImageListItem>
+        ))) ||
+          <Collapse in={alertData.open}>
+            <Alert
+              variant={alertData.variant}
+              severity={alertData.severity}
+              action={
+                <IconButton color="inherit" size="small" onClick={() => { setAlertData({ open: false }); }}>
+                  <CloseIcon fontSize="inherit" />
+                </IconButton>
+              } sx={{ mb: 2 }}>
+              {alertData.text}
+            </Alert>
+          </Collapse>
+        }
+      </Box>
+      <Button variant="contained" type="submit" onClick={handleSubmit} disabled={loading}>Zgłoś</Button>
+    </Box>
   )
 }
