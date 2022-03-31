@@ -128,7 +128,7 @@ const AddAnnouncement = ({ navigation }) => {
     //console.log(formData);
 
     try {
-      const response = await fetch("http://192.168.0.16:2400/anons/", {
+      const response = await fetch("http://"+ serwer + "/anons/", {
         method: "POST",
         credentials: "include",
         body: formData,
@@ -226,7 +226,7 @@ const AddAnnouncement = ({ navigation }) => {
               <StyledInputLabel>{"Kategoria"}</StyledInputLabel>
               <ButtonView>
                 <StyledButtonCategory onPress={() => (values.category = 0)}>
-                  <ButtonText isCategory={true}>Zaginionee</ButtonText>
+                  <ButtonText isCategory={true}>Zaginione</ButtonText>
                 </StyledButtonCategory>
                 <StyledButtonCategory onPress={() => (values.category = 1)}>
                   <ButtonText isCategory={true}>Znalezione</ButtonText>

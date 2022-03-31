@@ -10,6 +10,7 @@ import { createNativeStackNavigator} from '@react-navigation/native-stack';
 //import MainMap from './MainMap';
 import MapMain from './Map/MapMain';
 import AnnouncementView from './AnnouncementView';
+import Welcome from './Welcome';
 
 const MapAnnouncementsStack = createNativeStackNavigator();
 
@@ -18,7 +19,7 @@ const Dashboard = ({navigation}) => {
 
     return(
         <MapAnnouncementsStack.Navigator style={{flex: 1}} screenOptions={{headerShown: false}}>
-            <MapAnnouncementsStack.Screen name="Mapa" component={MapMain} navigation={navigation}/>
+            <MapAnnouncementsStack.Screen name="Mapa" component={MapMain}/>
             <MapAnnouncementsStack.Screen name="Ogloszenie" component={AnnouncementView}/>
         </MapAnnouncementsStack.Navigator>
 
