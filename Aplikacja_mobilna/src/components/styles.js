@@ -447,7 +447,9 @@ export const stylesAnnouncements = StyleSheet.create({
   announcementPhoto: {
       width: 300,
       height: 300,
-      alignSelf: 'center',
-      marginVertical: 8,
+      //resizeMode: "stretch",
+      
+      //alignSelf: 'center',
+      //marginVertical: 8,
   }
 });

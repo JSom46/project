@@ -1,8 +1,10 @@
 import React, {useState} from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity} from 'react-native';
 import { stylesAnnouncements } from '../components/styles';
-import SplashScreen from './SplashScreen';
 import axios from 'axios';
+import Swiper from 'react-native-swiper';
+
+import SplashScreen from './SplashScreen';
 
 //Przekazywane jest cale ogloszenie, w parametrzze 'announcement'
 
@@ -55,7 +57,16 @@ const AnnouncementView = ({ route, navigation }) => {
                         {announcement.title}
                     </Text>
 
-                    <Image style={stylesAnnouncements.announcementPhoto} source={{uri: 'http://' + serwer + '/anons/photo?name=' + announcement.images[0]}}/>
+                    {/* <Image style={stylesAnnouncements.announcementPhoto} source={{uri: 'http://' + serwer + '/anons/photo?name=' + announcement.images[0]}}/> */}
+                    <Swiper height={310} showsButtons={true} loop={false}>
+                        {announcement.images.map((item, key) => {
+                            return(
+                                <View key={key} style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'transparent'}}>
+                                    <Image style={stylesAnnouncements.announcementPhoto} source={{uri: 'http://' + serwer + '/anons/photo?name=' + item}}/>
+                                </View>
+                            )
+                        })}
+                    </Swiper>
 
                     <Text style={{alignSelf: 'center'}}>
                         Data zgłoszenia: {date.toLocaleDateString("pl-PL")}
@@ -79,7 +90,7 @@ const AnnouncementView = ({ route, navigation }) => {
                         </Text>
 
                         <Text style={stylesAnnouncements.announcementDescriptionText}>
-                            Opis: {announcement.description}
+                            {announcement.description}
                         </Text>
                     </View>
 

@@ -12,6 +12,9 @@ const MyProfileScreen = ({navigation, route}) => {
                 Profil użytkownika:{"\n"}
                 {route.params.userData.login}
             </Text>
+            <Text>
+                Email: {route.params.userData.email}
+            </Text>
 
         </View>
     )

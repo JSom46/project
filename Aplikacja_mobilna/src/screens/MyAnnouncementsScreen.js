@@ -15,7 +15,7 @@ async function getAnnouncements(){
             method: 'GET',
             credentials: 'include'
           });
-          console.log(response);
+          //console.log(response);
         let json = await response.json();
 
         let rows = [];
