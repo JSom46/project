@@ -190,12 +190,12 @@ router.get('/', (req, res) => {
 
 
 // zwraca liste ogloszen sortowana po dacie utworzenia malejaco i liczbe przeslanych ogloszen
-// parametry: page, num, category, type, coat, color, breed, lat, lng, rad
+// parametry: page, num, category, title, type, coat, color, breed, lat, lng, rad
 // parametr page informuje, ktora strone ogloszen zwrocic
 // parametr num informuje, ile ogloszen ma przypadac na strone
 // jesli parametr num jest niezdefiniowany, przyjmuje wartosc 30
 // jesli parametr page jest niezdefiniowany, to zwracane sa wszystkie ogloszenia
-// category, type, coat, color, breed pozwalaja filtrowac ogloszenia
+// category, title, type, coat, color, breed pozwalaja filtrowac ogloszenia
 // jesli ktorys z tych parametrow zostanie pominiety, oznacza to, ze wlasciwosc ta moze byc dowolna (w tym niezdefiniowana)
 // jesli wlasciwosc moze przyjac kilka wartosci, nalezy ja podac po przecinku (wartosc1,wartosc2,...)
 // jesli lat lub lng nie jest podany, ignorowane sa oba
@@ -210,6 +210,10 @@ router.get('/list', (req, res) => {
     if(req.query.category == 1 || req.query.category == 0){
         filters.push('category = ?');
         parameters.push(req.query.category);
+    }
+    if(req.query.title){
+        filters.push('title LIKE ?');
+        parameters.push('%' + req.query.title + '%');
     }
     if(req.query.type){
         filters.push('type IN (' + Array(req.query.type.split(',').length).fill('?').join(', ') + ')');
@@ -226,7 +230,7 @@ router.get('/list', (req, res) => {
     if(req.query.breed){
         filters.push('breed IN (' + Array(req.query.breed.split(',').length).fill('?').join(', ') + ')');
         req.query.breed.split(',').forEach((e) => {parameters.push(e);});
-    }    
+    }
 
     let statement = 'SELECT id, title, category, images image, datetime(create_date, "unixepoch", "localtime") create_date, lat, lng, type FROM anons' + 
     (filters.length > 0 ? ' WHERE ' : '') + filters.join(' AND ') + ' ORDER BY create_date DESC;'
