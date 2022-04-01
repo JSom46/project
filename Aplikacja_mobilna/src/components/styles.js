@@ -40,7 +40,7 @@ const {
 export const StyledContainer = styled.ScrollView`
   flex: 1;
   padding: 25px;
-  padding-top: ${StatusBarHeight + 40}px;
+  padding-top: ${StatusBarHeight}px;
   background-color: ${primary};
 
   ${(props) =>
@@ -394,6 +394,24 @@ export const stylesMap = StyleSheet.create({
       marginBottom: 4,
   },
 });
+
+export const stylesMyProfileContainer = {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  flexDirection: 'column',
+};
+
+export const stylesMyProfileButton = {
+  backgroundColor: 'skyblue',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: 15,
+  borderRadius: 10,
+  borderBottomWidth: 1,
+  borderRightWidth: 1,
+  borderColor: 'gray',
+};
 
 export const stylesAnnouncements = StyleSheet.create({
   listContainer: {

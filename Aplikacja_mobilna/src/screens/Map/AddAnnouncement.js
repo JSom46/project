@@ -142,7 +142,13 @@ const AddAnnouncement = ({ navigation }) => {
   }
   const handleSubmit = async (e) => {
     const response = await postAnnoucement();
-    // console.log(JSON.stringify(response));
+    //console.log(JSON.stringify(response));
+    if(response.status == 200){
+      alert("Pomyślnie dodano ogłoszenie.")
+      navigation.goBack();
+    }else{
+      alert("Nie udało się dodać ogłoszenia.");
+    }
   };
 
   return (

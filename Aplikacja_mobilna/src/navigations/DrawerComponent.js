@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useContext} from 'react';
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, StackActions } from "@react-navigation/native";
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerItem } from '@react-navigation/drawer'
 
 // import {AuthContext} from './App'
@@ -18,6 +18,7 @@ import axios from "axios";
 import Welcome from '../screens/Welcome';
 
 const Drawer = createDrawerNavigator();
+
 
 const DrawerComponent = ({navigation, route}) => {
     //const {logOut} = React.useContext(AuthContext);
@@ -102,7 +103,9 @@ const DrawerComponent = ({navigation, route}) => {
             <Drawer.Screen
               name="Dodaj Ogłoszenie"
               component={AddAnnouncement}
-            /> 
+            />
+
+
             
             {/* <Drawer.Screen
                 name='Witam'
