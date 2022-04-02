@@ -403,14 +403,21 @@ export const stylesMyProfileContainer = {
 };
 
 export const stylesMyProfileButton = {
-  backgroundColor: 'skyblue',
+  backgroundColor: 'white',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: 15,
+  padding: 5,
   borderRadius: 10,
-  borderBottomWidth: 1,
-  borderRightWidth: 1,
-  borderColor: 'gray',
+  borderWidth: 1,
+  borderColor: 'black',
+};
+
+export const stylesMyProfileTextInput = {
+  backgroundColor: 'lightgray',
+  marginBottom: 5,
+  padding: 15,
+  fontSize: 16,
+
 };
 
 export const stylesAnnouncements = StyleSheet.create({
