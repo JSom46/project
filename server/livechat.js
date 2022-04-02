@@ -11,6 +11,7 @@ const fs = require('fs');
 
 const con = require('./dbCon.js');
 const { SocketAddress } = require('net');
+const { contentSecurityPolicy } = require('helmet');
 
 
 let lastMessage, lastImage;
@@ -63,7 +64,7 @@ io.on("connection", function (socket) {
     socket.on('get-user-chats', (userid) => {
         con.all(
         `WITH Chats (anons_id, chat_id, user_id) AS (
-            SELECT anons_id, chat_id, user_id FROM ChatUsers WHERE user_id = 3
+            SELECT anons_id, chat_id, user_id FROM ChatUsers WHERE user_id = ?
             )
             SELECT c.anons_id, c.chat_id,
                 (SELECT count(*) FROM ChatMessages cm
@@ -87,7 +88,7 @@ io.on("connection", function (socket) {
     socket.on('get-chat-messages', (anonsid, userid) => {
         // wysyłamy do użytkownika wiadomości z konkretnego chatu
 
-        con.all('SELECT messageid, anonsid, userid, message_date, message_text FROM ChatMessages WHERE anonsid = ? AND userid = ?',
+        con.all('SELECT message_id, anons_id, user_id, message_date, message_text FROM ChatMessages WHERE anons_id = ? AND user_id = ?',
             anonsid, userid, (err, result) => {
                 if (err) {
                     socket.emit('error', err);
@@ -95,8 +96,6 @@ io.on("connection", function (socket) {
                     socket.emit('chat-messages', result);
                 }
         });
-        
-
     });
 
 
@@ -119,17 +118,31 @@ io.on("connection", function (socket) {
             
     });
 
-    socket.on('new-chat', ({anonsid, chatid}) => {
+    socket.on('new-chat', (anonsid, chatid) => {
         let chatroom = anonsid + ':' + chatid;
         socket.join(chatroom);
 
-        con.run(`INSERT INTO ChatUsers (anons_id, chat_id, user_id) VALUES (?, ?, ?)`, anonsid, chatid, chatid);
-        con.run(`INSERT INTO ChatUsers (anons_id, chat_id, user_id)
-                SELECT id, ?, author_id FROM anons
-                WHERE id = ?`, chatid, anonsid, (err) => {
-                    console.log(err.name + " | " + err.message);
-                    throw err;                    
-                });
+        con.all('SELECT * FROM ChatUsers WHERE anons_id = ? AND chat_id = ?',anonsid, chatid, (err, result) => {
+            console.debug(result)
+
+            if (result.length > 0) {
+                // chat już jest zapisany w bazie - nie można dodać nowego!
+
+                socket.emit('new-chat', {status: 'EXISTS'});
+            } else {
+                // można dodać nowy chat
+
+                con.run(`INSERT INTO ChatUsers (anons_id, chat_id, user_id) VALUES (?, ?, ?)`, anonsid, chatid, chatid);
+                con.run(`INSERT INTO ChatUsers (anons_id, chat_id, user_id)
+                        SELECT id, ?, author_id FROM anons
+                        WHERE id = ?`, chatid, anonsid, (err) => {
+                            console.log(err.name + " | " + err.message);
+                            throw err;                    
+                        });        
+
+                socket.emit('new-chat', {status: 'CREATED'});
+            }
+        })
 
         // powiadomienie dla ew. zalogowane drugiego użytkownika,
         // że pojawił się inny rozmówca
@@ -138,6 +151,9 @@ io.on("connection", function (socket) {
 
     socket.on("join-chat", ({anonsid, chatid, userid}) => {
         let chatroom = anonsid + ':' + chatid;
+
+        // sprawdzić, czy user_id ma założony chat ?
+
         socket.join(chatroom);
         io.to(chatroom).broadcast('user-join', {anonsid, chatid, userid});
 
