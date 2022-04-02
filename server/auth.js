@@ -56,10 +56,8 @@ router.post('/signup', (req, res) => {
             return res.status(400).json({msg: 'email already in use'});
         }
         //email jest wolny, sprawdz zlozonosc hasla
-        //const passwdValidation = passwordValidator(req.body.password);
-        //if(!passwdValidation.isValid){
         if(!passwordValidator(req.body.password).isValid){
-            return res.status(400).json({msg: 'password too weak', err: passwdValidation.errors});
+            return res.status(400).json({msg: 'password too weak'});
         }
         //haslo jest dostatecznie silne, zaszyfruj je
         bcrypt.hash(req.body.password, 10, (err, hash) => {
@@ -73,9 +71,6 @@ router.post('/signup', (req, res) => {
             do{
                 code = codeGenerator(64);
                 con.get(`SELECT COUNT(*) FROM users WHERE is_activated = 0 AND activation_code = ?`, code, (err, result) => {
-                    if(err){
-                        return res.sendStatus(500);
-                    }
                     if(result != 0){
                         isUnique = false;
                     }
@@ -90,20 +85,22 @@ router.post('/signup', (req, res) => {
                 `${req.body.login}, aktywuj swoje konto klikając w link poniżej:\n ${process.env.WEB_APP_ROOT_URI}/activate?code=${code}`);
 
             //dodaj usera do bazy
-            con.run(`INSERT INTO users (login, password, email, activation_code, is_activated, is_native, is_admin) 
-            VALUES (?, ?, ?, ?, 0, 1, 0);`, req.body.login, hash, req.body.email, code, (err, result) => {
+            con.run(`INSERT INTO users (
+                        login, 
+                        password, 
+                        email, 
+                        activation_code, 
+                        is_activated, 
+                        is_native, 
+                        is_admin) 
+                    VALUES (?, ?, ?, ?, 0, 1, 0);`, req.body.login, hash, req.body.email, code, (err, result) => {
                 if(err){
                     return res.sendStatus(500);
                 }
 
                 //wyslij maila z kodem aktywacyjnym
-                transporter.sendMail(mailOpt, (err, info) => {
-                    if (err) {
-                        //blad przy wysylaniu maila
-                        return res.sendStatus(500);
-                    }
-                    res.status(201).json({msg: 'account created'});
-                });
+                transporter.sendMail(mailOpt, (err, info) => {});
+                res.status(201).json({msg: 'account created'});
             });
         });
     });
@@ -190,7 +187,13 @@ router.get('/google', async (req, res) => {
         }
         //konto nie istnieje - utworzenie nowego konta przy pomocy pobranych danych
         if(!row){
-            con.run(`INSERT INTO users(login, password, email, is_activated, is_native, is_admin) VALUES (?, ?, ?, 1, 0, 0);`, user.name, user.id, user.email, (err, result) => {
+            con.run(`INSERT INTO users(
+                        login, password, 
+                        email, 
+                        is_activated, 
+                        is_native, 
+                        is_admin) 
+                    VALUES (?, ?, ?, 1, 0, 0);`, user.name, user.id, user.email, (err, result) => {
                 if(err){
                     return res.sendStatus(500);
                 }
@@ -247,7 +250,14 @@ router.get('/facebook', async (req, res) => {
         }
         //konto nie istnieje - utworzenie nowego konta przy pomocy pobranych danych
         if(!row){
-            con.run('INSERT INTO users(login, password, email, is_activated, is_native, is_admin) VALUES(?, ?, ?, 1, 0, 0);', user.name, user.id, user.email, function(err){
+            con.run(`INSERT INTO users(
+                        login, 
+                        password, 
+                        email, 
+                        is_activated, 
+                        is_native, 
+                        is_admin) 
+                    VALUES(?, ?, ?, 1, 0, 0);`, user.name, user.id, user.email, function(err){
                 if(err){
                     return res.sendStatus(500);
                 }
@@ -306,7 +316,15 @@ router.get('/logout', (req, res) => {
 router.get('/user', (req, res) => {
     if(req.query.id){
         //podano id
-        con.get('SELECT id, login, email, is_admin FROM users WHERE id = ?;', req.query.id, (err, row) => {
+        con.get(`SELECT 
+                    id, 
+                    login, 
+                    email, 
+                    is_admin 
+                FROM 
+                    users 
+                WHERE 
+                    id = ?;`, req.query.id, (err, row) => {
             if(err){
                 return res.sendStatus(500);
             }
@@ -328,6 +346,121 @@ router.get('/user', (req, res) => {
 });
 
 
+// wysyla maila z linkiem pozwalajacym zmienic haslo
+// req.body = {email : string}
+// email - email usera, ktorego haslo ma zostac zmienione
+router.post('/requestPasswordChange', (req, res)=> {
+    if(!req.body.email){
+        // nie podano maila
+        return res.status(400).json({msg: 'required fields empty'});
+    }
+    con.get(`SELECT 
+                id, 
+                login 
+            FROM 
+                users 
+            WHERE 
+                email = ?;`, req.body.email, (err, row) => {
+        if(err){
+            return res.sendStatus(500);
+        }
+        if(!row){
+            //brak konta o podanym mailu
+            return res.sendStatus(404);
+        }
+        //wygeneruj token
+        let code = codeGenerator(64);
+        //zaszyfruj token
+        bcrypt.hash(code, 10, (err, hash) => {
+            if(err){
+                return res.sendStatus(500);
+            }
+            con.run(`UPDATE 
+                        users 
+                    SET 
+                        password_change_token = ?, 
+                        password_token_expiration = (SELECT strftime ("%s", "now") + ${process.env.CHANGE_PASSWD_TOKEN_TTL}) 
+                    WHERE 
+                        id = ?;`, hash, row.id, (err) => {
+                if(err){
+                    return res.sendStatus(500);
+                }    
+                let mailOpt = mailOptions(
+                    process.env.EMAIL_ADDR, 
+                    req.body.email, 
+                    'Zmiana hasła', 
+                    `${row.login}, możesz zmienić swoje hasło klikając w link poniżej:\n ${process.env.WEB_APP_ROOT_URI}/changePassword?token=${code}&id=${row.id}\nLink będzie ważny przez tydzień.`
+                ); 
+                //wyslij maila z linkiem do zmiany hasla
+                transporter.sendMail(mailOpt, (err, info) => {});
+                return res.sendStatus(200);
+            });
+        });       
+    });
+});
+
+
+// pozwala zmienic haslo
+// req.body = {id : integer, token : string, password : string}
+// id - id usera, ktorego haslo jest zmieniane
+// token - ciag znakow znajdujacy sie w linku do zmiany hasla
+// password - nowe haslo
+router.patch('/passwordChange', (req, res) => {
+    if(!(req.body.id && req.body.token && req.body.password)){
+        // nie podano maila lub tokenu
+        return res.status(400).json({msg: 'required fields empty'});
+    }
+    if(!passwordValidator(req.body.password).isValid){
+        // nowe haslo nie spelnia wymagan
+        return res.status(400).json({msg: 'password too weak'});
+    }
+    con.get(`SELECT 
+                password_token_expiration, 
+                password_change_token 
+            FROM 
+                users 
+            WHERE 
+                id = ? AND password_token_expiration > (? / 1000);`, req.body.id, Date.now(), (err, row) => {
+        if(err){
+            return res.sendStatus(500);
+        }
+        if(!row){
+            // user o podanym id nie istnieje lub token wygasl
+            return res.sendStatus(404);
+        }
+        // porownaj przeslany token z tym w bazie danych
+        bcrypt.compare(req.body.token, row.password_change_token, (err, match) => {
+            if(err){
+                return res.sendStatus(500);
+            }
+            if(!match){
+                // niepoprawny token
+                return res.status(400).json({msg: 'invalid token'});
+            }
+            // token jest prawidlowy, zaszyfruj nowe haslo
+            bcrypt.hash(req.body.password, 10, (err, hash) => {
+                if(err){
+                    return res.sendStatus(500);
+                }
+                // zmien haslo w bazie i uniewaznij token
+                con.run(`UPDATE 
+                            users 
+                        SET 
+                            password = ?, 
+                            password_token_expiration = 0 
+                        WHERE 
+                            id = ?;`, hash, req.body.id, (err) => {
+                    if(err){
+                        return res.sendStatus(500);
+                    }
+                    return res.sendStatus(200);
+                })
+            });
+        });
+    });
+});
+
+/*
 //aktualizuje haslo uzytkownika, na ktorego zalogowany jest klient - wymaga zalogowania
 //req.body = {password : string, new_password : string}
 //password - aktualne haslo uzytkownika
@@ -368,7 +501,7 @@ router.patch('/user/password', (req, res) => {
         });
     });
 });
-
+*/
 
 //aktualizuje dane, inne niz haslo, uzytkownika, na ktorego zalogowany jest klient - wymaga zalogowania
 //req.body = {new_login : string}
@@ -382,7 +515,12 @@ router.patch('/user', (req, res) => {
         //login jest za dlugi
         return res.status(400).json({msg: 'login too long'});
     }
-    con.run('UPDATE users SET login = ? WHERE id = ?;', req.body.new_login, req.session.user_id, (err) => {
+    con.run(`UPDATE 
+                users 
+            SET 
+                login = ? 
+            WHERE 
+                id = ?;`, req.body.new_login, req.session.user_id, (err) => {
         if(err){
             return res.sendStatus(500);
         }

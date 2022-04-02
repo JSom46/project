@@ -229,6 +229,64 @@ paths:
         '500':
           description: błąd po stronie serwera
 
+/requestPasswordChange:
+    post:
+      tags:
+        - /auth - autentyfikacja
+      summary: generuje token pozwalający na zmianę hasła użytkownika i wysyła mail z linkiem do strony pozwalającej zmienić hasło
+      consumes:
+      - application/json
+      parameters:
+        - in: body
+          name: email
+          type: string
+          description: email użytkownika, któremu należy wygenerować token zmiany hasła - na ten adres zostanie wysłany token
+      responses:
+        '200':
+          description: wygenerowano token i wysłano maila
+        '400':
+          description: nie podano maila
+        '404':
+          description: konto o podanym mailu nie istnieje
+        '500':
+          description: błąd po stronie serwera
+
+/passwordChange:
+    patch:
+      tags:
+        - /auth - autentyfikacja
+      summary: zmienia hasło użytkownika
+      consumes:
+      - application/json
+      parameters:
+        - in: body
+          name: id
+          type: integer
+          description: id użytkownika, którego hasło ma zostac zmienione - jest przesyłane w mailu
+        - in: body
+          name: token
+          type: string
+          description: token zmiany hasła - jest przesyłany w mailu
+        - in: body
+          name: password
+          type: string
+          description: nowe hasło
+      responses:
+        '200':
+          description: hasło zostało zmienione
+        '400': 
+          description: nie podano maila/tokenu lub hasło jest za słabe
+          schema:
+            type: object
+            properties:
+              msg:
+                type: string
+                description: informuje, co poszło nie tak
+        '404':
+          description: nie znaleziono użytkownika o podanym id lub token wygasł
+        '500':
+          description: błąd po stronie serwera
+
 #/user/password:
 #    patch:
 #      tags:
