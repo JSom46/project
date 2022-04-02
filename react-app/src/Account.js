@@ -1,33 +1,115 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom/cjs/react-router-dom.min';
 import './login.css'
-import { Box, maxWidth } from '@mui/system';
+import { Box } from '@mui/system';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
-import { Typography, Button } from '@mui/material';
-import { Stack } from '@mui/material';
-
-import { CircularProgress } from '@mui/material';
+import { Typography, Button, TextField } from '@mui/material';
+import { LinearProgress } from '@mui/material';
+import { Snackbar, Alert } from '@mui/material';
 
 export default function Account(props) {
-  console.log(props);
+  const [userData, setUserData] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+  const [reload, setReload] = React.useState(false);
+  const [loginField, setLoginField] = React.useState(props.auth.login);
+  const [openEditLogin, setOpenEditLogin] = React.useState(false);
+  const [snackbarData, setSnackbarData] = React.useState({
+    open: false,
+    message: "",
+    severity: "success"
+  });
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      setUserData([]);
+      let url = 'http://localhost:2400/auth/user';
+      try {
+        await fetch(url, {
+          method: 'GET',
+          credentials: 'include'
+        }).then((response) => {
+          if (response.status === 401) {
+            sessionStorage.clear();
+            window.location.assign("/login");
+            return;
+          }
+          response.json().then(
+            (data) => {
+              // console.log(data);
+              setUserData(data);
+              setLoginField(data.login);
+            });
+        })
+      } catch (error) {
+        // setFetchError(true);
+        console.log("error", error);
+      }
+    };
+    fetchData();
+  }, [reload]);
+
+  async function editLogin() {
+    setLoading(true);
+    try {
+      fetch('http://localhost:2400/auth/user', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ new_login: loginField })
+      }).then(response => {
+        if (response.status === 200) {
+          setSnackbarData({
+            open: true,
+            message: "Pomyślnie zmieniono login",
+            severity: "success"
+          });
+          setOpenEditLogin(false);
+          setReload((prev) => !(prev));
+        }
+      })
+      setLoading(false);
+    }
+    catch (error) {
+      setLoading(false);
+      console.log(error);
+    }
+  }
+
   if (props.auth.msg === 'not logged in') return (<Redirect to="/login" />)
   return (
-    <Box>
-      <Card sx={{ minWidth: 275, maxWidth: 400}}>
-        <CardContent>
-          <Typography variant='h5' gutterBottom>
-            {props.auth.login}
+    <Box alignSelf="center">
+      <Card sx={{ minWidth: 275, maxWidth: 400 }}>
+        <LinearProgress hidden={userData.length !== 0} />
+        <CardContent >
+          <Typography variant='h5' gutterBottom hidden={openEditLogin}>
+            {userData.login}
           </Typography>
+          {loginField && <TextField hidden={!openEditLogin} value={loginField} variant="standard" type='text' onChange={(e) => setLoginField(e.target.value)} fullWidth />}
           <Typography variant='h6' gutterBottom>
-            {props.auth.email}
+            {userData.email}
           </Typography>
         </CardContent>
-        <CardActions>
-          <Button size="small">Zmień login</Button>
-          <Button size="small">Zmień hasło</Button>
+        <CardActions sx={{ justifyContent: "right", flex: 1 }}>
+          <Button size="small" onClick={() => setOpenEditLogin((prev) => !(prev))} hidden={openEditLogin}>Zmień login</Button>
+          <Button size="small" hidden={openEditLogin}>Zmień hasło</Button>
+          <Button size="small" color="error" onClick={() => { setOpenEditLogin((prev) => !(prev)); setLoginField(userData.login) }} hidden={!openEditLogin}>Anuluj</Button>
+          <Button size="small" color="success" hidden={!openEditLogin} onClick={() => editLogin()}>Zapisz</Button>
         </CardActions>
+        <LinearProgress hidden={!loading} />
+        <Snackbar
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          open={snackbarData.open}
+          onClose={() => setSnackbarData({ open: false })}
+          autoHideDuration={5000}
+        >
+          <Alert onClose={() => setSnackbarData({ open: false })} severity={snackbarData.severity} sx={{ width: '100%' }}>
+            {snackbarData.message}
+          </Alert>
+        </Snackbar>
       </Card>
     </Box>
   )
