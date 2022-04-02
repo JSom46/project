@@ -1,39 +1,118 @@
-import React from 'react';
-import { View, Text, Image} from 'react-native';
+import React, {useState} from 'react';
+import { View, Text, Image, ScrollView, TouchableOpacity} from 'react-native';
 import { stylesAnnouncements } from '../components/styles';
+import axios from 'axios';
+import Swiper from 'react-native-swiper';
+
+import SplashScreen from './SplashScreen';
+
+//Przekazywane jest cale ogloszenie, w parametrzze 'announcement'
 
 const AnnouncementView = ({ route, navigation }) => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [announcement, setAnnouncement] = useState();
+    const [date, setDate] = useState();
+    
 
-    //Przekazywane jest cale ogloszenie, w parametrzze 'announcement'
-    //jesli ogloszenia wczytujemy jako obiekty - tak jak ja to zrobilem to nie trzeba tu nic zmieniac
-    //ale jesli wczytujemy, tak jak Ty masz - tzn. ogloszenie jako tablica to trzeba pozmieniac z announcement.XYZ na announcement[ABC]
-
-    return(
+    //pobieranie szczegolowych informacji o ogloszeniu
+    React.useEffect(() => {
+        const getAnnouncement = (announcementId) => {
+            console.log(announcementId);
+            const url = "http://" + serwer + "/anons/?id=" + announcementId;
         
-        <View style={stylesAnnouncements.announcementContainer}>
+            axios
+              .get(url)
+              .then((response) => {
+                const result = response.data;
+                if (response.status == "200") {
+                  console.log("Pobrane ogloszenie: ",result);
+                  setAnnouncement(result);
+                  let tempDate = new Date(result.create_date * 1000);
+                  setDate(tempDate);
+                }
+              })
+              .catch((error) => {
+                console.log(error.JSON());
+                setIsLoading(true);
+              })
+              .finally(() => setIsLoading(false));
+        };
 
-            <Text style={stylesAnnouncements.announcementTitle}>
-                {route.params.announcement.category}
-            </Text>
-            
-            <Text style={stylesAnnouncements.announcementTitle}>
-                {route.params.announcement.title}
-            </Text>
+        getAnnouncement(route.params.announcement.id);
 
-            <Image style={stylesAnnouncements.announcementPhoto} source={{uri: 'http://' + serwer + '/anons/photo?name=' + route.params.announcement.image}}/>
+        
+    }, [])
+      
+    return(
+        <View style={{flex: 1}}>
+            {isLoading ? (
+                <SplashScreen/>
+            ) : (
+                <ScrollView style={stylesAnnouncements.announcementContainer}>
+                    <Text style={stylesAnnouncements.announcementTitle}>
+                        {announcement.category == 0 ? "Zaginięcie" : "Znalezienie"}
+                    </Text>
+                    
+                    <Text style={stylesAnnouncements.announcementTitle}>
+                        {announcement.title}
+                    </Text>
 
-            <Text>
-                Typ: {route.params.announcement.type}
-            </Text>
+                    {/* <Image style={stylesAnnouncements.announcementPhoto} source={{uri: 'http://' + serwer + '/anons/photo?name=' + announcement.images[0]}}/> */}
+                    <Swiper height={310} showsButtons={true} loop={false}>
+                        {announcement.images.map((item, key) => {
+                            return(
+                                <View key={key} style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'transparent'}}>
+                                    <Image style={stylesAnnouncements.announcementPhoto} source={{uri: 'http://' + serwer + '/anons/photo?name=' + item}}/>
+                                </View>
+                            )
+                        })}
+                    </Swiper>
 
-            <Text>
-                Data: {route.params.announcement.create_date}
-            </Text>
+                    <Text style={{alignSelf: 'center'}}>
+                        Data zgłoszenia: {date.toLocaleDateString("pl-PL")}
+                    </Text>
 
-            <Text>
-                Pozostale informacje o ogloszeniu.
-            </Text>
+                    <View style={stylesAnnouncements.announcementDescriptionContainer}>
+                        <Text style={stylesAnnouncements.announcementDescriptionText}>
+                            Rodzaj: {announcement.type}
+                        </Text>
 
+                        <Text style={stylesAnnouncements.announcementDescriptionText}>
+                            Rasa: {announcement.breed}
+                        </Text>
+                        
+                        <Text style={stylesAnnouncements.announcementDescriptionText}>
+                            Sierść: {announcement.coat}
+                        </Text>
+
+                        <Text style={stylesAnnouncements.announcementDescriptionText}>
+                            Kolor: {announcement.color}
+                        </Text>
+
+                        <Text style={stylesAnnouncements.announcementDescriptionText}>
+                            {announcement.description}
+                        </Text>
+                    </View>
+
+                    <TouchableOpacity
+                        onPress={() => alert("jescze nie zaimplementowane")}
+                        style={{
+                            backgroundColor: 'white',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: 5,
+                            borderRadius: 10,
+                            borderWidth: 1,
+                            borderColor: 'black',
+                            marginHorizontal: 20,
+                            marginBottom: 20,
+                        }}
+                    >
+                        <Text style={{fontSize: 20, fontWeight: "600"}}>Zobacz na mapie</Text>
+                    </TouchableOpacity>
+
+                </ScrollView>
+            )}
         </View>
     )
 }

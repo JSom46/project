@@ -295,6 +295,10 @@ paths:
         enum:
         - 0
         - 1
+      - name: title
+        in: path
+        description: "przesłane zostaną tylko ogłoszenia, których tytuł zawiera podany ciąg znaków"
+        type: string
       - name: type
         in: path
         description: "przesłane zostaną tylko ogłoszenia, których type jest równy wartości tego parametru. mozna podać kilka możliwych wartości - należy je wypisać po przecinku(val1,val2,...)"

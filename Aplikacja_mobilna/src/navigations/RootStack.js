@@ -13,6 +13,7 @@ import Welcome from "./../screens/Welcome";
 import MapMain from "./../screens/Map/MapMain";
 import AddAnnouncement from "../screens/Map/AddAnnouncement";
 import AnnouncementList from "../screens/Map/AnnouncementList";
+import SplashScreen from "../screens/SplashScreen";
 import { State } from "react-native-gesture-handler";
 //import { HeaderTitle } from "react-navigation-stack";
 import axios from "axios";
@@ -129,8 +130,33 @@ const RootStack = () => {
   // []
   // )
 
-  return (
+  // React.useEffect(() => {
+  //   const handleLoggedIn = () => {
+  //   const url = "http://" + serwer + "/auth/loggedin";
+  //   axios
+  //     .get(url)
+  //     .then((response) => {
+  //       const result = response.data;
+  //       console.log(result);
+  //       const { message, status, data } = result;
+  //       if (response.status == "200") {
+  //         //handleLogout(result.email);
+  //         console.log(result.email)
+  //         //setUserToken();
+  //       }
+  //       })
 
+  //     .catch((error) => {
+  //       console.log(error);
+  //       console.log("Nie jesteś zalogowany");
+  //     });
+  // };
+  // handleLoggedIn();
+  // setIsLoading(false)
+  // }, []);
+
+
+  return (
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={{
@@ -144,13 +170,9 @@ const RootStack = () => {
               paddingLeft: 20,
             },
           }}
-          initialRouteName="Login"
+          //initialRouteName="Login"
         >
-            <Stack.Screen
-              options={{headerShown: false}}
-              name="Nawigator"
-              component={DrawerComponent}
-            />
+            
             <Stack.Screen
               options={{
                 headerTransparent: false,
@@ -163,7 +185,11 @@ const RootStack = () => {
               name="Register" 
               component={Register}
             />
-
+            <Stack.Screen
+              options={{headerShown: false}}
+              name="Nawigator"
+              component={DrawerComponent}
+            />
 
           {/* <Stack.Screen name="MapMain" component={MapMain} />
           <Stack.Screen

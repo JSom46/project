@@ -229,33 +229,33 @@ paths:
         '500':
           description: błąd po stronie serwera
 
-/user/password:
-    patch:
-      tags:
-        - /auth - autentyfikacja
-      summary: zmienia hasło użytkownika - wymaga zalogowania
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      parameters:
-        - in: body
-          name: password
-          type: string
-          description: aktualne hasło uzytkownika
-        - in: body
-          name: new_password
-          type: string
-          description: nowe hasło
-      responses:
-        '200':
-          description: hasło zostało zmienione
-        '400':
-          description: nieprawidłowe dane
-        '401':
-          description: użytkownik nie zalogowany
-        '500':
-          description: błąd po stronie serwera
+#/user/password:
+#    patch:
+#      tags:
+#        - /auth - autentyfikacja
+#      summary: zmienia hasło użytkownika - wymaga zalogowania
+#      consumes:
+#      - application/json
+#      produces:
+#      - application/json
+#      parameters:
+#        - in: body
+#          name: password
+#          type: string
+#          description: aktualne hasło uzytkownika
+#        - in: body
+#          name: new_password
+#          type: string
+#          description: nowe hasło
+#      responses:
+#        '200':
+#          description: hasło zostało zmienione
+#        '400':
+#          description: nieprawidłowe dane
+#        '401':
+#          description: użytkownik nie zalogowany
+#        '500':
+#          description: błąd po stronie serwera
 
 /logout:
     get:
