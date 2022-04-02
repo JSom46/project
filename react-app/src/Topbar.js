@@ -48,23 +48,25 @@ export default function MenuAppBar(props) {
     }
   }));
   React.useEffect(() => {
-    try {
-      fetch('http://localhost:2400/anons/notifications/count', {
-        method: 'GET',
-        credentials: 'include'
-      }).then(response => response.json())
-        .then(data => {
-          if (data.count !== 0) {
+    if (sessionStorage.getItem('login') !== null && sessionStorage.getItem('notificationsCount') === null)
+      try {
+        fetch('http://localhost:2400/anons/notifications/count', {
+          method: 'GET',
+          credentials: 'include'
+        }).then(response => {
+          if (response.status === 401) sessionStorage.removeItem('login');
+          response.json().then(data => {
+            console.log(data);
+            sessionStorage.setItem('notificationsCount', data.count);
             setNotificationsCount(data.count);
-          }
-        });
-    } catch (error) {
-      console.log("error", error);
-    }
+          });
+        })
+      } catch (error) {
+        console.log("error", error);
+      }
   }, []);
   function logout() {
-    sessionStorage.removeItem('login');
-    sessionStorage.removeItem('msg');
+    sessionStorage.clear();
     window.location.assign("/");
     fetch('http://localhost:2400/auth/logout', {
       credentials: 'include',
@@ -101,9 +103,9 @@ export default function MenuAppBar(props) {
     setOpenAddAnnouncementDialog(false);
   }
   return (
-    <AppBar position="static" sx={{ maxHeight:'60px', flexGrow: 1 }}>
+    <AppBar position="static" sx={{ maxHeight: '60px', flexGrow: 1 }}>
       <Toolbar>
-        <Box sx={{ flexGrow: 1, display:"flex" }}>
+        <Box sx={{ flexGrow: 1, display: "flex" }}>
           <Button variant="text" sx={{ color: "white" }} href='/'>
             <Typography variant="h6" noWrap component="div" sx={{ mr: 2, display: "flex" }}>
               PZ-XIV
@@ -121,7 +123,7 @@ export default function MenuAppBar(props) {
               onClick={handleMenu}
               color="inherit"
             >
-              <Badge badgeContent={notificationsCount} color="error" invisible={notificationsCount === 0}>
+              <Badge badgeContent={notificationsCount} color="error">
                 <AccountCircle />
               </Badge>
             </IconButton>
@@ -141,7 +143,7 @@ export default function MenuAppBar(props) {
               onClose={handleAccountClose}
             >
               <MenuItem onClick={function (event) { handleAccountClose(); window.location.href = "/announcements" }}>
-                <Badge variant="dot" color="error" invisible={notificationsCount === 0} anchorOrigin={{ vertical: 'top', horizontal: 'left', }}>
+                <Badge badgeContent={notificationsCount} variant="dot" color="error" anchorOrigin={{ vertical: 'top', horizontal: 'left', }}>
                   Profile
                 </Badge>
               </MenuItem>

@@ -5,18 +5,22 @@ import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 import { Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, CircularProgress, LinearProgress, Collapse, Alert, IconButton, Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import Badge from '@mui/material/Badge';
 import { Stack, Box } from '@mui/material';
 import { Typography } from '@mui/material';
 import { Divider } from '@mui/material';
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
 import EditAnnouncement from './EditAnnouncement';
+import AnnouncementNotifications from './AnnouncementNotifications';
 
 const theme = createTheme(
     {},
     plPL,
 );
 const StyledDataGrid = styled(DataGrid)(() => ({
+    '& .MuiDataGrid-root:focus': {
+        outline: 'none'
+    },
     '& .MuiDataGrid-cell:focus': {
         outline: 'none'
     },
@@ -24,45 +28,19 @@ const StyledDataGrid = styled(DataGrid)(() => ({
         cursor: 'pointer'
     }
 }));
-const columns = [
-    // {
-    //   field: 'id',
-    //   headerName: 'ID',
-    //   width: 10,
-    // },
-    {
-        field: 'title',
-        headerName: 'Tytuł',
-        flex: 1,
-    },
-    {
-        field: 'category',
-        headerName: 'Kategoria',
-        flex: 0.2,
-    },
-    {
-        field: 'type',
-        headerName: 'Typ',
-        flex: 0.2,
-    },
-    {
-        field: 'createDate',
-        headerName: 'Data dodania',
-        type: 'dateTime',
-        flex: 0.5,
-    },
-];
-function createData(id, title, category, type, createDate) {
-    return { id, title, category, type, createDate };
+function createData(id, title, category, type, createDate, notifications_count) {
+    return { id, title, category, type, createDate, notifications_count };
 }
 
 export default function DataGridMy() {
     const [announcementData, setAnnouncementData] = useState([]);
-    const [tab, setTab] = useState(0);
+    const [notificationsData, setNotificationsData] = useState([]);
     const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [fetchError, setFetchError] = useState(false);
     const [openEditDialog, setOpenEditDialog] = useState(false);
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [openNotificationsDialog, setOpenNotificationsDialog] = useState({ open: false });
     const [openImageDialog, setOpenImageDialog] = useState({ open: false });
     const [alertData, setAlertData] = useState({
         open: false,
@@ -82,6 +60,11 @@ export default function DataGridMy() {
                     method: 'GET',
                     credentials: 'include'
                 });
+                if (response.status === 401) {
+                    sessionStorage.clear();
+                    window.location.assign("/login");
+                    return;
+                }
                 const json = await response.json();
                 const rows = [];
                 json.list.forEach(element => {
@@ -90,12 +73,14 @@ export default function DataGridMy() {
                         element.title,
                         (element.category === 0 ? "Zaginięcie" : "Znalezienie"),
                         element.type,
-                        element.create_date
+                        element.create_date,
+                        element.notifications_count
                     ));
                 });
                 setData(rows);
             } catch (error) {
                 setFetchError(true);
+
                 console.log("error", error);
             }
         };
@@ -111,6 +96,22 @@ export default function DataGridMy() {
             const json = await response.json();
             setAnnouncementData(json);
         } catch (error) {
+            console.log("error", error);
+        }
+    };
+    const fetchNotificationsData = async (id) => {
+        let url = 'http://localhost:2400/anons/notifications?id=' + id;
+        setLoading(true);
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                credentials: 'include'
+            });
+            const json = await response.json();
+            setNotificationsData(json);
+            setLoading(false);
+        } catch (error) {
+            setLoading(false);
             console.log("error", error);
         }
     };
@@ -216,28 +217,12 @@ export default function DataGridMy() {
             />
         );
     }
-    const handleTabChange = (event, newValue) => {
-        setTab(newValue);
-    };
     function CustomFooter() {
         return (
             <GridFooterContainer>
                 <IconButton sx={{ float: 'left' }} onClick={() => (setReload((prev) => !(prev)))}><RefreshIcon /></IconButton>
                 <CustomPagination />
             </GridFooterContainer>
-        );
-    }
-    function TabPanel(props) {
-        const { children, value, index } = props;
-
-        return (
-            <div>
-                {value === index && (
-                    <Box role="tabpanel" hidden={value !== index}>
-                        {children}
-                    </Box>
-                )}
-            </div>
         );
     }
     return (
@@ -267,7 +252,61 @@ export default function DataGridMy() {
                         <StyledDataGrid
                             autoHeight
                             rows={data}
-                            columns={columns}
+                            columns={[
+                                // {
+                                //   field: 'id',
+                                //   headerName: 'ID',
+                                //   width: 10,
+                                // },
+                                {
+                                    field: 'title',
+                                    headerName: 'Tytuł',
+                                    flex: 1,
+                                },
+                                {
+                                    field: 'category',
+                                    headerName: 'Kategoria',
+                                    flex: 0.2,
+                                },
+                                {
+                                    field: 'type',
+                                    headerName: 'Typ',
+                                    flex: 0.2,
+                                },
+                                {
+                                    field: 'createDate',
+                                    headerName: 'Data dodania',
+                                    type: 'dateTime',
+                                    flex: 0.5,
+                                },
+                                {
+                                    field: '',
+                                    headerName: '',
+                                    // description: 'powiadomienia',
+                                    flex: 0.01,
+                                    filterable: false,
+                                    disableColumnMenu: true,
+                                    sortable: false,
+                                    align: 'center',
+                                    renderCell: (cellValues) => {
+                                        const handleClick = (event, cellValues) => {
+                                            event.stopPropagation();
+                                            setNotificationsData([]);
+                                            setOpenNotificationsDialog({ open: true, row: cellValues });
+                                            fetchNotificationsData(cellValues.row.id);
+                                            // console.log(event);
+                                            // return console.log(cellValues);
+                                        };
+                                        return (
+                                            <IconButton onClick={(event) => { handleClick(event, cellValues) }}>
+                                                <Badge badgeContent={cellValues.row.notifications_count} size='small' color="error">
+                                                    <NotificationsIcon />
+                                                </Badge>
+                                            </IconButton>
+                                        );
+                                    }
+                                },
+                            ]}
                             pageSize={10}
                             rowsPerPageOptions={[10]}
                             onRowClick={handleRowClick}
@@ -283,78 +322,67 @@ export default function DataGridMy() {
             </ThemeProvider>
             <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth={true}>
                 <Box sx={{ width: '100%' }}>
-                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                        <Tabs value={tab} onChange={handleTabChange}>
-                            <Tab label="Ogłoszenie" />
-                            <Tab label="Powiadomienia" />
-                        </Tabs>
-                    </Box>
-                    <TabPanel value={tab} index={0}>
-                        {announcementData.length === 0 ? (
-                            <Stack alignItems="center" m={3}>
-                                <CircularProgress />
-                            </Stack>
-                        ) : (
-                            <div>
-                                <DialogTitle>{announcementData.title}</DialogTitle>
-                                <DialogContent>
-                                    <Typography variant="subtitle1">Opis</Typography>
-                                    <DialogContentText>
-                                        {announcementData.description}
-                                    </DialogContentText>
-                                    <Divider />
-                                    {(announcementData.images[0] !== '' && announcementData.images.length !== 0) &&
-                                        <span>
-                                            <Typography variant="subtitle1">Zdjęcia</Typography>
-                                            {announcementData.images && announcementData.images.map((element) => (
-                                                <img style={{ width: "100px", height: "100px", objectFit: "cover", marginRight: 2, marginBottom: 2 }} src={'http://localhost:2400/anons/photo?name=' + element}
-                                                    alt={announcementData.title} key={announcementData.id} onClick={handleImageClick} />
-                                            ))}
-                                            <Divider />
-                                        </span>
-                                    }
-                                    <Stack justifyContent="space-between" direction="row" alignContent="center" spacing={2}>
-                                        <span>
-                                            <Typography variant="subtitle1">Typ</Typography>
-                                            <DialogContentText>
-                                                {announcementData.type}
-                                            </DialogContentText>
-                                        </span>
-                                        <span>
-                                            <Typography variant="subtitle1">Rasa</Typography>
-                                            <DialogContentText>
-                                                {announcementData.breed}
-                                            </DialogContentText>
-                                        </span>
-                                        <span>
-                                            <Typography variant="subtitle1">Owłosienie</Typography>
-                                            <DialogContentText>
-                                                {announcementData.coat}
-                                            </DialogContentText>
-                                        </span>
-                                        <span>
-                                            <Typography variant="subtitle1">Umaszczenie</Typography>
-                                            <DialogContentText>
-                                                {announcementData.color}
-                                            </DialogContentText>
-                                        </span>
-                                    </Stack>
-                                    <Divider />
-                                </DialogContent>
-                                <DialogActions>
-                                    <Button onClick={() => (setOpen(false))}>Wróć</Button>
-                                    <Button color='warning' onClick={() => (setOpenEditDialog(true))}>Edytuj</Button>
-                                    <Button color='error' onClick={() => (setOpenDeleteDialog(true))}>Usuń</Button>
-                                    <Button onClick={() => (
-                                        window.location.href = "/dashboard" + "?lat=" + announcementData.lat + "&lng=" + announcementData.lng
-                                    )}>Pokaż na mapie</Button>
-                                </DialogActions>
-                            </div>
-                        )}
-                    </TabPanel>
-                    <TabPanel value={tab} index={1}>
-                        TO DO
-                    </TabPanel>
+                    {announcementData.length === 0 ? (
+                        <Stack alignItems="center" m={3}>
+                            <CircularProgress />
+                        </Stack>
+                    ) : (
+                        <div>
+                            <DialogTitle>{announcementData.title}</DialogTitle>
+                            <DialogContent>
+                                <Typography variant="subtitle1">Opis</Typography>
+                                <DialogContentText>
+                                    {announcementData.description}
+                                </DialogContentText>
+                                <Divider />
+                                {(announcementData.images[0] !== '' && announcementData.images.length !== 0) &&
+                                    <span>
+                                        <Typography variant="subtitle1">Zdjęcia</Typography>
+                                        {announcementData.images && announcementData.images.map((element) => (
+                                            <img style={{ width: "100px", height: "100px", objectFit: "cover", marginRight: 2, marginBottom: 2 }} src={'http://localhost:2400/anons/photo?name=' + element}
+                                                alt={announcementData.title} key={announcementData.id} onClick={handleImageClick} />
+                                        ))}
+                                        <Divider />
+                                    </span>
+                                }
+                                <Stack justifyContent="space-between" direction="row" alignContent="center" spacing={2}>
+                                    <span>
+                                        <Typography variant="subtitle1">Typ</Typography>
+                                        <DialogContentText>
+                                            {announcementData.type}
+                                        </DialogContentText>
+                                    </span>
+                                    <span>
+                                        <Typography variant="subtitle1">Rasa</Typography>
+                                        <DialogContentText>
+                                            {announcementData.breed}
+                                        </DialogContentText>
+                                    </span>
+                                    <span>
+                                        <Typography variant="subtitle1">Owłosienie</Typography>
+                                        <DialogContentText>
+                                            {announcementData.coat}
+                                        </DialogContentText>
+                                    </span>
+                                    <span>
+                                        <Typography variant="subtitle1">Umaszczenie</Typography>
+                                        <DialogContentText>
+                                            {announcementData.color}
+                                        </DialogContentText>
+                                    </span>
+                                </Stack>
+                                <Divider />
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={() => (setOpen(false))}>Wróć</Button>
+                                <Button color='warning' onClick={() => (setOpenEditDialog(true))}>Edytuj</Button>
+                                <Button color='error' onClick={() => (setOpenDeleteDialog(true))}>Usuń</Button>
+                                <Button onClick={() => (
+                                    window.location.href = "/dashboard" + "?lat=" + announcementData.lat + "&lng=" + announcementData.lng
+                                )}>Pokaż na mapie</Button>
+                            </DialogActions>
+                        </div>
+                    )}
                 </Box>
             </Dialog>
             <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)} maxWidth="md" fullWidth={true}>
@@ -373,6 +401,16 @@ export default function DataGridMy() {
             <Dialog open={openEditDialog} onClose={() => (setOpenEditDialog(false))} fullWidth>
                 <DialogTitle>Edytuj ogłoszenie</DialogTitle>
                 <EditAnnouncement row={announcementData} parentCallback={handleCallback} />
+            </Dialog>
+            <Dialog open={openNotificationsDialog.open} onClose={() => (setOpenNotificationsDialog({ open: false }))} maxWidth="md" fullWidth>
+                <DialogTitle>Notyfikacje</DialogTitle>
+                {loading ? (
+                    <Stack alignItems="center" m={3}>
+                        <CircularProgress />
+                    </Stack>
+                ) : (
+                    <AnnouncementNotifications row={notificationsData} parentCallback={handleCallback} />
+                )}
             </Dialog>
             <Dialog open={openImageDialog.open} onClose={() => (setOpenImageDialog((prev) => ({ open: false, src: prev.src })))} fullWidth>
                 <img src={openImageDialog.src} alt={announcementData.title} />
