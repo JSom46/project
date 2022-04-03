@@ -1,3 +1,7 @@
+
+// chatid - id uzytkownika zakladajacego czat
+//userid - id uzytkownika posiadajacego anons
+
 require('dotenv').config();
 
 const express = require('express');
@@ -78,9 +82,9 @@ io.on("connection", function (socket) {
             FROM Chats c`
         , userid, (err, result) => {
             if (err) {
-                socket.emit('error', err);
+                socket.emit('user-chats', {status: -1, result: err.message});
             } else {
-                socket.emit('user-chats', result);
+                socket.emit('user-chats', {status: 1, result: result});
             }                                
         });
     });
@@ -88,59 +92,68 @@ io.on("connection", function (socket) {
     socket.on('get-chat-messages', (anonsid, userid) => {
         // wysyłamy do użytkownika wiadomości z konkretnego chatu
 
-        con.all('SELECT message_id, anons_id, user_id, message_date, message_text FROM ChatMessages WHERE anons_id = ? AND user_id = ?',
-            anonsid, userid, (err, result) => {
-                if (err) {
-                    socket.emit('error', err);
-                } else {
-                    socket.emit('chat-messages', result);
-                }
+        con.all(`SELECT message_id, anons_id, user_id, message_date, message_text`
+                ` FROM ChatMessages WHERE anons_id = ? AND user_id = ?`, anonsid, userid,
+                (err, result) => {
+                    if (err) {
+                        socket.emit('chat-messages', {status: -1, result: err.message});
+                    } else {
+                        socket.emit('chat-messages', {status: 1, result: result});
+                    }
         });
     });
 
 
-    socket.on('auth-request', ({userid}) => {
+    socket.on('auth-request', ({username}) => {
             // tutaj uwierzytelniamy(?) użytkownika 
             // i wysyłamu mu status, czyli informacje o jego 
             // czatach i wiadomościach na nich
 
-            // dopisujemy użytkownika do mapy (socketid, userid)
-            socketUserMap.set(socket.id, userid);
-            userSocketMap.set(userid, socket.id);
-            self.userId = userid;
+            con.get('SELECT id FROM users WHERE login = "?"', username, 
+            (err, result) => {
+                if (!err && result.id != undefined) {
+                    // dopisujemy użytkownika do mapy (socketid, userid)
+                    socketUserMap.set(socket.id, result.id);
+                    userSocketMap.set(result.id, socket.id);
+                    self.userId = result.id;
 
-            // zapytanie do bazy wyciągające wiadomości na czatach
-            // do uzytkownika i je odsyłamy
-
-            //con.all('select message from charMessage where userid = ?', userid); // ZMIENIĆ!!!
-
-            socket.emit('auth-response', {status: 1});
-            
+                    socket.emit('auth-response', {status: 1, result: result.id});
+                }
+                else {
+                    socket.emit('auth-response', {status: -1, result: 0});
+                }
+            })
     });
 
     socket.on('new-chat', (anonsid, chatid) => {
         let chatroom = anonsid + ':' + chatid;
         socket.join(chatroom);
 
-        con.all('SELECT * FROM ChatUsers WHERE anons_id = ? AND chat_id = ?',anonsid, chatid, (err, result) => {
+        con.get('SELECT COUNT(*) cnt FROM ChatUsers WHERE anons_id = ? AND chat_id = ?',anonsid, chatid, 
+        (err, result) => {
+            if (err) {
+                console.debug(err)
+                socket.emit('new-chat-response', {status: -1, result: 'Internal error'} ); // -1 .. lub ERORR ?
+                return;
+            }
             console.debug(result)
 
-            if (result.length > 0) {
+            if (result.cnt > 0) {
                 // chat już jest zapisany w bazie - nie można dodać nowego!
 
-                socket.emit('new-chat', {status: 'EXISTS'});
+                socket.emit('new-chat-response', {status: -1, result: "Already exists"});
             } else {
                 // można dodać nowy chat
 
                 con.run(`INSERT INTO ChatUsers (anons_id, chat_id, user_id) VALUES (?, ?, ?)`, anonsid, chatid, chatid);
                 con.run(`INSERT INTO ChatUsers (anons_id, chat_id, user_id)
-                        SELECT id, ?, author_id FROM anons
-                        WHERE id = ?`, chatid, anonsid, (err) => {
-                            console.log(err.name + " | " + err.message);
-                            throw err;                    
-                        });        
+                         SELECT id, ?, author_id FROM anons WHERE id = ?`, chatid, anonsid, 
+                            (err) => {
+                                console.log(err.name + " | " + err.message);
+                                throw err;                    
+                            });        
 
-                socket.emit('new-chat', {status: 'CREATED'});
+                socket.emit('new-chat-response', {status: 1, result: 'OK'});
             }
         })
 
@@ -152,10 +165,18 @@ io.on("connection", function (socket) {
     socket.on("join-chat", ({anonsid, chatid, userid}) => {
         let chatroom = anonsid + ':' + chatid;
 
-        // sprawdzić, czy user_id ma założony chat ?
+        // sprawdzić, czy user_id ma założony chat
 
-        socket.join(chatroom);
-        io.to(chatroom).broadcast('user-join', {anonsid, chatid, userid});
+        con.get('SELECT COUNT(*) cnt FROM ChatUsers WHERE anons_id = ? AND chat_id = ? ', anonsid, chatid, 
+        (err, result) => {
+            if (!err && result.cnt > 0) {
+                socket.join(chatroom);
+                io.to(chatroom).broadcast('user-join', {anonsid, chatid, userid});
+            }
+            else{
+                socket.emit("join-chat-response", {status: -1, result: 'No such chat'});
+            }
+        })
 
         //userSocketMap.get(userid).emit('new-message', {anons: anonsid, chat: chatid, user: userid});
     });
@@ -177,7 +198,7 @@ io.on("connection", function (socket) {
 
         // wiadomość do użytkowników podłączonych do pokoju 
         let chatroom = anonsid + ':' + chatid;
-        io.to(chatroom).broadcast.emit('chat-message', {anonsid, userid, msgtext});  // zmienić grupę na właściwą dla użytkownika i anonsu
+        io.to(chatroom).broadcast.emit('chat-message', {anonsid, chatid, userid, msgtext});  // zmienić grupę na właściwą dla użytkownika i anonsu
 
         // dodatkowo powinniśmy powiadomić wszystkich użytkowników (u nas jednego), których to dotyczy,
         // tj. podłączonych do serwera/aplikacji ale nie będących aktualnie w pokoju czatowym,
@@ -185,7 +206,8 @@ io.on("connection", function (socket) {
 
         // tabelę ChatUsers można wczytać do pamięci operacyjnej przy uruchamianiu serwera
         // żeby nie robić zapytań SQL przy każdej wiadomośc chat-owej
-        con.run('SELECT user_id FROM ChatUsers WHERE anons_id = ? AND chat_id = ?', anonsid, chatid, (err, result) => {
+        con.run('SELECT user_id FROM ChatUsers WHERE anons_id = ? AND chat_id = ?', anonsid, chatid, 
+        (err, result) => {
             for (let user in result) {
                 let sockid = userSocketMap.get(user.user_id);
                 if (sockid != undefined ) {
@@ -201,9 +223,9 @@ io.on("connection", function (socket) {
     });
 
 
-    socket.on("chat-image", ({anonsid, userid, image}) => {
-
-        socket.broadcast.emit('message_image', {anonsid, userid, image}); // zmienić grupę na właściwą dla użytkownika i anonsu
+    socket.on("chat-image", ({anonsid, chatid, userid, image}) => {
+        let chatroom = anonsid + ':' + chatid;
+        io.to(chatroom).broadcast.emit('chat-image', {anonsid, chatid, userid, image});
 
         let curDate = Date.now();
         lastImage++;
@@ -215,10 +237,11 @@ io.on("connection", function (socket) {
         writer.end();
         writer.on('finish', () => {
             // zapis do pliku na dysku zokończony
+            console.log('Image saved: ', imgPath)
         })
 
-        con.run(`INSERT INTO ChatMessages (message_id, anons_id, user_id, message_date, message_text) VALUES
-                 (${lastMessage}, ${anonsid}, ${userid}, ${curDate}, NULL)`);
+        con.run(`INSERT INTO ChatMessages (message_id, anons_id, chat_id, user_id, message_date, message_text) VALUES
+                 (${lastMessage}, ${anonsid}, ${chatid},${userid}, ${curDate}, NULL)`);
         con.run(`INSERT INTO  Images (image_id, message_id, user_id, path) VALUES
                  (${lastImage}, ${lastMessage}, ${userid}, "${imgPath}")`);
     })
