@@ -11,6 +11,7 @@ import { Typography } from '@mui/material';
 import { CircularProgress } from '@mui/material';
 import { Snackbar, Alert } from '@mui/material';
 import { Grid } from '@mui/material';
+import { Dialog, LinearProgress, DialogContent, DialogActions, DialogTitle } from '@mui/material';
 
 import './login.css'
 
@@ -56,12 +57,14 @@ export default function Login(props) {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [loading, setLoading] = useState(false);
-  const [snackbarData, setSnackbarData] = React.useState({
+  const [openChangePasswordDialog, setOpenChangePasswordDialog] = useState(false);
+  const [requestEmail, setRequestEmail] = useState(false);
+  const [snackbarData, setSnackbarData] = useState({
     open: false,
     message: "",
     severity: "error"
   });
-  
+
   async function loginUser(userData) {
     setLoading(true);
     try {
@@ -96,9 +99,34 @@ export default function Login(props) {
       })
     }
     else {
-      sessionStorage.setItem('login',response.login);
+      sessionStorage.setItem('login', response.login);
       sessionStorage.setItem('msg', "logged in");
       window.location.reload();
+    }
+  }
+  async function handleRequestPasswordChange() {
+    setLoading(true);
+    try {
+      fetch('http://localhost:2400/auth/requestPasswordChange', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email: requestEmail })
+      }).then(response => {
+        setSnackbarData({
+          open: true,
+          message: "Wysłano email, jeśli z tym adresem email jest powiązane konto",
+          severity: "info"
+        });
+        setOpenChangePasswordDialog(false);
+      })
+      setLoading(false);
+    }
+    catch (error) {
+      setLoading(false);
+      console.log(error);
     }
   }
   if (sessionStorage.getItem('login') !== null)
@@ -123,8 +151,8 @@ export default function Login(props) {
           <FormControl sx={{ width: 300 }}>
             <form onSubmit={handleSubmit}>
               <FormGroup>
-                <TextField type='email' id="email" label="Email" variant="standard" required onBlur={e => setEmail(e.target.value)} />
-                <TextField type='password' id="password" label="Hasło" variant="standard" required onBlur={e => setPassword(e.target.value)} />
+                <TextField type='email' id="email" label="Email" variant="standard" required onChange={e => setEmail(e.target.value)} />
+                <TextField type='password' id="password" label="Hasło" variant="standard" required onChange={e => setPassword(e.target.value)} />
                 <br />
                 <Button variant="contained" type="submit">Zaloguj</Button>
               </FormGroup>
@@ -134,8 +162,30 @@ export default function Login(props) {
               </Stack>
             </form>
           </FormControl>
+          <Button variant="standard" size="small" onClick={() => setOpenChangePasswordDialog(true)}>Zapomniałem hasła</Button>
           <CircularProgress hidden={!loading} />
         </Stack>
+        <Dialog open={openChangePasswordDialog} onClose={() => setOpenChangePasswordDialog(false)} maxWidth="xs" fullWidth={true}>
+          <LinearProgress hidden={!loading} />
+          <DialogTitle>Podaj adres email powiązany z twoim kontem</DialogTitle>
+          <DialogContent>
+            <TextField
+              autoFocus
+              margin="dense"
+              id="name"
+              label="Email"
+              type="email"
+              fullWidth
+              variant="standard"
+              required
+              onChange={(e) => setRequestEmail(e.target.value)}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button color='success' onClick={handleRequestPasswordChange}>Wyślij</Button>
+            <Button onClick={() => (setOpenChangePasswordDialog(false))}>Anuluj</Button>
+          </DialogActions>
+        </Dialog>
         <Snackbar
           anchorOrigin={{ vertical: "top", horizontal: "center" }}
           open={snackbarData.open}

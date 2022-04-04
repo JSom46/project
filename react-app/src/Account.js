@@ -8,6 +8,7 @@ import CardContent from '@mui/material/CardContent';
 import { Typography, Button, TextField } from '@mui/material';
 import { LinearProgress } from '@mui/material';
 import { Snackbar, Alert } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 
 export default function Account(props) {
   const [userData, setUserData] = React.useState([]);
@@ -15,6 +16,7 @@ export default function Account(props) {
   const [reload, setReload] = React.useState(false);
   const [loginField, setLoginField] = React.useState(props.auth.login);
   const [openEditLogin, setOpenEditLogin] = React.useState(false);
+  const [openChangePasswordDialog, setOpenChangePasswordDialog] = React.useState(false);
   const [snackbarData, setSnackbarData] = React.useState({
     open: false,
     message: "",
@@ -78,6 +80,33 @@ export default function Account(props) {
       console.log(error);
     }
   }
+  async function handleRequestPasswordChange() {
+    setLoading(true);
+    try {
+      fetch('http://localhost:2400/auth/requestPasswordChange', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ email: userData.email })
+      }).then(response => {
+        if (response.status === 200) {
+          setSnackbarData({
+            open: true,
+            message: "Wysłano email. Sprawdź swoją skrzynkę pocztową.",
+            severity: "success"
+          });
+          setOpenChangePasswordDialog(false);
+        }
+      })
+      setLoading(false);
+    }
+    catch (error) {
+      setLoading(false);
+      console.log(error);
+    }
+  }
 
   if (props.auth.msg === 'not logged in') return (<Redirect to="/login" />)
   return (
@@ -95,11 +124,24 @@ export default function Account(props) {
         </CardContent>
         <CardActions sx={{ justifyContent: "right", flex: 1 }}>
           <Button size="small" onClick={() => setOpenEditLogin((prev) => !(prev))} hidden={openEditLogin}>Zmień login</Button>
-          <Button size="small" hidden={openEditLogin}>Zmień hasło</Button>
+          <Button size="small" hidden={openEditLogin} onClick={() => setOpenChangePasswordDialog(true)}>Zmień hasło</Button>
           <Button size="small" color="error" onClick={() => { setOpenEditLogin((prev) => !(prev)); setLoginField(userData.login) }} hidden={!openEditLogin}>Anuluj</Button>
           <Button size="small" color="success" hidden={!openEditLogin} onClick={() => editLogin()}>Zapisz</Button>
         </CardActions>
         <LinearProgress hidden={!loading} />
+        <Dialog open={openChangePasswordDialog} onClose={() => setOpenChangePasswordDialog(false)} maxWidth="xs" fullWidth={true}>
+          <LinearProgress hidden={!loading} />
+          <DialogTitle>Potwierdź usuwanie ogłoszenia</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Wysłać email z linkiem do zmiany hasła?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button color='success' onClick={handleRequestPasswordChange}>Wyślij</Button>
+            <Button onClick={() => (setOpenChangePasswordDialog(false))}>Anuluj</Button>
+          </DialogActions>
+        </Dialog>
         <Snackbar
           anchorOrigin={{ vertical: "top", horizontal: "center" }}
           open={snackbarData.open}

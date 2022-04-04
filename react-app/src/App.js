@@ -13,6 +13,7 @@ import Account from './Account';
 import Dashboard from './Dashboard';
 import Announcements from './Announcements';
 import Footer from './Footer';
+import ChangePassword from './ChangePassword';
 
 import MapTesting from './MapTesting'; //TEMP
 import { Box } from '@mui/material';
@@ -78,6 +79,9 @@ function App() {
             </Route>
             <Route path="/login">
               <Login auth={auth} />
+            </Route>
+            <Route path="/changePassword">
+              <ChangePassword />
             </Route>
             <Route path="/maptest">
               <MapTesting />
