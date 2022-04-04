@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const distance = require('./distance.js');
 const types = require('./db/types.json').types;
+const log = require('loglevel');
 
 let date = BigInt(Date.now());
 // funkcja generujaca unikalne nazwy dla plikow
@@ -102,12 +103,15 @@ router.get('/activate', authorize);
 //color - umaszczenie   - niewymagane
 //breed - rasa - niewymagane
 router.post('/', upload.array('pictures'), (req, res) => {
+    log.debug('/ : post\nfiles:', req.files, '\nbody:', req.body);
     //brakuje ktoregos z niezbednych pol lub ktores z pol zawiera niepoprawne dane - ogloszenie nie moze zostac dodane
     if(!(req.body.title && req.body.description && req.body.category && req.body.lat && req.body.lng && req.body.type) || 
     (req.body.category != 0 && req.body.category != 1) || isNaN(parseFloat(req.body.lat)) || isNaN(parseFloat(req.body.lng))){
         //ogloszenie nie zostanie dodane - kasujemy powiazane z nim zdjecia
         req.files.forEach((e) => {
-            fs.unlink('./pictures/' + e.filename, (err) => {});
+            fs.unlink('./pictures/' + e.filename, (err) => {
+                log.error('unlink: ', e);
+            });
         });
         return res.status(400).json({msg: 'required field is empty/contain invalid data'});
     }
@@ -142,8 +146,11 @@ router.post('/', upload.array('pictures'), (req, res) => {
         if(err){
             //dodanie ogloszenia sie nie powiodlo - kasujemy powiazane z nim zdjecia
             req.files.forEach((e) => {
-                fs.unlink('./pictures/' + e.filename, (err) => {});
+                fs.unlink('./pictures/' + e.filename, (err) => {
+                    log.error('unlink: ', e);
+                });
             });
+            log.trace(err);
             return res.sendStatus(500);
         }
         return res.status(200).json({id: this.lastID});
@@ -173,6 +180,7 @@ router.get('/', (req, res) => {
             WHERE 
                 id = ?`, req.query.id, (err, row) => {
         if(err){
+            log.trace(err);
             return res.sendStatus(500);
         }
         if(!row){
@@ -259,6 +267,7 @@ router.get('/list', (req, res) => {
     let arr = [];
     con.each(statement, parameters, (err, row) => {
         if(err){
+            log.trace(err);
             res.sendStatus(500);
         }
         // zdefiniowano parametry lat i lng - odfiltrowujemy zbyt oddalone ogloszenia
@@ -272,6 +281,7 @@ router.get('/list', (req, res) => {
         }
     }, (err, number) => {
         if(err){
+            log.trace(err);
             res.sendStatus(500);
         }
         
@@ -301,7 +311,9 @@ router.put('/', upload.array('pictures'), (req, res) => {
     if(!(req.body.id && req.body.title && req.body.description && req.body.category && req.body.lat && req.body.lng && req.body.type) || 
     (req.body.category != 0 && req.body.category != 1) || isNaN(parseFloat(req.body.lat)) || isNaN(parseFloat(req.body.lng))){
         req.files.forEach((e) => {
-            fs.unlink('./pictures/' + e.filename, (err) => {});
+            fs.unlink('./pictures/' + e.filename, (err) => {
+                log.error('unlink: ', e);
+            });
         });
         return res.status(400).json({msg: 'required field is empty/contain invalid data'});
     }
@@ -313,6 +325,7 @@ router.put('/', upload.array('pictures'), (req, res) => {
             WHERE 
                 id = ?;`, req.body.id, (err, row) => {
         if(err){
+            log.trace(err);
             return res.sendStatus(500);
         }
         //ogloszenie nie istnieje
@@ -354,14 +367,19 @@ router.put('/', upload.array('pictures'), (req, res) => {
             if(err){
                 //aktualizacja ogloszenia sie nie powiodlo - kasujemy powiazane z nim zdjecia
                 req.files.filename.forEach((e) => {
-                    fs.unlink('./pictures/' + e.filename, (err) => {});
+                    fs.unlink('./pictures/' + e.filename, (err) => {
+                        log.error('unlink: ', e);
+                    });
                 });
+                log.trace(err);
                 return res.sendStatus(500);
             }
             //usuwamy stare zdjecia
             if(row.images.length > 0){
                 row.images.split('#').forEach((e) => {
-                    fs.unlink('./pictures/' + e, (err) => {});
+                    fs.unlink('./pictures/' + e, (err) => {
+                        log.error('unlink: ', e);
+                    });
                 });
             }
             return res.sendStatus(200);
@@ -381,6 +399,7 @@ router.delete('/', (req, res) => {
             WHERE 
                 id = ?;`, req.body.id, (err, row) => {
         if(err){
+            log.trace(err);
             return res.sendStatus(500);
         }
         //ogloszenie nie istnieje
@@ -397,6 +416,7 @@ router.delete('/', (req, res) => {
                 WHERE 
                     id = ?`, req.body.id, (err) => {
             if(err){
+                log.trace(err);
                 return res.sendStatus(500);
             }
             return res.sendStatus(200);
@@ -404,7 +424,9 @@ router.delete('/', (req, res) => {
         //jesli ogłoszenie mialo jakies zdjecia - usun je
         if(row.images.length > 0){
             row.images.split('#').forEach((e) => {
-                fs.unlink('./pictures/' + e, (err) => {});
+                fs.unlink('./pictures/' + e, (err) => {
+                    log.error('unlink: ', e);
+                });
             });
         }  
     });
@@ -436,6 +458,7 @@ router.get('/my', (req, res) => {
                 author_id = ?`, 
     req.session.user_id, (err, rows) => {
         if(err){
+            log.trace(err);
             return res.sendStatus(500);
         }
 
@@ -468,6 +491,7 @@ router.get('/notifications', (req, res) => {
                 WHERE 
                     id = ?;`, req.query.id, (err, row) => {
             if(err){
+                log.trace(err);
                 return res.sendStatus(500);
             }
             //brak ogloszenia o podanym id
@@ -491,6 +515,7 @@ router.get('/notifications', (req, res) => {
                         anon_id = ?;`, 
             req.query.id, (err, rows) => {
                 if(err){
+                    log.trace(err);
                     return res.sendStatus(500);
                 }
                 if(rows.length > 0){
@@ -527,6 +552,7 @@ router.get('/notifications', (req, res) => {
                         WHERE 
                             author_id = ?)`, req.session.user_id, (err, rows) => {
             if(err){
+                log.trace(err);
                 return res.sendStatus(500);
             }
             if(rows.length > 0){
@@ -559,6 +585,7 @@ router.get('/notifications/count', (req, res) => {
                     WHERE 
                         author_id = ?);`, req.session.user_id, (err, row) => {
         if(err){
+            log.trace(err);
             return res.sendStatus(500);
         }
         return res.status(200).json({count: row.count});
@@ -577,7 +604,9 @@ router.post('/notifications', singleUpload.single('picture'), (req, res) => {
     if(!req.body.anon_id || isNaN(parseFloat(req.body.lat)) || isNaN(parseFloat(req.body.lng))){
         // usuwanie przeslanych zdjec, jesli istnieja
         if(req.file){
-            fs.unlink('./pictures/' + req.file.filename, (err) => {});
+            fs.unlink('./pictures/' + req.file.filename, (err) => {
+                log.error('unlink: ', e);
+            });
         }       
         return res.status(400).json({msg: 'required field is empty/contain invalid data'});
     }
@@ -595,8 +624,11 @@ router.post('/notifications', singleUpload.single('picture'), (req, res) => {
         if(err){
             // dodanie notyfikacji sie nie udalo - usuwanie przeslanych zdjec
             if(req.file){
-                fs.unlink('./pictures/' + req.file.filename, (err) => {});
+                fs.unlink('./pictures/' + req.file.filename, (err) => {
+                    log.error('unlink: ', e);
+                });
             }
+            log.trace(err);
             return res.sendStatus(500);
         }
         return res.sendStatus(200);
@@ -622,6 +654,7 @@ router.post('/activate', (req, res) => {
             WHERE 
                 id = ?;`, req.body.id, (err, row) => {
         if(err){
+            log.trace(err);
             return res.sendStatus(500);
         }
 
@@ -649,6 +682,7 @@ router.post('/activate', (req, res) => {
                 WHERE 
                     id = ?;`, req.body.id, (err) => {
             if(err){
+                log.trace(err);
                 return res.sendStatus(500);
             }
         });

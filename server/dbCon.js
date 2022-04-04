@@ -2,11 +2,11 @@
 require('dotenv').config();
 
 const bcrypt = require('bcrypt');
-
+const log = require('loglevel');
 const sqlite3 = require('sqlite3').verbose();
 const con = new sqlite3.Database('./db/serverdb.db', (err) => {
     if(err){
-		console.log('db connecting error! ' + err.message);
+		log.error('connecting to database: ', err);
 		throw err;
 	}
 });
@@ -26,21 +26,21 @@ con.serialize(() => {
                 password_change_token TEXT, 
                 password_token_expiration INTEGER);`, (err) => {
         if(err){
-            console.log(err.name + " | " + err.message);
+            log.error('creating users: ', err);
             throw err;
         }
     });
 
     con.get('SELECT COUNT(*) num FROM users', (err, result) => {
         if(err){
-            console.log(err.name + " | " + err.message);
+            log.error('selecting num of users: ', err);
             throw err;
         }
         //jesli w tabeli users nie ma zadnych rekordow, tworzone jest konto admin z uprawnieniami administratora
         if(result.num == 0){
             bcrypt.hash(process.env.ADMIN_PASSWD, 10, (err, hash) => {
                 if(err){
-                    console.log(err.name + " | " + err.message);
+                    log.error('encrypting admin`s passsword:', err);
                     throw err;
                 }
                 con.run(`INSERT INTO users(
@@ -58,7 +58,7 @@ con.serialize(() => {
                             1, 
                             1)`, (err) => {
                     if(err){
-                        console.log(err.name + " | " + err.message);
+                        log.error('inserting admin into users: ', err);
                         throw err;
                     }
                 });
@@ -85,7 +85,7 @@ con.run(`CREATE TABLE IF NOT EXISTS anons(
             breed TEXT, 
             is_active INTEGER NOT NULL);`, (err) => {
     if(err){
-        console.log(err.name + " | " + err.message);
+        log.error('creating anons: ', err);
         throw err;
     }
 });
@@ -101,7 +101,7 @@ con.run(`CREATE TABLE IF NOT EXISTS notifications(
             is_new INTEGER, 
             create_date INTEGER NOT NULL)`, (err) => {
     if(err){
-        console.log(err.name + " | " + err.message);
+        log.error('creating notifications: ', err);
         throw err;
     }
 });
@@ -112,7 +112,7 @@ setInterval(() => {
     //usuniecie przedawnionych notyfikacji
     con.run('DELETE FROM notifications WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.NOTIFICATION_TTL), (err) => {
         if(err){
-            console.log(err.name + " | " + err.message);
+            log.error('deleting expired notifications: ', err);
             throw err;
         }
     });
@@ -120,7 +120,7 @@ setInterval(() => {
     //dezaktywacja przeterminowanych ogloszen
     con.run('UPDATE anons SET is_active = 0 WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.ANON_TTL), (err) => {
         if(err){
-            console.log(err.name + " | " + err.message);
+            log.error('deactivating expired anons: ', err);
             throw err;
         }
     });
@@ -128,7 +128,7 @@ setInterval(() => {
     //usuniecie zbyt dlugo nieaktywnych ogloszen
     con.run('DELETE FROM anons WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.INACTIVE_ANON_TTL), (err) => {
         if(err){
-            console.log(err.name + " | " + err.message);
+            log.error('deleting anons inactive for too long: ', err);
             throw err;
         }
     });
