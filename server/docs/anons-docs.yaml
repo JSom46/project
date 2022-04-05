@@ -376,6 +376,9 @@ paths:
                       type: number 
                       format: float
                       description: długość geograficzna w stopniach punktu, w którym umieszczono ogłoszenie
+                    distance:
+                      type: integer
+                      description: odległość w pełnych kilometrach od punktu (lat, lng), o ile te wartości zostały podane
         '500':
           description: Błąd po stronie serwera
 
