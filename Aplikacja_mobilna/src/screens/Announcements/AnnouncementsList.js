@@ -33,33 +33,7 @@ import {stylesHome, stylesAnnouncements} from '../../components/styles';
 function createData(id, title, category, image, lat, lng, type, create_date) {
     return { id, title, category, image, lat, lng, type, create_date };
 }
-async function getAnnouncements(){
-    try {
-        let response = await fetch('http://'+ serwer +'/anons/list');
-        let json = await response.json();
 
-        let rows = [];
-
-        json.list.forEach(element => {
-            rows.push(createData(
-                element.id,
-                element.title,
-                (element.category === 0 ? "Zaginięcie" : "Znalezienie"),
-                element.image,
-                element.lat,
-                element.lng,
-                element.type,
-                element.create_date,
-            ));
-            console.log(element);
-        });
-        //console.log(rows);
-
-        return rows;
-      } catch (error) {
-         console.error(error);
-      }
-};
 
   //Tak wyglada pojedyncze ogloszenie na liscie, jest renderowane przez funkcje renderItem
   const Announcement = ({ title, image, category }) => (
@@ -76,6 +50,38 @@ const AnnouncementsList = ({navigation }) => {
 
     const [isLoading, setLoading] = useState(true);
     const [announcements, setAnnouncements] = useState([]);
+    //const [pageCount, setPageCount] = useState(1);
+
+    async function getAnnouncements(){
+      try {
+          //let page = pageCount;
+          // let response = await fetch('http://'+ serwer +'/anons/list?page=' + page);
+          let response = await fetch('http://'+ serwer +'/anons/list');
+          let json = await response.json();
+  
+          let rows = [];
+  
+          json.list.forEach(element => {
+              rows.push(createData(
+                  element.id,
+                  element.title,
+                  (element.category === 0 ? "Zaginięcie" : "Znalezienie"),
+                  element.image,
+                  element.lat,
+                  element.lng,
+                  element.type,
+                  element.create_date,
+              ));
+              console.log(element);
+          });
+          //console.log(rows);
+          
+          //setPageCount(page + 1);
+          return rows;
+        } catch (error) {
+           console.error(error);
+        }
+    };
 
     React.useEffect(() => {
         getAnnouncements().then(rows => setAnnouncements(rows)).finally(() => setLoading(false));
@@ -98,6 +104,16 @@ const AnnouncementsList = ({navigation }) => {
                     data={announcements}
                     keyExtractor={item => item.id}
                     renderItem={renderItem}
+                    // onEndReached={() => {
+                    //   alert("prawei koniec");
+                    //   getAnnouncements().then(rows => setAnnouncements(announcements.concat(rows))).finally(() => {
+                    //     console.log("wczytano kolejna strone")
+                    //     console.log(pageCount);
+                    //     //setPageCount(pageCount + 1);
+                    //   });
+                      
+                    // }}
+                    // onEndReachedThreshold={0.8}
                 />
             </SafeAreaView>
           )}
