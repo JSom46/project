@@ -1,7 +1,4 @@
 
-// chatid - id uzytkownika zakladajacego czat
-//userid - id uzytkownika posiadajacego anons
-
 require('dotenv').config();
 
 const fs = require('fs');
@@ -154,8 +151,9 @@ io.on("connection", function (socket) {
 
     socket.on('get-chat-messages', (anonsId, chatId) => {
         // wysyłamy do użytkownika wiadomości z konkretnego chatu
-        con.all(`SELECT message_id, anons_id, chat_id, user_id, message_date, message_text
-                 FROM ChatMessages WHERE anons_id = ? AND chat_id = ?`, anonsId, chatId,
+        con.all(`SELECT message_id, anons_id, chat_id, login, message_date, message_text
+                 FROM ChatMessages cm JOIN users ON cm.user_id = users.id
+                 WHERE anons_id = ? AND chat_id = ?`, anonsId, chatId,
                 (err, result) => {
                     if (!err) {
                         socket.emit('chat-messages', result.length, result);
@@ -189,7 +187,7 @@ io.on("connection", function (socket) {
                         (err, result) => {
                             if (!err) {
                                 if (result.cnt === 0) {
-                                    socket.emit('new-chat-response', -1, 'Advert does not exist');
+                                    socket.emit('new-chat-response', -1, -1, 'Advert does not exist');
                                 }
                                 else {
                                     // można dodać nowy chat
@@ -204,7 +202,7 @@ io.on("connection", function (socket) {
                                             if (err) { console.log(err.name + " | " + err.message); }
                                         });
 
-                                    socket.emit('new-chat-response', socket.userId, 'Chat created');
+                                    socket.emit('new-chat-response', anonsId, socket.userId, 'Chat created');
                                 }
                             } else { console.log('[new-chat] error: ', err.message); }
                         });
@@ -232,10 +230,10 @@ io.on("connection", function (socket) {
 
                     socket.join(chatroom);
                     socket.to(chatroom).emit('user-join', anonsId, chatId, socket.userName);
-                    socket.emit('join-chat-response', 1, 'Joined to chatroom');
+                    socket.emit('join-chat-response', anonsId, chatId, 'Joined to chatroom');
                 }
                 else {
-                    socket.emit('join-chat-response', -1, 'No such chatroom');
+                    socket.emit('join-chat-response', -1, -1, 'No such chatroom');
                 }
             }
         })
@@ -256,14 +254,14 @@ io.on("connection", function (socket) {
             socket.to(chatroom).emit('user-leave', anonsId, chatId, socket.userName); 
             socket.leave(chatroom);
 
-            socket.emit('leave-chat-response', 1, 'You have left the chatroom');
+            socket.emit('leave-chat-response', anonsId, chatId, 'You have left the chatroom');
 
             // Aktualizacja daty ostaniej wizyty w chatroomie
             con.run('UPDATE ChatUsers SET last_seen_time = ? WHERE anons_id = ? AND chat_id = ? and user_id = ?',
                 Date.now(), anonsId, chatId, socket.userId
             );
         } else {
-            socket.emit('leave-chat-response', -1, 'Not in chatroom');
+            socket.emit('leave-chat-response', -1, -1, 'Not in chatroom');
         }
     });
 
@@ -312,7 +310,7 @@ io.on("connection", function (socket) {
                         // w pokoju czatowym
                         let sock = io.sockets.sockets.get(sockid)
                         if (!sock.rooms.has(chatroom)) {
-                            io.to(sockid).emit('new-chat-msg', lastMessage, anonsId, chatId, socket.userName, curDate, msgText);
+                            io.to(sockid).emit('new-msg-notification', lastMessage, anonsId, chatId, socket.userName, curDate, msgText);
                         }
                     }
                 }
@@ -379,7 +377,7 @@ io.on("connection", function (socket) {
                         // w pokoju czatowym
                         const sock = io.sockets.sockets.get(sockid)
                         if (!sock.rooms.has(chatroom)) {
-                            io.to(sockid).emit('new-chat-img', lastImage, anonsId, chatId, socket.userName, curDate, imgName, imgType);
+                            io.to(sockid).emit('new-img-notification', lastImage, anonsId, chatId, socket.userName, curDate, imgName, imgType);
                         }
                     }
                 }
