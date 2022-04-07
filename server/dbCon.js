@@ -65,50 +65,58 @@ con.run('CREATE TABLE IF NOT EXISTS notifications(id INTEGER PRIMARY KEY, anon_i
 
 // Tabele dla LIVE CHAT
 // ChatMessages - wiadomości live chat
-// Images - obrazy przesyłane w sesjaach live chat
+// ChatImages - obrazy wysyłane w sesjaach live chat
+// ChatUsers - chatroomy z przypisanymi członkami
 
-con.run(`CREATE TABLE IF NOT EXISTS ChatMessages (
-    message_id INT,
-    anons_id INT,
-    chat_id INT, -- user_id użytkownika pytającego /nie wlaściciela anonsu/
-	user_id INT,
-	message_date INT,
-	message_text TEXT, 
-	constraint chat_messages_pk primary key (message_id),
-	constraint chat_messages_fk_user_id foreign key (user_id) references users (id),
-	constraint chat_messages_fk_anons_id foreign key (anons_id) references anons (id)
-    )`, 
-    (err) => {
-        if(err){
-            console.log(err.name + " | " + err.message);
-            throw err;
-    }
-});
+con.serialize(() => {
+    con.run(`CREATE TABLE IF NOT EXISTS ChatMessages (
+        message_id INT PRIMARY KEY,
+        anons_id INT,
+        chat_id INT, -- user_id użytkownika pytającego /nie wlaściciela anonsu/
+        user_id INT,
+        message_date INT,
+        message_text TEXT, 
+        CONSTRAINT chat_messages_fk_user_id FOREIGN KEY (user_id) REFERENCES users (id),
+        CONSTRAINT chat_messages_fk_anons_id FOREIGN KEY (anons_id) REFERENCES anons (id)
+        )`,
+        (err) => {
+            if (err) {
+                console.log(err.name + " | " + err.message);
+                throw err;
+            }
+        });
 
-con.run(`CREATE TABLE IF NOT EXISTS ChatUsers (
-    anons_id INT,
-    chat_id INT,
-    user_id INT,
-    PRIMARY KEY (anons_id, chat_id, user_id))`, 
-    (err) => {
-        if(err){
-            console.log(err.name + " | " + err.message);
-            throw err;
-    }
-});
+    con.run(`CREATE TABLE IF NOT EXISTS ChatImages (
+        image_id INT PRIMARY KEY,
+        message_id INT,
+        user_id INT,
+        path TEXT,
+        type TEXT,
+        CONSTRAINT Images_FK_message_id FOREIGN KEY (message_id) REFERENCES ChatMessages (message_id)
+        )`,
+        (err) => {
+            if (err) {
+                console.log(err.name + " | " + err.message);
+                throw err;
+            }
+        });
 
-con.run(`CREATE TABLE IF NOT EXISTS Images (
-    image_id INT PRIMARY KEY,
-    message_id INT,
-	user_id INT,
-    path TEXT,
-    constraint Images_ms_id foreign key (message_id) references ChatMessages (message_id)
-    )`, 
-    (err) => {
-        if(err){
-            console.log(err.name + " | " + err.message);
-            throw err;
-    }
+    con.run(`CREATE TABLE IF NOT EXISTS ChatUsers (
+        anons_id INT,
+        chat_id INT,
+        user_id INT,
+        last_seen_time INT,
+        PRIMARY KEY (anons_id, chat_id, user_id),
+        FOREIGN KEY (anons_id) REFERENCES anons (id),
+        FOREIGN KEY (user_id) REFERENCES users (id)
+        )`,
+        (err) => {
+            if (err) {
+                console.log(err.name + " | " + err.message);
+                throw err;
+            }
+        });
+
 });
 
 

@@ -1,6 +1,7 @@
 server/node_modules/
 server/db/serverdb.db
 server/db/sessiondb.db
+server/chatpictures/
 
 react-app/node_modules/
 

@@ -28,12 +28,13 @@ CREATE TABLE IF NOT EXISTS "notifications" (
 	"create_date"	INTEGER NOT NULL,
 	PRIMARY KEY("id")
 );
-DROP TABLE IF EXISTS "Images";
+DROP TABLE IF EXISTS "ChatImages";
 CREATE TABLE IF NOT EXISTS "Images" (
 	"image_id"	INT,
 	"message_id"	INT,
 	"user_id"	INT,
 	"path"	TEXT,
+	"type"	TEXT,
 	CONSTRAINT "Images_ms_id" FOREIGN KEY("message_id") REFERENCES "ChatMessages"("message_id"),
 	PRIMARY KEY("image_id")
 );
