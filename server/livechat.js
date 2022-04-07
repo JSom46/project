@@ -151,9 +151,10 @@ io.on("connection", function (socket) {
 
     socket.on('get-chat-messages', (anonsId, chatId) => {
         // wysyłamy do użytkownika wiadomości z konkretnego chatu
-        con.all(`SELECT message_id, anons_id, chat_id, login, message_date, message_text
+        con.all(`SELECT cm.message_id, cm.anons_id, cm.chat_id, users.login username, cm.message_date, cm.message_text, ci.image_id
                  FROM ChatMessages cm JOIN users ON cm.user_id = users.id
-                 WHERE anons_id = ? AND chat_id = ?`, anonsId, chatId,
+                 LEFT JOIN ChatImages ci ON ci.message_id = cm.message_id
+                 WHERE cm.anons_id = ? AND cm.chat_id = ?`, anonsId, chatId,
                 (err, result) => {
                     if (!err) {
                         socket.emit('chat-messages', result.length, result);
@@ -343,7 +344,7 @@ io.on("connection", function (socket) {
         ++lastImage;
         ++lastMessage;
 
-        io.to(chatroom).emit('chat-img', lastImage, anonsId, chatId, socket.userName, curDate, imgName, imgType, imgData);
+        io.to(chatroom).emit('chat-img', lastMessage, anonsId, chatId, socket.userName, curDate, lastImage, imgName, imgType, imgData);
 
         let imgFileName = anonsId + '-' + lastImage + '!' + imgName;
         let imgFilePath = path.resolve(__dirname, 'chatpictures', imgFileName);
@@ -377,7 +378,7 @@ io.on("connection", function (socket) {
                         // w pokoju czatowym
                         const sock = io.sockets.sockets.get(sockid)
                         if (!sock.rooms.has(chatroom)) {
-                            io.to(sockid).emit('new-img-notification', lastImage, anonsId, chatId, socket.userName, curDate, imgName, imgType);
+                            io.to(sockid).emit('new-img-notification', lastMessage, anonsId, chatId, socket.userName, curDate, lastImage, imgName, imgType);
                         }
                     }
                 }

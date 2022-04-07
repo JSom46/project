@@ -92,4 +92,10 @@ KLIENT			SERWER
 			(status: int, message: string)
 
 ---------------------------------------------------------------	
+[get-image] -->
+
+	originator	<-- [image]
+			(image_id: int, img_name: string, img_type: string, img_data: buffer)
+
+---------------------------------------------------------------	
 
