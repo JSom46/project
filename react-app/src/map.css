@@ -1,9 +1,9 @@
 @import "https://unpkg.com/leaflet@1.7.1/dist/leaflet.css";
 @import "https://unpkg.com/react-leaflet-markercluster/dist/styles.min.css";
 
-.map_picker {width: 480px; height: 300px; }
+.map_picker { height: 320px; }
 
-.map_overview {width: 1280px; height: 720px; }
+.map_overview { height: 800px; }
 
 .map_simple {width: 300px; height: 300px; }
 

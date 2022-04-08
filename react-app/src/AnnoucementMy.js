@@ -108,7 +108,7 @@ function Row(props) {
     setOpenEditDialog((prev) => !(prev));
   }
   const handleCallback = (childData) => {
-    if (childData?.status) {
+    if (childData?.status === 200) {
       setAlert({
         "value": "Pomyślnie zapisano.",
         "severity": "success",
@@ -118,7 +118,6 @@ function Row(props) {
       setTimeout(() => {
         setAlert({ "hidden": true, "disableButton": false });
         setOpenEditDialog(false);
-        setEnabled(false);
       }, 3000);
     }
     else {
@@ -132,7 +131,6 @@ function Row(props) {
         setOpenEditDialog(false);
       }, 3000);
     }
-    console.log(childData);
   }
   if (enabled)
     return (

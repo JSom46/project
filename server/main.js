@@ -4,6 +4,8 @@ require('dotenv').config();
 
 const express = require('express');
 const helmet = require ('helmet');
+const log = require('loglevel');
+log.setLevel((new Set(['trace', 'debug', 'info', 'warn', 'error', 'silent'])).has(process.argv[2]) ? process.argv[2] : 'info', true);
 
 const authRoute = require('./auth.js');
 const anonsRoute = require('./anons.js');
@@ -21,7 +23,8 @@ app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(session({
     store: new SqliteStore({
         driver: sqlite3.Database,
-        path: './db/sessiondb.db',
+        //path: './db/sessiondb.db',
+        path: ':memory:',
         ttl: 12 * 60 * 60 * 1000,
     }),
     secret: process.env.SESSION_SECRET,
@@ -46,6 +49,10 @@ app.use('/api-docs', apiDocs);
 
 const httpServer = require('./livechat.js');
 
-httpServer.listen(2400, () => {
-	console.log("Server started\nport: 2400");
+httpServer.listen(2300, () => {
+	log.info('Chat server started\nport: 2300');
+});
+
+app.listen(2400, () => {
+  log.info('Server started\nport: 2400');
 });

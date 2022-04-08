@@ -12,6 +12,8 @@ import { Select, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box';
 import ImageListItem from '@mui/material/ImageListItem';
 import { Stack } from '@mui/material';
+import { Collapse, Alert, IconButton } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 import MapPicker from './MapPicker';
 
@@ -20,23 +22,31 @@ function createTypes(name, coats, colors, breeds) {
 }
 
 export default function EditAnnoucment(props) {
-    console.log(props);
+    const [id] = useState(props.row.id);
     const [title, setTitle] = useState(props.row.title);
     const [description, setDescription] = useState(props.row.description);
     const [category, setCategory] = useState(props.row.category);
-    const [pictures, setPictures] = useState();
-    const [picturesPreview, setPicturesPreview] = useState();
+    const [pictures, setPictures] = useState(new FormData());
+    const [picturesPreview, setPicturesPreview] = useState([]);
     const [type, setType] = useState(props.row.type ? props.row.type : '');
     const [coat, setCoat] = useState(props.row.coat ? props.row.coat : '');
     const [color, setColor] = useState(props.row.color ? props.row.color : '');
     const [breed, setBreed] = useState(props.row.breed ? props.row.breed : '');
-    const [coats, setCoats] = useState([]);
-    const [colors, setColors] = useState([]);
-    const [breeds, setBreeds] = useState([]);
-    const [types, setTypes] = useState();
-    const [lat, setLat] = useState(); //Dane z mapy
-    const [lng, setLng] = useState(); //Dane z mapy
-    const [location, setLocation] = useState(null);
+    const [typesData, setTypesData] = useState({
+        types: '',
+        coats: '',
+        colors: '',
+        breeds: ''
+    });
+    const [alertData, setAlertData] = useState({
+        open: false,
+        variant: 'filled',
+        severity: 'error',
+        text: ''
+    });
+    const [lat, setLat] = useState(props.row.lat); //Dane z mapy
+    const [lng, setLng] = useState(props.row.lng); //Dane z mapy
+    const [location, setLocation] = useState([props.row.lat, props.row.lng]);
 
     function handleLocationChange(loc) {
         setLat(loc.lat);
@@ -55,13 +65,16 @@ export default function EditAnnoucment(props) {
     };
     const handleTypeChange = (event) => {
         setType(event.target.value);
-        const choice = types.filter((type) => { return type.name === event.target.value });
         setCoat('');
-        setColor('');
         setBreed('');
-        setCoats(choice[0].coats);
-        setColors(choice[0].colors);
-        setBreeds(choice[0].breeds);
+        setColor('');
+        const choice = typesData.types.filter((type) => { return type.name === event.target.value });
+        setTypesData((prev) => ({
+            types: prev.types,
+            coats: choice[0].coats,
+            colors: choice[0].colors,
+            breeds: choice[0].breeds
+        }))
     };
     const handleCoatChange = (event) => {
         setCoat(event.target.value);
@@ -73,26 +86,39 @@ export default function EditAnnoucment(props) {
         setBreed(event.target.value);
     };
     const handlePictures = (event) => {
-        const formData = new FormData();
-        const picturesPreviewArray = [];
-        for (let i = 0; i < event.target.files.length; i++) {
-            picturesPreviewArray.push(URL.createObjectURL(event.target.files[i]));
-            formData.append('pictures', event.target.files[i]);
+        if (event.target.files.length > 8 || Array.from(event.target.files).filter((file) => { return file.size > 4 * 1024 * 1024 }).length > 0) {
+            setAlertData({
+                open: true,
+                variant: 'filled',
+                severity: 'error',
+                text: 'Zdjęcia nie spełniają wymogów'
+            })
+            setPictures(null);
+            setPicturesPreview([]);
         }
-        setPictures(formData);
-        setPicturesPreview(picturesPreviewArray);
+        else {
+            setAlertData({ open: false });
+            const kformData = new FormData();
+            const picturesPreviewArray = [];
+            for (let i = 0; i < event.target.files.length; i++) {
+                picturesPreviewArray.push(URL.createObjectURL(event.target.files[i]));
+                kformData.append('pictures', event.target.files[i]);
+            }
+            setPictures(kformData);
+            setPicturesPreview(picturesPreviewArray);
+        }
         // console.log(picturesPreview);
     };
 
     async function editAnnoucement() {
         const formData = new FormData();
-        formData.append('id',props.row.id);
-        formData.append('title', title);
-        formData.append('category', category);
-        formData.append('description', description);
+        formData.append('id', id);
         for (let value of pictures.values()) {
             formData.append('pictures', value);
         }
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('category', category);
         formData.append('lat', lat); //Dane z mapy
         formData.append('lng', (((lng + 180) % 360 + 360) % 360) - 180); //Dane z mapy, znormalizowana dlugosc geog.
         formData.append('type', type);
@@ -105,8 +131,8 @@ export default function EditAnnoucment(props) {
                 credentials: 'include',
                 body: formData
             });
-            const json = await response.json();
-            props.parentCallback(json);
+            // console.log(response);
+            props.parentCallback(response);
         } catch (error) {
             console.log("error", error);
         }
@@ -114,12 +140,11 @@ export default function EditAnnoucment(props) {
 
     const handleSubmit = async e => {
         e.preventDefault();
-        const response = await editAnnoucement();
-        console.log(response);
+        await editAnnoucement();
     }
 
     useEffect(() => {
-        const fetchTypes = async () => {
+        const fetchTypes = async (type) => {
             let url = 'http://localhost:2400/anons/types';
             try {
                 const response = await fetch(url, {
@@ -136,21 +161,25 @@ export default function EditAnnoucment(props) {
                         element.breeds
                     ));
                 });
-                // const psycolors = rows.filter((type) => {return type.name === "Psy"});
-                // console.log(psycolors[0].colors);
-                setTypes(rows);
+                const choice = rows.filter((c) => { return c.name === type });
+                setTypesData({
+                    types: rows,
+                    coats: choice[0].coats,
+                    colors: choice[0].colors,
+                    breeds: choice[0].breeds
+                })
             } catch (error) {
                 console.log("error", error);
             }
         };
-        fetchTypes();
-    }, []);
+        fetchTypes(props.row.type);
+    }, [props.row.type]);
 
     return (
         <FormControl style={{ width: '100%' }} sx={{ padding: 2 }}>
             <form autoComplete='off'>
                 <FormGroup>
-                    <TextField value={title} fullWidth={true} type='text' id="title" label="Tytuł" variant="standard" required onChange={handleTitleChange} />
+                    <TextField defaultValue={title} fullWidth={true} type='text' id="title" label="Tytuł" variant="standard" required onBlur={handleTitleChange} />
                     <FormControl variant="standard">
                         <InputLabel id="category" required>Rodzaj zgłoszenia</InputLabel>
                         <Select value={category} labelId="category" id="category" label="Kategoria" onChange={handleCategoryChange}>
@@ -158,11 +187,11 @@ export default function EditAnnoucment(props) {
                             <MenuItem value={1}>Znalezienie</MenuItem>
                         </Select>
                     </FormControl>
-                    <TextField value={description} type='text' id="description" label="Opis" variant="standard" multiline minRows={4} required onChange={handleDescriptionChange} />
+                    <TextField defaultValue={description} type='text' id="description" label="Opis" variant="standard" multiline minRows={4} required onBlur={handleDescriptionChange} />
                     <FormControl variant="standard">
                         <InputLabel id="type" required>Typ</InputLabel>
-                        <Select value={types ? type : ''} labelId="type" id="type" onChange={handleTypeChange} >
-                            {type && types && types.map((item) => (
+                        <Select value={typesData.types ? type : ''} labelId="type" id="type" onChange={handleTypeChange} >
+                            {type && typesData.types && typesData.types.map((item) => (
                                 <MenuItem key={item.name} value={item.name}>{item.name}</MenuItem>
                             ))}
                         </Select>
@@ -170,26 +199,35 @@ export default function EditAnnoucment(props) {
                     <Stack justifyContent="space-evenly" direction="row" alignItems="center" spacing={2}>
                         <FormControl variant="standard" style={{ width: '100%' }}>
                             <InputLabel id="coat">Owłosienie</InputLabel>
-                            <Select value={coat} labelId="coat" id="coat" onChange={handleCoatChange} disabled={coats.length === 0}>
-                                {coats && coats.map((item) => (
-                                    <MenuItem key={item} value={item}>{item}</MenuItem>
-                                ))}
+                            <Select value={coat} labelId="coat" id="coat" onChange={handleCoatChange} disabled={typesData.coats.length === 0}>
+                                {typesData.coats.length === 0 ?
+                                    <MenuItem key={coat} value={coat}>{coat}</MenuItem>
+                                    :
+                                    typesData.coats.map((item) => (
+                                        <MenuItem key={item} value={item}>{item}</MenuItem>
+                                    ))}
                             </Select>
                         </FormControl>
                         <FormControl variant="standard" style={{ width: '100%' }}>
                             <InputLabel id="colors">Umaszczenie</InputLabel>
-                            <Select value={color} labelId="colors" id="colors" onChange={handleColorChange} disabled={colors.length === 0}>
-                                {colors && colors.map((item) => (
-                                    <MenuItem key={item} value={item}>{item}</MenuItem>
-                                ))}
+                            <Select value={color} labelId="colors" id="colors" onChange={handleColorChange} disabled={typesData.colors.length === 0}>
+                                {typesData.colors.length === 0 ?
+                                    <MenuItem key={color} value={color}>{color}</MenuItem>
+                                    :
+                                    typesData.colors.map((item) => (
+                                        <MenuItem key={item} value={item}>{item}</MenuItem>
+                                    ))}
                             </Select>
                         </FormControl>
                         <FormControl variant="standard" style={{ width: '100%' }}>
                             <InputLabel id="breeds">Rasa</InputLabel>
-                            <Select value={breed} labelId="breeds" id="breeds" onChange={handleBreedChange} disabled={breeds.length === 0}>
-                                {breeds && breeds.map((item) => (
-                                    <MenuItem key={item} value={item}>{item}</MenuItem>
-                                ))}
+                            <Select value={breed} labelId="breeds" id="breeds" onChange={handleBreedChange} disabled={typesData.breeds.length === 0}>
+                                {typesData.breeds.length === 0 ?
+                                    <MenuItem key={breed} value={breed}>{breed}</MenuItem>
+                                    :
+                                    typesData.breeds.map((item) => (
+                                        <MenuItem key={item} value={item}>{item}</MenuItem>
+                                    ))}
                             </Select>
                         </FormControl>
                     </Stack>
@@ -200,8 +238,8 @@ export default function EditAnnoucment(props) {
                         <input type="file" accept='.jpg, .png' onChange={handlePictures} hidden multiple />
                     </Button>
                 </FormGroup>
-                <Box sx={{ border: (picturesPreview ? "1px solid" : ""), marginTop: 1, marginBottom: 1 }}>
-                    {picturesPreview && picturesPreview.map((item) => (
+                <Box sx={{ border: (picturesPreview.length !== 0 ? "1px solid" : ""), marginTop: 1, marginBottom: 1 }}>
+                    {(picturesPreview.length !== 0 && picturesPreview.map((item) => (
                         <ImageListItem key={Math.random()} sx={{ margin: 1 }}>
                             <img
                                 style={{ width: "100px", height: "100px", objectFit: "cover" }}
@@ -210,7 +248,20 @@ export default function EditAnnoucment(props) {
                                 loading="lazy"
                             />
                         </ImageListItem>
-                    ))}
+                    ))) ||
+                        <Collapse in={alertData.open}>
+                            <Alert
+                                variant={alertData.variant}
+                                severity={alertData.severity}
+                                action={
+                                    <IconButton color="inherit" size="small" onClick={() => { setAlertData({ open: false }); }}>
+                                        <CloseIcon fontSize="inherit" />
+                                    </IconButton>
+                                } sx={{ mb: 2 }}>
+                                {alertData.text}
+                            </Alert>
+                        </Collapse>
+                    }
                 </Box>
                 <Button variant="contained" type="submit" onClick={handleSubmit}>Zapisz</Button>
             </form>
