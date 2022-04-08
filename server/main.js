@@ -47,6 +47,12 @@ app.use('/auth', authRoute);
 app.use('/anons', anonsRoute);
 app.use('/api-docs', apiDocs);
 
+const httpServer = require('./livechat.js');
+
+httpServer.listen(2300, () => {
+	log.info('Chat server started\nport: 2300');
+});
+
 app.listen(2400, () => {
-    log.info('Server started\nport: 2400');
+  log.info('Server started\nport: 2400');
 });
