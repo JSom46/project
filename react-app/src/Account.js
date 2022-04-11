@@ -8,7 +8,7 @@ import CardContent from '@mui/material/CardContent';
 import { Typography, Button, TextField } from '@mui/material';
 import { LinearProgress } from '@mui/material';
 import { Snackbar, Alert } from '@mui/material';
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { Dialog, DialogActions, DialogTitle } from '@mui/material';
 
 export default function Account(props) {
   const [userData, setUserData] = React.useState([]);
@@ -131,12 +131,7 @@ export default function Account(props) {
         <LinearProgress hidden={!loading} />
         <Dialog open={openChangePasswordDialog} onClose={() => setOpenChangePasswordDialog(false)} maxWidth="xs" fullWidth={true}>
           <LinearProgress hidden={!loading} />
-          <DialogTitle>Potwierdź usuwanie ogłoszenia</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Wysłać email z linkiem do zmiany hasła?
-            </DialogContentText>
-          </DialogContent>
+          <DialogTitle>Wysłać email z linkiem do zmiany hasła?</DialogTitle>
           <DialogActions>
             <Button color='success' onClick={handleRequestPasswordChange}>Wyślij</Button>
             <Button onClick={() => (setOpenChangePasswordDialog(false))}>Anuluj</Button>

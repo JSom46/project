@@ -13,7 +13,7 @@ import { styled } from '@mui/material/styles';
 import { indigo } from '@mui/material/colors';
 import { Dialog, DialogTitle } from '@mui/material';
 import Snackbar from '@mui/material/Snackbar';
-import { Alert } from '@mui/material';
+import { Alert, Stack } from '@mui/material';
 import AddAnnouncement from './AddAnnouncement';
 // import MUIDrawer from './Drawer'
 import Divider from '@mui/material/Divider';
@@ -48,15 +48,15 @@ export default function MenuAppBar(props) {
     }
   }));
   React.useEffect(() => {
-    if (sessionStorage.getItem('login') !== null && sessionStorage.getItem('notificationsCount') === null)
+    function fetchNotifications() {
       try {
         fetch('http://localhost:2400/anons/notifications/count', {
           method: 'GET',
           credentials: 'include'
         }).then(response => {
-          if (response.status === 401) sessionStorage.removeItem('login');
+          if (response.status === 401) sessionStorage.clear();
           response.json().then(data => {
-            console.log(data);
+            // console.log(data);
             sessionStorage.setItem('notificationsCount', data.count);
             setNotificationsCount(data.count);
           });
@@ -64,6 +64,14 @@ export default function MenuAppBar(props) {
       } catch (error) {
         console.log("error", error);
       }
+    }
+    if (sessionStorage.getItem('login') !== null) {
+      fetchNotifications();
+      const interval = setInterval(() => {
+        fetchNotifications();
+      }, 3 * 60 * 1000);
+      return () => clearInterval(interval);
+    }
   }, []);
   function logout() {
     sessionStorage.clear();
@@ -123,6 +131,7 @@ export default function MenuAppBar(props) {
               onClick={handleMenu}
               color="inherit"
             >
+              <Typography variant='subtitle2'>{sessionStorage.getItem('login')}&nbsp;</Typography>
               <Badge badgeContent={notificationsCount} color="error">
                 <AccountCircle />
               </Badge>
@@ -131,7 +140,7 @@ export default function MenuAppBar(props) {
               id="menu-appbar"
               anchorEl={accountAnchor}
               anchorOrigin={{
-                vertical: 'top',
+                vertical: 'bottom',
                 horizontal: 'right',
               }}
               keepMounted
@@ -143,11 +152,11 @@ export default function MenuAppBar(props) {
               onClose={handleAccountClose}
             >
               <MenuItem onClick={function (event) { handleAccountClose(); window.location.href = "/announcements" }}>
-                <Badge badgeContent={notificationsCount} variant="dot" color="error" anchorOrigin={{ vertical: 'top', horizontal: 'left', }}>
-                  Profile
+                <Badge badgeContent={notificationsCount} variant="dot" color="error" anchorOrigin={{ vertical: 'top', horizontal: 'right', }}>
+                  Moje ogłoszenia
                 </Badge>
               </MenuItem>
-              <MenuItem onClick={function (event) { handleAccountClose(); window.location.href = "/account" }}>My account</MenuItem>
+              <MenuItem onClick={function (event) { handleAccountClose(); window.location.href = "/account" }}>Moje konto</MenuItem>
               <Divider />
               <MenuItem onClick={function (event) { logout() }}>Wyloguj</MenuItem>
             </Menu>
