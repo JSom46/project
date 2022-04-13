@@ -3,7 +3,7 @@
 
 import React ,{useState}from 'react';
 import { SafeAreaView, View, FlatList, StyleSheet, Text, StatusBar, TouchableOpacity, Image } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useIsFocused } from '@react-navigation/native';
 import { createNativeStackNavigator} from '@react-navigation/native-stack';
 import SplashScreen from '../SplashScreen';
 import {stylesHome, stylesAnnouncements} from '../../components/styles';
@@ -46,17 +46,18 @@ function createData(id, title, category, image, lat, lng, type, create_date) {
     </View>
   );
 
-const AnnouncementsList = ({navigation }) => {
+const AnnouncementsList = ({navigation, route}) => {
 
     const [isLoading, setLoading] = useState(true);
     const [announcements, setAnnouncements] = useState([]);
-    //const [pageCount, setPageCount] = useState(1);
+    const [pageCount, setPageCount] = useState(1);
+    const isFocused = useIsFocused();
 
     async function getAnnouncements(){
       try {
-          //let page = pageCount;
-          // let response = await fetch('http://'+ serwer +'/anons/list?page=' + page);
-          let response = await fetch('http://'+ serwer +'/anons/list');
+          let page = pageCount;
+          let response = await fetch('http://'+ serwer +'/anons/list?page=' + page + '&num=' + 20);
+          //let response = await fetch('http://'+ serwer +'/anons/list');
           let json = await response.json();
   
           let rows = [];
@@ -76,7 +77,10 @@ const AnnouncementsList = ({navigation }) => {
           });
           //console.log(rows);
           
-          //setPageCount(page + 1);
+          
+          if(page == 1){
+            setPageCount(page + 1);
+          }
           return rows;
         } catch (error) {
            console.error(error);
@@ -99,21 +103,21 @@ const AnnouncementsList = ({navigation }) => {
     return(
         <View style={{flex: 1}}>
           {isLoading ? <SplashScreen/> : (
-            <SafeAreaView style={{flex: 1, marginTop: StatusBar.currentHeight || 0}}>
+            <SafeAreaView style={{flex: 1}}>
                 <FlatList
                     data={announcements}
                     keyExtractor={item => item.id}
                     renderItem={renderItem}
-                    // onEndReached={() => {
-                    //   alert("prawei koniec");
-                    //   getAnnouncements().then(rows => setAnnouncements(announcements.concat(rows))).finally(() => {
-                    //     console.log("wczytano kolejna strone")
-                    //     console.log(pageCount);
-                    //     //setPageCount(pageCount + 1);
-                    //   });
+                    onEndReached={() => {
+                      alert("prawei koniec");
+                      getAnnouncements().then(rows => setAnnouncements(announcements.concat(rows))).finally(() => {
+                        console.log("wczytano kolejna strone")
+                        console.log(pageCount);
+                        setPageCount(pageCount + 1);
+                      });
                       
-                    // }}
-                    // onEndReachedThreshold={0.8}
+                    }}
+                    onEndReachedThreshold={0.8}
                 />
             </SafeAreaView>
           )}

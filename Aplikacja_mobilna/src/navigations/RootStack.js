@@ -25,6 +25,7 @@ const Stack = createStackNavigator();
 
 const RootStack = () => {
   const [userToken, setUserToken] = useState(null);
+  const guestData = {user_id: "guestId", email: "guest@email", login: "guest", is_admin: 0};
 
   // const authContextData = React.useMemo(() => ({
   //   LoginGoogle: async () => {
