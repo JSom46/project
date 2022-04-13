@@ -39,6 +39,7 @@ const Login = ({ navigation }) => {
   const [hidePassword, setHidedPassword] = useState(true);
   const [message, setMessage] = useState();
   const [messageType, setMessageType] = useState();
+  const guestData = {user_id: "guestId", email: "guest@email", login: "guest", is_admin: 0};
 
   // const {handleLogin} = React.useContext(AuthContext);
   // const {LoginGoogleFunc} = React.useContext(AuthContext);
@@ -46,29 +47,30 @@ const Login = ({ navigation }) => {
   // const {handleLogout} = React.useContext(AuthContext);
   //const {handleMessage} = React.useContext(AuthContext);
   
-  //sprawdzanie po wlaczeniu aplikacji czy uzytkownik jest zalogowany
-  React.useEffect(() => {
-    const handleLoggedIn = () => {
-    const url = "http://" + serwer + "/auth/loggedin";
-    axios
-      .get(url)
-      .then((response) => {
-        const result = response.data;
-        console.log(result);
-        const { message, status, data } = result;
-        if (response.status == "200") {
-          console.log(result.email)
-          navigation.replace('Nawigator', {userData: result});
-        }
-        })
+  // //sprawdzanie po wlaczeniu aplikacji czy uzytkownik jest zalogowany
+  // React.useEffect(() => {
+  //   const handleLoggedIn = () => {
+  //   const url = "http://" + serwer + "/auth/loggedin";
+  //   axios
+  //     .get(url)
+  //     .then((response) => {
+  //       const result = response.data;
+  //       console.log(result);
+  //       const { message, status, data } = result;
+  //       if (response.status == "200") {
+  //         console.log(result.email)
+  //         navigation.replace('Nawigator', {userData: result});
+  //       }
+  //       })
 
-      .catch((error) => {
-        //console.log(error);
-        console.log("Nie jesteś zalogowany");
-      });
-    };
-      handleLoggedIn();
-  }, []);
+  //     .catch((error) => {
+  //       //console.log(error);
+  //       console.log("Nie jesteś zalogowany");
+  //       navigation.replace('Nawigator', {userData: guestData});
+  //     });
+  //   };
+  //     handleLoggedIn();
+  // }, []);
 
 
   async function LoginGoogle() {
@@ -188,7 +190,7 @@ const Login = ({ navigation }) => {
           {({ handleChange, handleBlur, handleSubmit, values }) => (
             <StyledFormArea>
               <MyTextInput
-                label="Email Address"
+                label="Adres email"
                 icon="mail"
                 placeholder="email"
                 placeholderTextColor={darkLight}
@@ -199,7 +201,7 @@ const Login = ({ navigation }) => {
               />
 
               <MyTextInput
-                label="Password"
+                label="Hasło"
                 icon="lock"
                 placeholder="* * * * * * *"
                 placeholderTextColor={darkLight}

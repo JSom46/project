@@ -24,8 +24,12 @@ const Stack = createStackNavigator();
 //export const AuthContext = React.createContext();
 
 const RootStack = () => {
-  const [userToken, setUserToken] = useState(null);
-  const guestData = {user_id: "guestId", email: "guest@email", login: "guest", is_admin: 0};
+  //const [userToken, setUserToken] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState();
+  //const [initialRoute, setInitialRoute] = useState("Nawigator");
+  //const guestData = {user_id: "guestId", email: "guest@email", login: "guest", is_admin: 0};
+ 
 
   // const authContextData = React.useMemo(() => ({
   //   LoginGoogle: async () => {
@@ -131,31 +135,37 @@ const RootStack = () => {
   // []
   // )
 
-  // React.useEffect(() => {
-  //   const handleLoggedIn = () => {
-  //   const url = "http://" + serwer + "/auth/loggedin";
-  //   axios
-  //     .get(url)
-  //     .then((response) => {
-  //       const result = response.data;
-  //       console.log(result);
-  //       const { message, status, data } = result;
-  //       if (response.status == "200") {
-  //         //handleLogout(result.email);
-  //         console.log(result.email)
-  //         //setUserToken();
-  //       }
-  //       })
 
-  //     .catch((error) => {
-  //       console.log(error);
-  //       console.log("Nie jesteś zalogowany");
-  //     });
-  // };
-  // handleLoggedIn();
-  // setIsLoading(false)
-  // }, []);
+  //sprawdzanie po wlaczeniu aplikacji czy uzytkownik jest zalogowany
+  React.useEffect(() => {
+    const handleLoggedIn = () => {
+    const url = "http://" + serwer + "/auth/loggedin";
+    //console.log("RootStack useEffect");
 
+    axios
+      .get(url)
+      .then((response) => {
+        const result = response.data;
+        console.log(result);
+        const { message, status, data } = result;
+        if (response.status == "200") {
+          console.log(result.email)
+          //navigation.replace('Nawigator', {userData: result});
+          //setInitialRouteName("");
+          setUser(result);
+        }
+        })
+
+      .catch((error) => {
+        //console.log(error);
+        console.log("Nie jesteś zalogowany");
+        //navigation.replace('Nawigator', {userData: guestData});
+        setUser(guestData);
+      })
+      .finally(() => setIsLoading(false));
+    };
+      handleLoggedIn();
+  }, []);
 
   return (
       <NavigationContainer>
@@ -171,9 +181,22 @@ const RootStack = () => {
               paddingLeft: 20,
             },
           }}
-          //initialRouteName="Login"
+          //initialRouteName={initialRoute}
         >
-            
+          {isLoading == true ? (
+            <Stack.Screen
+              name="Loading"
+              component={SplashScreen}
+            />
+          ) : (
+            <>
+
+            <Stack.Screen
+              options={{headerShown: false}}
+              name="Nawigator"
+              component={DrawerComponent}
+              initialParams={{userData: user}}
+            />
             <Stack.Screen
               options={{
                 headerTransparent: false,
@@ -186,11 +209,11 @@ const RootStack = () => {
               name="Register" 
               component={Register}
             />
-            <Stack.Screen
-              options={{headerShown: false}}
-              name="Nawigator"
-              component={DrawerComponent}
-            />
+            
+            </>
+          )}
+            
+            
 
           {/* <Stack.Screen name="MapMain" component={MapMain} />
           <Stack.Screen

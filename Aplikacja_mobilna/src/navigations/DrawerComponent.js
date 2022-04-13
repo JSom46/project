@@ -22,6 +22,7 @@ const Drawer = createDrawerNavigator();
 
 const DrawerComponent = ({navigation, route}) => {
     //const {logOut} = React.useContext(AuthContext);
+    const [userData, setUserData] = useState(route.params.userData);
 
     const handleLogout = (credentials) => {
       console.log(credentials);
@@ -33,7 +34,10 @@ const DrawerComponent = ({navigation, route}) => {
           const result = response.data;
           const { message, status, data } = result;
           if (response.status == "200") {
-            navigation.navigate("Login");
+            //navigation.navigate("Login");
+            setUserData(guestData);
+            navigation.navigate('Nawigator');
+            console.log("Wylogowano");
           }
         })
         .catch((error) => {
@@ -59,7 +63,7 @@ const DrawerComponent = ({navigation, route}) => {
         });
     };
 
-    console.log("w drawerze: ", route.params.userData);
+    console.log("w drawerze: ", userData);
 
     return(
         //Customizowanie DrawerNavigatora przez dodanie DrawerItem - przycisku do wylogowania
@@ -67,15 +71,27 @@ const DrawerComponent = ({navigation, route}) => {
             return (
               <DrawerContentScrollView {...props}>
                 <DrawerItemList {...props} />
-                <DrawerItem 
-                    label={({focused, size}) => (
-                        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                            <Text style={{color: 'gray'}}>Wyloguj</Text>
-                        </View>
-                    )}
-                    //onPress={logOut} 
-                    onPress={() => handleLoggedIn()}
-                />
+                
+                {userData.user_id == "guestId" ? (
+                  <DrawerItem 
+                      label={({focused, size}) => (
+                          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                              <Text style={{color: 'gray'}}>Zaloguj się</Text>
+                          </View>
+                      )}
+                      onPress={() => navigation.navigate('Login')}
+                  />
+                ) : (
+                  <DrawerItem 
+                      label={({focused, size}) => (
+                          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                              <Text style={{color: 'gray'}}>Wyloguj</Text>
+                          </View>
+                      )}
+                      //onPress={logOut} 
+                      onPress={() => handleLoggedIn()}
+                  />
+              )}
               </DrawerContentScrollView>
             )
         }}>
@@ -90,7 +106,8 @@ const DrawerComponent = ({navigation, route}) => {
             <Drawer.Screen
                 name='Profil'
                 component={MyProfileScreen}
-                initialParams={{userData: route.params.userData}}
+                //initialParams={{userData: route.params.userData}}
+                initialParams={{userData: userData}}
             />
             <Drawer.Screen
               name='Moje Ogłoszenia'
