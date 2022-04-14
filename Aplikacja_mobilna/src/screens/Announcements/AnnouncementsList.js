@@ -102,6 +102,22 @@ const AnnouncementsList = ({navigation, route}) => {
 
     return(
         <View style={{flex: 1}}>
+          <TouchableOpacity
+                onPress={() => navigation.navigate('Dodaj Ogloszenie')}
+                style={{
+                    backgroundColor: 'white',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 5,
+                    borderRadius: 10,
+                    borderWidth: 1,
+                    borderColor: 'black',
+                    marginHorizontal: 20,
+                    marginVertical: 5,
+                }}
+            >
+                <Text style={{fontSize: 20, fontWeight: "600"}}>Dodaj ogłoszenie</Text>
+          </TouchableOpacity>
           {isLoading ? <SplashScreen/> : (
             <SafeAreaView style={{flex: 1}}>
                 <FlatList
@@ -109,7 +125,7 @@ const AnnouncementsList = ({navigation, route}) => {
                     keyExtractor={item => item.id}
                     renderItem={renderItem}
                     onEndReached={() => {
-                      alert("prawei koniec");
+                      //alert("prawei koniec");
                       getAnnouncements().then(rows => setAnnouncements(announcements.concat(rows))).finally(() => {
                         console.log("wczytano kolejna strone")
                         console.log(pageCount);

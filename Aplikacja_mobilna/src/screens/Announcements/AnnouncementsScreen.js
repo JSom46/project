@@ -5,6 +5,7 @@ import { createNativeStackNavigator} from '@react-navigation/native-stack';
 import {stylesHome, stylesAnnouncements} from '../../components/styles';
 import AnnouncementsList from './AnnouncementsList';
 import AnnouncementView from '../AnnouncementView';
+import AddAnnouncement from '../Map/AddAnnouncement';
 
 
 const AnnouncementsStack = createNativeStackNavigator();
@@ -16,6 +17,7 @@ const AnnouncementsScreen = ({ route, navigation }) => {
         <AnnouncementsStack.Navigator screenOptions={{headerShown: false}}>
           <AnnouncementsStack.Screen name="Lista" component={AnnouncementsList} />
           <AnnouncementsStack.Screen name="Ogloszenie" component={AnnouncementView}/>
+          <AnnouncementsStack.Screen name="Dodaj Ogloszenie" component={AddAnnouncement}/>
         </AnnouncementsStack.Navigator>
       //</NavigationContainer>
     );

@@ -72,7 +72,7 @@ const MyAnnouncementsScreen = ({navigation}) => {
     return(
         <View style={{flex: 1}}>
             <TouchableOpacity
-                onPress={() => navigation.navigate('Dodaj Ogłoszenie')}
+                onPress={() => navigation.navigate('Dodaj Ogloszenie')}
                 style={{
                     backgroundColor: 'white',
                     alignItems: 'center',
