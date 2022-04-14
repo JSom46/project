@@ -101,7 +101,7 @@ export default function Login(props) {
     else {
       sessionStorage.setItem('login', response.login);
       sessionStorage.setItem('msg', "logged in");
-      window.location.reload();
+      window.location.href = "/announcements";
     }
   }
   async function handleRequestPasswordChange() {
