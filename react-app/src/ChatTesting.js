@@ -3,6 +3,7 @@ import io from 'socket.io-client';
 
 import { Typography } from '@mui/material';
 import { Divider } from '@mui/material';
+import { Button } from '@mui/material';
 
 import styles from "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import {
@@ -14,13 +15,17 @@ import {
     Sidebar,
     Conversation,
     ConversationList,
-    ConversationHeader
+    InputToolbox,
+    AttachmentButton,
+    SendButton
 } from "@chatscope/chat-ui-kit-react";
 
 export default function ChatTesting(props) {
     const [socket, setSocket] = useState(null);
     const [connected, setConnected] = useState(false);
     const [authenticated, setAuthenticated] = useState(false);
+
+    const fileInput = React.useRef(null);
 
     const [anonsId, setAnonsId] = useState(-1);
     const [chatId, setChatId] = useState(-1);
@@ -51,10 +56,22 @@ export default function ChatTesting(props) {
                 socket.emit('auth-request', login);
             }
             if (connected && authenticated) {
+                if (props.id !== undefined) {
+                    socket.emit('new-chat', props.id);
+                }
+                socket.on("new-chat-response", (anons_id, chat_id, message) => {
+                    if(anons_id === -1){
+                    }
+                    else {
+                        socket.emit('get-user-chats');
+                        handleChatClick(anons_id,chat_id);
+                    }
+                })
                 socket.on("user-chats", (count, userChats) => {
                     setUserChats(userChats);
                 })
                 socket.on("chat-messages", (count, chatMsg) => {
+                    // console.log(chatMsg);
                     setChatMessages(chatMsg);
                 })
                 socket.on("chat-msg", (message_id, anons_id, chat_id, username, datatime, message) => {
@@ -68,6 +85,16 @@ export default function ChatTesting(props) {
                     }
                     if (anons_id === anonsId && chat_id === chatId) setChatMessages((prev) => [...prev, msg])
                 })
+                socket.on("chat-img", (image_id, anons_id, chat_id, username, datetime, img_name, img_type, img_data) => {
+                    console.log(image_id);
+                    console.log(anons_id);
+                    console.log(chat_id);
+                    console.log(username);
+                    console.log(datetime);
+                    console.log(img_name);
+                    console.log(img_type);
+                    console.log(img_data);
+                })
                 socket.on("chat-response", (status, message) => {
                     console.log(status);
                     console.log(message);
@@ -77,7 +104,7 @@ export default function ChatTesting(props) {
             }
             return () => socket.off();
         }
-    }, [socket, connected, authenticated, anonsId, chatId, login]);
+    }, [socket, connected, authenticated, anonsId, chatId, login, props.id]);
     const handleChatClick = (anons_id, chat_id) => {
         // console.log(anons_id);
         // console.log(chat_id);
@@ -94,6 +121,17 @@ export default function ChatTesting(props) {
         if (socket !== null) {
             socket.emit("chat-msg", anonsId, chatId, message);
         }
+    }
+    const handleSendPicture = (event) => {
+        let file = event.target.files[0];
+        let reader = new FileReader();
+        let result = null;
+        reader.readAsArrayBuffer(file);
+        reader.onload = function () {
+            if (socket !== null) {
+                socket.emit("chat-img", anonsId, chatId, file.name, file.type, reader.result);
+            }
+        };
     }
     return (
         <div style={{
@@ -124,6 +162,7 @@ export default function ChatTesting(props) {
                         {chatMessages && chatMessages.map((item) => (
                             <Message key={item.message_id}
                                 model={{
+                                    type: (item.image_id === null ? "html" : "image"),
                                     message: item.message_text,
                                     sentTime: item.message_date.toString(),
                                     sender: item.username,
@@ -134,9 +173,16 @@ export default function ChatTesting(props) {
                             </Message>
                         ))}
                     </MessageList>
-                    <MessageInput placeholder="Type message here" onSend={(message) => handleSendMessage(message)} />
+                    <MessageInput disabled={anonsId === -1 || chatId === -1} placeholder="Wpisz wiadomość tutaj..." onAttachClick={() => fileInput.current.click()} onSend={(message) => handleSendMessage(message)} />
                 </ChatContainer>
             </MainContainer>
+            <input
+                type="file"
+                ref={fileInput}
+                accept="image/*"
+                onChange={handleSendPicture}
+                hidden
+            />
         </div>
     )
 }

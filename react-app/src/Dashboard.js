@@ -69,6 +69,10 @@ export default function Dashboard(props) {
 
   const urldata = useLocation();
 
+  const chatRedirect = (id) => {
+    props.chatRedirect(id);
+  }
+
   //get map position from url params
   useEffect(() => {
     const params = new URLSearchParams(urldata.search);
@@ -238,6 +242,7 @@ export default function Dashboard(props) {
         announcementData={announcementData}
         setOpen={setAnnouncementDialogOpen}
         showOnMap={showOnMap}
+        chatRedirect={chatRedirect}
       />
 
       {/*<button onClick={openFiltersDialog} >Filtry</button>*/}
