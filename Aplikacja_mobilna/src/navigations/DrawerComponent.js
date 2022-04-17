@@ -107,6 +107,7 @@ const DrawerComponent = ({navigation, route}) => {
               <Drawer.Screen
                 name='Ogłoszenia'
                 component={AnnouncementsScreen}
+                initialParams={{userData: userData}}
               />
               </>
             ):(
@@ -118,6 +119,7 @@ const DrawerComponent = ({navigation, route}) => {
                 <Drawer.Screen
                     name='Ogłoszenia'
                     component={AnnouncementsScreen}
+                    initialParams={{userData: userData}}
                 />
                 <Drawer.Screen
                     name='Profil'
