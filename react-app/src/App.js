@@ -25,7 +25,7 @@ function App() {
   const [auth, setAuth] = useState("");
   const [anonsId, setAnonsId] = useState(-1);
   const chatRedirect = (id) => {
-    console.log(id);
+    // console.log(id);
     setAnonsId(id);
   }
   useEffect(() => {
