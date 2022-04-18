@@ -6,7 +6,7 @@ import { SafeAreaView, View, FlatList, StyleSheet, Text, StatusBar, TouchableOpa
 import { NavigationContainer, useIsFocused } from '@react-navigation/native';
 import { createNativeStackNavigator} from '@react-navigation/native-stack';
 import SplashScreen from '../SplashScreen';
-import {stylesHome, stylesAnnouncements} from '../../components/styles';
+import {stylesHome, stylesAnnouncements, announcementAddButton} from '../../components/styles';
 
 // do testow listy
 // const DATA = [
@@ -51,6 +51,7 @@ const AnnouncementsList = ({navigation, route}) => {
     const [isLoading, setLoading] = useState(true);
     const [announcements, setAnnouncements] = useState([]);
     const [pageCount, setPageCount] = useState(1);
+    const [userData, setUserData] = useState(route.params.userData);
     const isFocused = useIsFocused();
 
     async function getAnnouncements(){
@@ -88,7 +89,9 @@ const AnnouncementsList = ({navigation, route}) => {
     };
 
     React.useEffect(() => {
+      if(pageCount == 1){
         getAnnouncements().then(rows => setAnnouncements(rows)).finally(() => setLoading(false));
+      }
     }, []);
 
     //Ta funkcja renderuje ogloszenia - jest wywolywana dla kazdego elementu (item) na liscie
@@ -102,22 +105,22 @@ const AnnouncementsList = ({navigation, route}) => {
 
     return(
         <View style={{flex: 1}}>
-          <TouchableOpacity
+          {userData.user_id == "guestId" ? (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Login')}
+              style={announcementAddButton}
+            >
+                <Text style={{fontSize: 20, fontWeight: "600"}}>Zaloguj się żeby dodać ogłoszenie</Text>
+            </TouchableOpacity>
+          ):(
+            <TouchableOpacity
                 onPress={() => navigation.navigate('Dodaj Ogloszenie')}
-                style={{
-                    backgroundColor: 'white',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: 5,
-                    borderRadius: 10,
-                    borderWidth: 1,
-                    borderColor: 'black',
-                    marginHorizontal: 20,
-                    marginVertical: 5,
-                }}
+                style={announcementAddButton}
             >
                 <Text style={{fontSize: 20, fontWeight: "600"}}>Dodaj ogłoszenie</Text>
-          </TouchableOpacity>
+             </TouchableOpacity>
+          )}
+          
           {isLoading ? <SplashScreen/> : (
             <SafeAreaView style={{flex: 1}}>
                 <FlatList

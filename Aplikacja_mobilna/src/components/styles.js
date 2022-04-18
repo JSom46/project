@@ -99,7 +99,7 @@ export const SubTitle = styled.Text`
 `;
 
 export const StyledFormArea = styled.View`
-  width: 90%;
+  width: 100%;
 `;
 
 export const StyledTextInput = styled.TextInput`
@@ -219,8 +219,8 @@ export const StyledButtonCategory = styled.TouchableOpacity`
   margin-vertical: 5px;
   height: 60px;
   width: 140px;
-  border-radius: 10;
-  border-width: 1;
+  border-radius: 10px;
+  border-width: 1px;
   border-color: ${black};
   ${(props) =>
     props.isPressed == 0 &&
@@ -260,8 +260,8 @@ export const ButtonText = styled.Text`
   ${(props) =>
     props.isPhoto == true &&
     `
-  color: ${primary};
-  font-size: 18px;
+  color: ${black};
+  font-size: 14px;
   `}
 `;
 
@@ -375,6 +375,38 @@ export const stylesMyProfileTextInput = {
   fontSize: 16,
 
 };
+
+export const announcementAddButton = {
+  backgroundColor: 'white',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: 5,
+  borderRadius: 10,
+  borderWidth: 1,
+  borderColor: 'black',
+  marginHorizontal: 20,
+  marginVertical: 5,
+};
+
+export const categoryButton = {
+  padding: 1,
+  backgroundColor: "#ffffff",
+  justifyContent: 'center',
+  alignItems: 'center',
+  borderRadius: 15,
+  marginVertical: 5,
+  height: 60,
+  width: 160,
+  borderWidth: 1,
+  borderColor: "black",
+};
+
+export const pickerStyle = {
+  height: 50,
+  width: '100%',
+  backgroundColor: "#E5E7EB",
+  marginVertical: 5,
+}
 
 export const stylesAnnouncements = StyleSheet.create({
   listContainer: {
