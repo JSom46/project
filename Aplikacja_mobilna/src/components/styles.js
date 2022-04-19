@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { StyleSheet, StatusBar } from "react-native"
+import { StyleSheet, StatusBar } from "react-native";
 import {
   View,
   Text,
@@ -23,6 +23,7 @@ export const Colors = {
   black: "#000000",
   facebook: "#3b5998",
   add: "#AFCF5F",
+  blue: "#B0E0E6",
 };
 
 const {
@@ -36,11 +37,13 @@ const {
   facebook,
   add,
   black,
+  blue,
 } = Colors;
 export const StyledContainer = styled.ScrollView`
   flex: 1;
-  padding: 25px;
-  padding-top: ${StatusBarHeight}px;
+  padding: 15px;
+  padding-bottom: 20px;
+  padding-right: 20px;
   background-color: ${primary};
 
   ${(props) =>
@@ -69,7 +72,7 @@ export const StyledContainer = styled.ScrollView`
 export const InnerContainer = styled.View`
   flex: 1;
   width: 100%;
-  align-items: center;
+  align-items: stretch;
 `;
 
 export const InnerContainerOne = styled.View`
@@ -81,6 +84,17 @@ export const InnerContainerOne = styled.View`
 export const ImageOne = styled.Image`
   width: 100px;
   height: 100px;
+  margin: 2px;
+`;
+
+export const InnerContainerImage = styled.View`
+  width: 90%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
 `;
 
 export const PageTitle = styled.Text`
@@ -134,6 +148,12 @@ export const StyledInputLabel = styled.Text`
   color: ${tetriary};
   font-size: 13px;
   text-align: left;
+  ${(props) =>
+    props.filter == true &&
+    `
+    font-weight: bold;
+    font-size: 15px;
+`}
 `;
 
 export const LeftIcon = styled.View`
@@ -155,6 +175,14 @@ export const AddingIcon = styled.TouchableOpacity`
   top: 34px;
   position: absolute;
   z-index: 1;
+  ${(props) =>
+    props.mapPicker == true &&
+    `
+  right: 15px;
+  top: 14px;
+  position: absolute;
+  z-index: 1;
+`}
 `;
 
 export const StyledButton = styled.TouchableOpacity`
@@ -208,6 +236,14 @@ export const StyledButton = styled.TouchableOpacity`
   flex-direction: row;
   justify-content: space-evenly;
   `}
+  ${(props) =>
+    props.filter == true &&
+    `
+    padding: 0px;
+  height: 40px;
+  width: 350px;
+  background-color: ${brand};
+  `}
 `;
 
 export const StyledButtonCategory = styled.TouchableOpacity`
@@ -219,13 +255,14 @@ export const StyledButtonCategory = styled.TouchableOpacity`
   margin-vertical: 5px;
   height: 60px;
   width: 140px;
-  border-radius: 10;
-  border-width: 1;
+  border-radius: 10px;
+  border-width: 1px;
   border-color: ${black};
   ${(props) =>
-    props.isPressed == 0 &&
+    props.isPress == true &&
     `
-    background-color: ${black};
+    font-size: 18px;
+    background-color: ${blue};
     `}
 `;
 
@@ -260,8 +297,15 @@ export const ButtonText = styled.Text`
   ${(props) =>
     props.isPhoto == true &&
     `
-  color: ${primary};
+  color: ${black};
   font-size: 18px;
+  `}
+
+  ${(props) =>
+    props.filter == true &&
+    `
+  color: ${primary};
+  font-size: 16px;
   `}
 `;
 
@@ -315,98 +359,125 @@ export const WelcomeContainer = styled(InnerContainer)`
   justify-content: center;
 `;
 
-
-
-
-
 //---------
 
 export const stylesHome = StyleSheet.create({
   dashboard: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   title: {
-      fontSize: 32,
-      textAlign: "center",
-      color: "black",
-      marginBottom: 4,
+    fontSize: 32,
+    textAlign: "center",
+    color: "black",
+    marginBottom: 4,
   },
 });
 
 export const stylesMap = StyleSheet.create({
   callout: {
-      width: 150,
-      height: 150,
-      paddingBottom: 10,
+    width: 150,
+    height: 150,
+    paddingBottom: 10,
   },
 
   calloutTitle: {
-      fontSize: 16,
-      color: "black",
-      textAlign: "center",
-      marginBottom: 4,
+    fontSize: 16,
+    color: "black",
+    textAlign: "center",
+    marginBottom: 4,
   },
 });
 
 export const stylesMyProfileContainer = {
   flex: 1,
-  justifyContent: 'space-around',
-  alignItems: 'center',
-  flexDirection: 'column',
+  justifyContent: "space-around",
+  alignItems: "center",
+  flexDirection: "column",
 };
 
 export const stylesMyProfileButton = {
-  backgroundColor: 'white',
-  alignItems: 'center',
-  justifyContent: 'center',
+  backgroundColor: "white",
+  alignItems: "center",
+  justifyContent: "center",
   padding: 5,
   borderRadius: 10,
   borderWidth: 1,
-  borderColor: 'black',
+  borderColor: "black",
 };
 
 export const stylesMyProfileTextInput = {
-  backgroundColor: 'lightgray',
+  backgroundColor: "lightgray",
   marginBottom: 5,
   padding: 15,
   fontSize: 16,
+};
 
+export const announcementAddButton = {
+  backgroundColor: "white",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 5,
+  borderRadius: 10,
+  borderWidth: 1,
+  borderColor: "black",
+  marginHorizontal: 20,
+  marginVertical: 5,
+};
+
+export const categoryButton = {
+  padding: 1,
+  backgroundColor: "#ffffff",
+  justifyContent: "center",
+  alignItems: "center",
+  borderRadius: 15,
+  marginVertical: 5,
+  height: 60,
+  width: 160,
+  borderWidth: 1,
+  borderColor: "black",
+};
+
+export const pickerStyle = {
+  height: 50,
+  width: "100%",
+  backgroundColor: "#E5E7EB",
+  marginVertical: 5,
 };
 
 export const stylesAnnouncements = StyleSheet.create({
   listContainer: {
-      flex: 1,
-      //marginTop: StatusBar.currentHeight || 0,
+    flex: 1,
+    //marginTop: StatusBar.currentHeight || 0,
   },
 
   announcementListItem: {
-      backgroundColor: 'white',
-      padding: 4,
-      paddingVertical: 8,
-      marginVertical: 1,
-      marginHorizontal: 8,
-      borderBottomWidth: 1,
-      borderRightWidth: 2,
-      borderColor: 'lightgray',
-      flex: 1,
-      flexDirection: "row"
+    backgroundColor: "white",
+    padding: 4,
+    paddingVertical: 8,
+    marginVertical: 1,
+    marginHorizontal: 8,
+    borderBottomWidth: 1,
+    borderRightWidth: 2,
+    borderColor: "lightgray",
+    flex: 1,
+    flexDirection: "row",
   },
 
   announcementListItemTitle: {
-      fontSize: 24,
+    fontSize: 24,
   },
 
   announcementListItemPhoto: {
-      width: 100,
-      height: 100,
-      marginRight: 8,
+    width: 100,
+    height: 100,
+    marginRight: 8,
   },
 
   announcementContainer: {
-      flex: 1,
+    flex: 1,
   },
 
   announcementDescriptionContainer: {
@@ -420,17 +491,17 @@ export const stylesAnnouncements = StyleSheet.create({
   },
 
   announcementTitle: {
-      fontSize: 32,
-      textAlign: "center",
-      color: "black",
+    fontSize: 32,
+    textAlign: "center",
+    color: "black",
   },
 
   announcementPhoto: {
-      width: 300,
-      height: 300,
-      //resizeMode: "stretch",
-      
-      //alignSelf: 'center',
-      //marginVertical: 8,
-  }
+    width: 300,
+    height: 300,
+    //resizeMode: "stretch",
+
+    //alignSelf: 'center',
+    //marginVertical: 8,
+  },
 });

@@ -157,6 +157,7 @@ export default function MenuAppBar(props) {
                 </Badge>
               </MenuItem>
               <MenuItem onClick={function (event) { handleAccountClose(); window.location.href = "/account" }}>Moje konto</MenuItem>
+              <MenuItem onClick={function (event) { handleAccountClose(); window.location.href = "/chatTesting" }}>Czat</MenuItem>
               <Divider />
               <MenuItem onClick={function (event) { logout() }}>Wyloguj</MenuItem>
             </Menu>

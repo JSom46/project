@@ -11,11 +11,12 @@ import AddAnnouncement from '../Map/AddAnnouncement';
 const AnnouncementsStack = createNativeStackNavigator();
 
 const AnnouncementsScreen = ({ route, navigation }) => {
+  const [userData, setUserData] = useState(route.params.userData);
 
     return(
       //<NavigationContainer>
         <AnnouncementsStack.Navigator screenOptions={{headerShown: false}}>
-          <AnnouncementsStack.Screen name="Lista" component={AnnouncementsList} />
+          <AnnouncementsStack.Screen name="Lista" component={AnnouncementsList} initialParams={{userData: userData}}/>
           <AnnouncementsStack.Screen name="Ogloszenie" component={AnnouncementView}/>
           <AnnouncementsStack.Screen name="Dodaj Ogloszenie" component={AddAnnouncement}/>
         </AnnouncementsStack.Navigator>
