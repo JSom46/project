@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 
 import { Colors } from "./../components/styles";
 
@@ -9,15 +9,17 @@ import { createStackNavigator } from "@react-navigation/stack";
 //screens
 import Register from "./../screens/auth/Register";
 import Login from "./../screens/auth/Login";
-import Welcome from "./../screens/Welcome";
-import MapMain from "./../screens/Map/MapMain";
+
 import AddAnnouncement from "../screens/Map/AddAnnouncement";
-import AnnouncementList from "../screens/Map/AnnouncementList";
 import SplashScreen from "../screens/SplashScreen";
 import { State } from "react-native-gesture-handler";
 //import { HeaderTitle } from "react-navigation-stack";
 import axios from "axios";
 import DrawerComponent from "./DrawerComponent";
+
+import Filter from "../screens/Map/Filter";
+import ImageBrowser from "../screens/ImageBrowserScreen";
+import AddNotification from "../screens/Announcements/AddNotification";
 
 const Stack = createStackNavigator();
 
@@ -29,7 +31,6 @@ const RootStack = () => {
   const [user, setUser] = useState();
   //const [initialRoute, setInitialRoute] = useState("Nawigator");
   //const guestData = {user_id: "guestId", email: "guest@email", login: "guest", is_admin: 0};
- 
 
   // const authContextData = React.useMemo(() => ({
   //   LoginGoogle: async () => {
@@ -135,67 +136,62 @@ const RootStack = () => {
   // []
   // )
 
-
   //sprawdzanie po wlaczeniu aplikacji czy uzytkownik jest zalogowany
   React.useEffect(() => {
     const handleLoggedIn = () => {
-    const url = "http://" + serwer + "/auth/loggedin";
-    //console.log("RootStack useEffect");
+      const url = "http://" + serwer + "/auth/loggedin";
+      //console.log("RootStack useEffect");
 
-    axios
-      .get(url)
-      .then((response) => {
-        const result = response.data;
-        console.log(result);
-        const { message, status, data } = result;
-        if (response.status == "200") {
-          console.log(result.email)
-          //navigation.replace('Nawigator', {userData: result});
-          //setInitialRouteName("");
-          setUser(result);
-        }
+      axios
+        .get(url)
+        .then((response) => {
+          const result = response.data;
+          console.log(result);
+          const { message, status, data } = result;
+          if (response.status == "200") {
+            console.log(result.email);
+            //navigation.replace('Nawigator', {userData: result});
+            //setInitialRouteName("");
+            setUser(result);
+          }
         })
 
-      .catch((error) => {
-        //console.log(error);
-        console.log("Nie jesteś zalogowany");
-        //navigation.replace('Nawigator', {userData: guestData});
-        setUser(guestData);
-      })
-      .finally(() => setIsLoading(false));
+        .catch((error) => {
+          //console.log(error);
+          console.log("Nie jesteś zalogowany");
+          //navigation.replace('Nawigator', {userData: guestData});
+          setUser(guestData);
+        })
+        .finally(() => setIsLoading(false));
     };
-      handleLoggedIn();
+    handleLoggedIn();
   }, []);
 
   return (
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{
-            headerStyled: {
-              backgroundColor: "transparent",
-            },
-            headerTintColor: Colors.tetriary,
-            headerTransparent: true,
-            HeaderTitle: "",
-            headerLeftContainerStyle: {
-              paddingLeft: 20,
-            },
-          }}
-          //initialRouteName={initialRoute}
-        >
-          {isLoading == true ? (
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyled: {
+            backgroundColor: "transparent",
+          },
+          headerTintColor: Colors.tetriary,
+          headerTransparent: true,
+          HeaderTitle: "",
+          headerLeftContainerStyle: {
+            paddingLeft: 20,
+          },
+        }}
+        //initialRouteName={initialRoute}
+      >
+        {isLoading == true ? (
+          <Stack.Screen name="Loading" component={SplashScreen} />
+        ) : (
+          <>
             <Stack.Screen
-              name="Loading"
-              component={SplashScreen}
-            />
-          ) : (
-            <>
-
-            <Stack.Screen
-              options={{headerShown: false}}
+              options={{ headerShown: false }}
               name="Nawigator"
               component={DrawerComponent}
-              initialParams={{userData: user}}
+              initialParams={{ userData: user }}
             />
             <Stack.Screen
               options={{
@@ -205,17 +201,42 @@ const RootStack = () => {
               component={Login}
             />
 
-            <Stack.Screen
-              name="Register" 
-              component={Register}
-            />
-            
-            </>
-          )}
-            
-            
+            <Stack.Screen name="Register" component={Register} />
+          </>
+        )}
+        <Stack.Screen
+          options={{
+            headerTransparent: false,
+          }}
+          name="Filtry"
+          component={Filter}
+        />
+        <Stack.Screen
+          name="ImageBrowser"
+          component={ImageBrowser}
+          options={{
+            title: "Selected 0 files",
+            headerTransparent: false,
+          }}
+        />
+        <Stack.Screen
+          name="AddAnnouncement"
+          component={AddAnnouncement}
+          options={{
+            headerShown: false,
+          }}
+        />
 
-          {/* <Stack.Screen name="MapMain" component={MapMain} />
+        <Stack.Screen
+          name="AddNotification"
+          component={AddNotification}
+          options={{
+            title: "Wyślij powiadomienie",
+            headerShown: true,
+          }}
+        />
+
+        {/* <Stack.Screen name="MapMain" component={MapMain} />
           <Stack.Screen
             options={{ headerTintColor: Colors.secondary, headerShown: false }}
             name="AnnouncementList"
@@ -231,8 +252,8 @@ const RootStack = () => {
             name="AddAnnouncement"
             component={AddAnnouncement}
           /> */}
-        </Stack.Navigator>
-      </NavigationContainer>
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
 export default RootStack;

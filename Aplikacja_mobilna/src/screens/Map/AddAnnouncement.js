@@ -1,5 +1,5 @@
 import { View, SafeAreaView, Text, TouchableOpacity } from "react-native";
-import {Picker} from '@react-native-picker/picker';
+import { Picker } from "@react-native-picker/picker";
 
 import React, { useState, useEffect } from "react";
 //icon
@@ -52,10 +52,10 @@ const AddAnnouncement = ({ navigation }) => {
   const [description, setDescription] = useState();
   const [category, setCategory] = useState();
   const [pictures, setPictures] = useState();
-  const [type, setType] = useState('');
-  const [coat, setCoat] = useState('');
-  const [color, setColor] = useState('');
-  const [breed, setBreed] = useState('');
+  const [type, setType] = useState("");
+  const [coat, setCoat] = useState("");
+  const [color, setColor] = useState("");
+  const [breed, setBreed] = useState("");
   const [picturesPreview, setPicturesPreview] = useState();
   const [image, setImage] = useState(null);
   const [lat, setLat] = useState();
@@ -150,7 +150,7 @@ const AddAnnouncement = ({ navigation }) => {
     console.log("FormData: ", formData);
 
     try {
-      const response = await fetch("http://"+ serwer + "/anons/", {
+      const response = await fetch("http://" + serwer + "/anons/", {
         method: "POST",
         credentials: "include",
         body: formData,
@@ -165,10 +165,10 @@ const AddAnnouncement = ({ navigation }) => {
   const handleSubmit = async (e) => {
     const response = await postAnnoucement();
     //console.log(JSON.stringify(response));
-    if(response.status == 200){
-      alert("Pomyślnie dodano ogłoszenie.")
+    if (response.status == 200) {
+      alert("Pomyślnie dodano ogłoszenie.");
       navigation.goBack();
-    }else{
+    } else {
       alert("Nie udało się dodać ogłoszenia.");
     }
   };
@@ -178,12 +178,14 @@ const AddAnnouncement = ({ navigation }) => {
     //console.log(value);
     //console.log(typesList);
     //console.log(typesList[0].name);
-    const choice = typesList.filter((item) => { return item.name == value });
+    const choice = typesList.filter((item) => {
+      return item.name == value;
+    });
     //console.log(choice);
     //console.log(choice[0].coats);
-    setCoat('');
-    setColor('');
-    setBreed('');
+    setCoat("");
+    setColor("");
+    setBreed("");
     setCoatsList(choice[0].coats);
     setColorsList(choice[0].colors);
     setBreedsList(choice[0].breeds);
@@ -191,8 +193,8 @@ const AddAnnouncement = ({ navigation }) => {
 
   React.useEffect(() => {
     const fetchTypes = async () => {
-      const url = 'http://' + serwer + '/anons/types';
-      
+      const url = "http://" + serwer + "/anons/types";
+
       axios
         .get(url)
         .then((response) => {
@@ -203,13 +205,15 @@ const AddAnnouncement = ({ navigation }) => {
             //const json = response.json();
             const tempTypes = [];
 
-            result.forEach(element => {
-              tempTypes.push(createTypes(
-                element.name,
-                element.coats,
-                element.colors,
-                element.breeds
-              ));
+            result.forEach((element) => {
+              tempTypes.push(
+                createTypes(
+                  element.name,
+                  element.coats,
+                  element.colors,
+                  element.breeds
+                )
+              );
             });
 
             //console.log(tempTypes);
@@ -219,12 +223,11 @@ const AddAnnouncement = ({ navigation }) => {
         })
         .catch((error) => {
           console.log(error);
-        })
-      };
+        });
+    };
 
     fetchTypes();
-}, [])
-
+  }, []);
 
   return (
     <StyledContainer>
@@ -306,22 +309,23 @@ const AddAnnouncement = ({ navigation }) => {
               <Picker
                 style={pickerStyle}
                 onValueChange={(itemValue) => {
-                  handleChange('type');
+                  handleChange("type");
                   values.type = itemValue;
                   //alert(values.type);
-                  handleTypeChange(itemValue);  
+                  handleTypeChange(itemValue);
                   setSelectedType(itemValue);
                 }}
                 selectedValue={selectedType}
-                prompt = "Typ"
+                prompt="Typ"
               >
                 {typesList.map((item) => {
-                  return(
-                        <Picker.Item 
-                        label={item.name.toString()} 
-                        value={item.name.toString()} 
-                        key={item.name.toString()} />
-                  )
+                  return (
+                    <Picker.Item
+                      label={item.name.toString()}
+                      value={item.name.toString()}
+                      key={item.name.toString()}
+                    />
+                  );
                 })}
               </Picker>
 
@@ -329,29 +333,21 @@ const AddAnnouncement = ({ navigation }) => {
               <Picker
                 style={pickerStyle}
                 onValueChange={(itemValue) => {
-                  handleChange('coat');
+                  handleChange("coat");
                   values.coat = itemValue;
                   setSelectedCoat(itemValue);
                 }}
                 selectedValue={selectedCoat}
-                prompt = "Owłosienie"
-                enabled = {coatsList.length > 1 ? true : false} 
+                prompt="Owłosienie"
+                enabled={coatsList.length > 1 ? true : false}
               >
                 {coatsList.length > 1 ? (
                   coatsList.map((item) => {
                     //console.log(item);
-                    return(
-                          <Picker.Item 
-                          label={item} 
-                          value={item} 
-                          key={item} />
-                    )}
-                  )
-                ):(
-                  <Picker.Item 
-                  label={"Wybierz owłosienie"} 
-                  value={0} 
-                  key={0} />
+                    return <Picker.Item label={item} value={item} key={item} />;
+                  })
+                ) : (
+                  <Picker.Item label={"Wybierz owłosienie"} value={0} key={0} />
                 )}
               </Picker>
 
@@ -359,29 +355,25 @@ const AddAnnouncement = ({ navigation }) => {
               <Picker
                 style={pickerStyle}
                 onValueChange={(itemValue) => {
-                  handleChange('color');
+                  handleChange("color");
                   values.color = itemValue;
                   setSelectedColor(itemValue);
                 }}
                 selectedValue={selectedColor}
-                prompt = "Umaszczenie"
-                enabled = {colorsList.length > 1 ? true : false} 
+                prompt="Umaszczenie"
+                enabled={colorsList.length > 1 ? true : false}
               >
                 {colorsList.length > 1 ? (
                   colorsList.map((item) => {
                     //console.log(item);
-                    return(
-                          <Picker.Item 
-                          label={item} 
-                          value={item} 
-                          key={item} />
-                    )}
-                  )
-                ):(
-                  <Picker.Item 
-                  label={"Wybierz umaszczenie"} 
-                  value={0} 
-                  key={0} />
+                    return <Picker.Item label={item} value={item} key={item} />;
+                  })
+                ) : (
+                  <Picker.Item
+                    label={"Wybierz umaszczenie"}
+                    value={0}
+                    key={0}
+                  />
                 )}
               </Picker>
 
@@ -389,29 +381,21 @@ const AddAnnouncement = ({ navigation }) => {
               <Picker
                 style={pickerStyle}
                 onValueChange={(itemValue) => {
-                  handleChange('breed');
+                  handleChange("breed");
                   values.breed = itemValue;
                   setSelectedBreed(itemValue);
                 }}
                 selectedValue={selectedBreed}
-                prompt = "Rasa"
-                enabled = {breedsList.length > 1 ? true : false} 
+                prompt="Rasa"
+                enabled={breedsList.length > 1 ? true : false}
               >
                 {breedsList.length > 1 ? (
                   breedsList.map((item) => {
                     //console.log(item);
-                    return(
-                          <Picker.Item 
-                          label={item} 
-                          value={item} 
-                          key={item} />
-                    )}
-                  )
-                ):(
-                  <Picker.Item 
-                  label={"Wybierz rasę"} 
-                  value={0} 
-                  key={0} />
+                    return <Picker.Item label={item} value={item} key={item} />;
+                  })
+                ) : (
+                  <Picker.Item label={"Wybierz rasę"} value={0} key={0} />
                 )}
               </Picker>
 
@@ -424,25 +408,36 @@ const AddAnnouncement = ({ navigation }) => {
                   <ButtonText isCategory={true}>Znalezione</ButtonText>
                 </StyledButtonCategory> */}
                 <TouchableOpacity
-                  style={[categoryButton, {backgroundColor: category == 0 ? '#E5E7EB' : '#ffffff'}]}
-                  onPress={() => {values.category = 0; setCategory(0)}}
+                  style={[
+                    categoryButton,
+                    { backgroundColor: category == 0 ? "#E5E7EB" : "#ffffff" },
+                  ]}
+                  onPress={() => {
+                    values.category = 0;
+                    setCategory(0);
+                  }}
                 >
-                  <Text style={{fontSize: 18, color: "black"}}>
+                  <Text style={{ fontSize: 18, color: "black" }}>
                     Zaginione
                   </Text>
-                  
                 </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[categoryButton, {backgroundColor: category == 1 ? '#E5E7EB' : '#ffffff'}]}
-                  onPress={() => {values.category = 1; setCategory(1)}}
+                <TouchableOpacity
+                  style={[
+                    categoryButton,
+                    { backgroundColor: category == 1 ? "#E5E7EB" : "#ffffff" },
+                  ]}
+                  onPress={() => {
+                    values.category = 1;
+                    setCategory(1);
+                  }}
                 >
-                  <Text style={{fontSize: 18, color: "black"}}>
+                  <Text style={{ fontSize: 18, color: "black" }}>
                     Znalezione
                   </Text>
                 </TouchableOpacity>
               </ButtonView>
 
-              <StyledButton onPress={handleSubmit} style={{marginBottom: 50}}>
+              <StyledButton onPress={handleSubmit} style={{ marginBottom: 50 }}>
                 <ButtonText>Dodaj</ButtonText>
               </StyledButton>
             </StyledFormArea>

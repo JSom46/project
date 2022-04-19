@@ -12,11 +12,14 @@
   "dependencies": {
     "@expo/ngrok": "4.1.0",
     "@react-native-community/masked-view": "^0.1.11",
+    "@react-native-community/slider": "^4.2.1",
     "@react-native-masked-view/masked-view": "^0.2.6",
+    "@react-native-picker/picker": "2.2.1",
     "@react-navigation/drawer": "^6.3.0",
     "@react-navigation/native": "^6.0.8",
     "@react-navigation/native-stack": "^6.3.0",
     "@react-navigation/stack": "^6.1.1",
+    "@unimodules/core": "^7.1.2",
     "axios": "^0.26.0",
     "expo": "~44.0.0",
     "expo-image-picker": "~12.0.1",
@@ -24,6 +27,7 @@
     "expo-images-picker": "^2.2.5",
     "expo-linking": "~3.0.0",
     "expo-location": "~14.0.1",
+    "expo-screen-orientation": "^4.1.2",
     "expo-status-bar": "~1.2.0",
     "formik": "^2.2.9",
     "react": "17.0.1",
@@ -31,6 +35,7 @@
     "react-native": "0.64.3",
     "react-native-gesture-handler": "~2.1.0",
     "react-native-image-crop-picker": "^0.37.3",
+    "react-native-map-clustering": "^3.4.2",
     "react-native-maps": "0.29.4",
     "react-native-material-menu": "^2.0.0",
     "react-native-paper": "^4.11.2",
@@ -40,11 +45,12 @@
     "react-native-svg": "^12.3.0",
     "react-native-swiper": "^1.6.0",
     "react-native-table-component": "^1.2.2",
+    "react-native-unimodules": "^0.14.10",
     "react-native-web": "0.17.1",
     "react-navigation": "^4.4.4",
     "react-navigation-stack": "^2.10.4",
     "styled-components": "^5.3.3",
-    "@react-native-picker/picker": "2.2.1"
+    "unimodules-permissions-interface": "^6.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"
