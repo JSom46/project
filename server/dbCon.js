@@ -163,32 +163,32 @@ con.serialize(() => {
 });
 
 
-//usuwanie przedawnionych notyfikacji i dezaktywowanie przeterminowanych ogłoszeni w okreslonym interwale
-// setInterval(() => {
-//     //usuniecie przedawnionych notyfikacji
-//     con.run('DELETE FROM notifications WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.NOTIFICATION_TTL), (err) => {
-//         if(err){
-//             log.error('deleting expired notifications: ', err);
-//             throw err;
-//         }
-//     });
+// usuwanie przedawnionych notyfikacji i dezaktywowanie przeterminowanych ogłoszeni w okreslonym interwale
+setInterval(() => {
+    //usuniecie przedawnionych notyfikacji
+    con.run('DELETE FROM notifications WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.NOTIFICATION_TTL), (err) => {
+        if(err){
+            log.error('deleting expired notifications: ', err);
+            throw err;
+        }
+    });
 
-//     //dezaktywacja przeterminowanych ogloszen
-//     con.run('UPDATE anons SET is_active = 0 WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.ANON_TTL), (err) => {
-//         if(err){
-//             log.error('deactivating expired anons: ', err);
-//             throw err;
-//         }
-//     });
+    //dezaktywacja przeterminowanych ogloszen
+    con.run('UPDATE anons SET is_active = 0 WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.ANON_TTL), (err) => {
+        if(err){
+            log.error('deactivating expired anons: ', err);
+            throw err;
+        }
+    });
 
-//     //usuniecie zbyt dlugo nieaktywnych ogloszen
-//     con.run('DELETE FROM anons WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.INACTIVE_ANON_TTL), (err) => {
-//         if(err){
-//             log.error('deleting anons inactive for too long: ', err);
-//             throw err;
-//         }
-//     });
-// }, parseInt(process.env.INTERVAL));
+    //usuniecie zbyt dlugo nieaktywnych ogloszen
+    con.run('DELETE FROM anons WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.INACTIVE_ANON_TTL), (err) => {
+        if(err){
+            log.error('deleting anons inactive for too long: ', err);
+            throw err;
+        }
+    });
+}, parseInt(process.env.INTERVAL));
 
 
 module.exports = con;
