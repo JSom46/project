@@ -113,20 +113,34 @@ con.run(`CREATE TABLE IF NOT EXISTS notifications(
 // ChatImages - obrazy wysyłane w sesjaach live chat
 // ChatUsers - chatroomy z przypisanymi członkami
 con.serialize(() => {
-    con.run(`CREATE TABLE IF NOT EXISTS ChatMessages (
-        message_id INT PRIMARY KEY,
+    con.run(`CREATE TABLE IF NOT EXISTS ChatUsers (
         anons_id INT,
-        chat_id INT, -- user_id użytkownika pytającego /nie wlaściciela anonsu/
+        chat_id INT,
         user_id INT,
-        message_date INT,
-        message_text TEXT, 
-        CONSTRAINT chat_messages_fk_user_id FOREIGN KEY (user_id) REFERENCES users (id),
-        CONSTRAINT chat_messages_fk_anons_id FOREIGN KEY (anons_id) REFERENCES anons (id)
+        last_seen_time INT,
+        PRIMARY KEY (chat_id, user_id),
+        FOREIGN KEY (anons_id) REFERENCES anons (id),
+        FOREIGN KEY (user_id) REFERENCES users (id)
         )`,
         (err) => {
             if (err) {
-                console.log(err.name + " | " + err.message);
-                throw err;
+                console.debug(err)
+                throw err
+            }
+        });
+    
+    con.run(`CREATE TABLE IF NOT EXISTS ChatMessages (
+        message_id INT PRIMARY KEY,
+        chat_id INT, 
+        user_id INT,
+        message_date INT,
+        message_text TEXT, 
+        CONSTRAINT ChatMessages_FK_user_id FOREIGN KEY (user_id) REFERENCES users (id)
+        )`,
+        (err) => {
+            if (err) {
+                console.debug(err)
+                throw err
             }
         });
 
@@ -134,61 +148,47 @@ con.serialize(() => {
         image_id INT PRIMARY KEY,
         message_id INT,
         user_id INT,
-        path TEXT,
-        type TEXT,
+        filename TEXT,
+        filepath TEXT,
+        mimetype TEXT,
         CONSTRAINT Images_FK_message_id FOREIGN KEY (message_id) REFERENCES ChatMessages (message_id)
+        CONSTRAINT Images_FK_user_id FOREIGN KEY (user_id) REFERENCES users (id)
         )`,
         (err) => {
             if (err) {
-                console.log(err.name + " | " + err.message);
-                throw err;
-            }
-        });
-
-    con.run(`CREATE TABLE IF NOT EXISTS ChatUsers (
-        anons_id INT,
-        chat_id INT,
-        user_id INT,
-        last_seen_time INT,
-        PRIMARY KEY (anons_id, chat_id, user_id),
-        FOREIGN KEY (anons_id) REFERENCES anons (id),
-        FOREIGN KEY (user_id) REFERENCES users (id)
-        )`,
-        (err) => {
-            if (err) {
-                console.log(err.name + " | " + err.message);
-                throw err;
+                console.debug(err)
+                throw err
             }
         });
 });
 
 
 //usuwanie przedawnionych notyfikacji i dezaktywowanie przeterminowanych ogłoszeni w okreslonym interwale
-setInterval(() => {
-    //usuniecie przedawnionych notyfikacji
-    con.run('DELETE FROM notifications WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.NOTIFICATION_TTL), (err) => {
-        if(err){
-            log.error('deleting expired notifications: ', err);
-            throw err;
-        }
-    });
+// setInterval(() => {
+//     //usuniecie przedawnionych notyfikacji
+//     con.run('DELETE FROM notifications WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.NOTIFICATION_TTL), (err) => {
+//         if(err){
+//             log.error('deleting expired notifications: ', err);
+//             throw err;
+//         }
+//     });
 
-    //dezaktywacja przeterminowanych ogloszen
-    con.run('UPDATE anons SET is_active = 0 WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.ANON_TTL), (err) => {
-        if(err){
-            log.error('deactivating expired anons: ', err);
-            throw err;
-        }
-    });
+//     //dezaktywacja przeterminowanych ogloszen
+//     con.run('UPDATE anons SET is_active = 0 WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.ANON_TTL), (err) => {
+//         if(err){
+//             log.error('deactivating expired anons: ', err);
+//             throw err;
+//         }
+//     });
 
-    //usuniecie zbyt dlugo nieaktywnych ogloszen
-    con.run('DELETE FROM anons WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.INACTIVE_ANON_TTL), (err) => {
-        if(err){
-            log.error('deleting anons inactive for too long: ', err);
-            throw err;
-        }
-    });
-}, parseInt(process.env.INTERVAL));
+//     //usuniecie zbyt dlugo nieaktywnych ogloszen
+//     con.run('DELETE FROM anons WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.INACTIVE_ANON_TTL), (err) => {
+//         if(err){
+//             log.error('deleting anons inactive for too long: ', err);
+//             throw err;
+//         }
+//     });
+// }, parseInt(process.env.INTERVAL));
 
 
 module.exports = con;

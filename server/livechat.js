@@ -12,23 +12,21 @@ const httpServer = createServer(app);
 const con = require('./dbCon.js');
 const { resourceUsage } = require('process');
 
-var lastMessage, lastImage;
+var lastMessage, lastImage, lastChat;
 
-con.get('SELECT MAX(message_id) msgID from ChatMessages', (err, result) => {
-    if (err) {
-        console.log(err.name + " | " + err.message);
-        throw err;
-    } else {
-        lastMessage = result.msgID ?? 0;
-    }
-});
-con.get('SELECT MAX(image_id) imgID from ChatImages', (err, result) => {
-    if (err) {
-        console.log(err.name + " | " + err.message);
-        throw err;
-    } else { 
-        lastImage = result.imgID ?? 0;
-    }
+con.get(`SELECT (SELECT MAX(message_id) from ChatMessages) msgId,
+                (SELECT MAX(image_id) from ChatImages) imgId,
+                (SELECT MAX(chat_id) from ChatUsers) chatId`,
+    (err, result) => {
+        if (!err) {
+            lastMessage = result.msgId ?? 0;
+            lastImage = result.imgId ?? 0;
+            lastChat = result.chatId ?? 0;
+
+            console.log('msg id:', lastMessage,', img id:', lastImage,', chat_id:', lastChat)
+        } else { 
+            console.debug(err);
+        }
 });
 
 
@@ -46,23 +44,22 @@ const io = new Server(httpServer, {
 
 
 io.on("connection", function (socket) {
-    console.log("client connected", socket.handshake.address);
+    console.log("client connected", socket.id, '[', socket.handshake.address, ']');
 
     socket.on('disconnecting', () => {
-        socket.rooms.forEach(chatroom => {
-            const [ anonsId, chatId ] = chatroom.split(':', 2);
-            // powiadomienia o wyjściu dla członków chatroom'u            
-            socket.to(chatroom).emit('user-leave', anonsId, chatId, socket.userName); 
+        socket.rooms.forEach((chatroom, roomidx, rooms) => {
+            // powiadomienia o wyjściu dla członków chatroom'u
+            socket.to(chatroom).emit('user-leave', chatroom, socket.userName); 
             socket.leave(chatroom);
 
             // Aktualizacja daty ostaniej wizyty w chatroomie
-            con.run('UPDATE ChatUsers SET last_seen_time = ? WHERE anons_id = ? AND chat_id = ? and user_id = ?',
-                Date.now(), anonsId, chatId, socket.userId);
+            con.run('UPDATE ChatUsers SET last_seen_time = ? WHERE chat_id = ? and user_id = ?',
+                Date.now(), chatroom, socket.userId);
         });
     });
 
     socket.on("disconnect", () => {
-        console.log('client disconnected', socket.handshake.address);
+        console.log('client disconnected', socket.id, '[', socket.handshake.address, ']');
 
         // zapisywać datę i godzinę rozłączenia użytkownika
         // żeby przy zalogowaniu móc podawać informację 
@@ -76,12 +73,16 @@ io.on("connection", function (socket) {
 
     // middleware do weryfikacji autoryzacji
     socket.use(([event, ...args], next) => {
-         console.log(socket.userName, 'event: ', event);
-         //console.debug(args);
 
-        if ('auth-request' !== event && !socket.userId) {
-            return next(new Error('unauthorized'));
+        if ('auth-request' !== event) {
+            console.log(socket.userName, ': ', event);
+            if (!socket.userId) {
+                return next(new Error('unauthorized'));
+            }
+        } else {
+            console.log(socket.id, ': ', event, args[0]);
         }
+        
         next();
     });
 
@@ -121,25 +122,28 @@ io.on("connection", function (socket) {
     // zwraca listę czatów z informacją ile jest wszystkich i nowych wiadomości
     socket.on('get-user-chats', () => {
         con.all(
-        `WITH Chats (anons_id, chat_id, user_id) AS (
-            SELECT anons_id, chat_id, user_id FROM ChatUsers WHERE user_id = ?
-            )
-            SELECT c.anons_id, c.chat_id,
-                (SELECT count(*) FROM ChatMessages cm
-                    WHERE cm.anons_id = c.anons_id AND cm.chat_id = c.chat_id
+        `WITH Chats (anons_id, chat_id, convers_id, asking_id) AS (
+            SELECT ow.anons_id, ow.chat_id, co.user_id, ow.user_id FROM ChatUsers ow
+                JOIN ChatUsers co ON ow.chat_id = co.chat_id AND ow.user_id <> co.user_id 
+                WHERE ow.user_id = ?)
+            SELECT c.anons_id, c.chat_id, users.login, anons.title, 
+                (SELECT count(*) FROM ChatMessages chm 
+                    WHERE chm.chat_id = c.chat_id
                 ) AllMsgs,
-                (SELECT count(*) FROM ChatMessages cm 
-                    WHERE cm.anons_id = c.anons_id AND cm.chat_id = c.chat_id
-                        AND cm.user_id <> c.user_id AND cm.message_date > 
-                            (SELECT last_active_time FROM users WHERE id = c.user_id)
+                (SELECT count(*) FROM ChatMessages chm 
+                    WHERE chm.chat_id = c.chat_id
+                        AND chm.user_id <> c.convers_id AND chm.message_date > 
+                            (SELECT last_active_time FROM users u WHERE u.id = c.convers_id)
                 ) NewMsgs			
-            FROM Chats c`
-        , socket.userId, (err, result) => {
-            if (!err) {
-                socket.emit('user-chats', result.length, result);
-            } else {
-                console.debug(err);
-            }                                
+            FROM Chats c
+            JOIN anons on c.anons_id = anons.id
+            JOIN users on c.convers_id = users.id`, socket.userId,
+            (err, result) => {
+                if (!err) {
+                    socket.emit('user-chats', result.length, result);
+                } else {
+                    console.debug(err);
+                }                                
         });
     });
 
@@ -147,14 +151,19 @@ io.on("connection", function (socket) {
     ///////////////////////////////////////////////////////////
     // zwraca listę wiadomości z podanego czatu
     // parametry:
-    //  - anonsId   : id anonsu z tabeli [anons]
+    //  - chatId   : id chatu
 
-    socket.on('get-chat-messages', (anonsId, chatId) => {
+    socket.on('get-chat-messages', (chatId) => {
         // wysyłamy do użytkownika wiadomości z konkretnego chatu
-        con.all(`SELECT cm.message_id, cm.anons_id, cm.chat_id, users.login username, cm.message_date, cm.message_text, ci.image_id
-                 FROM ChatMessages cm JOIN users ON cm.user_id = users.id
-                 LEFT JOIN ChatImages ci ON ci.message_id = cm.message_id
-                 WHERE cm.anons_id = ? AND cm.chat_id = ?`, anonsId, chatId,
+        con.all(`WITH Chats (anons_id, chat_id, user_id) AS (
+            SELECT anons_id, chat_id, user_id
+            FROM ChatUsers WHERE user_id = ?)
+            SELECT cm.message_id, ch.chat_id, users.login,
+                   cm.message_date, cm.message_text, ci.image_id
+            FROM Chats ch JOIN users ON users.id = ch.user_id
+                JOIN ChatMessages cm ON cm.chat_id = ch.chat_id
+                LEFT JOIN ChatImages ci ON ci.message_id = cm.message_id
+            WHERE ch.chat_id = ?`, socket.userId, chatId,
                 (err, result) => {
                     if (!err) {
                         socket.emit('chat-messages', result.length, result);
@@ -172,97 +181,98 @@ io.on("connection", function (socket) {
     socket.on('new-chat', (anonsId) => {
 
         // czy istnieje już czat, który ma być założony?
-        con.get(`SELECT COUNT(*) cnt FROM (
-                SELECT anons_id FROM ChatUsers WHERE anons_id = $anons AND chat_id = $user
-                UNION ALL
-                SELECT id FROM anons WHERE id = $anons AND author_id = $user
-                )`, { $anons: anonsId, $user: socket.userId }, (err, result) => {
+        con.get(`SELECT chat_id, count(*) cnt FROM ChatUsers WHERE anons_id = $anons and user_id = $user`,
+                { $anons: anonsId, $user: socket.userId },
+            (err, result) => {
 
             if (!err) {
                 if (result.cnt > 0) {
                     // chat jest już utworzony w bazie - nie można dodać nowego!
-                    socket.emit('new-chat-response', -1, 'Chat already exists or own advert');
+                    socket.emit('new-chat-response', result.chat_id, 'Chat already exists');
                 } else {
                     // czy istanieje anons, do którego będzie utworzowny chat?
-                    con.get('SELECT COUNT(*) cnt FROM anons WHERE id = ?', anonsId,
+                    con.get(`SELECT
+                            (SELECT COUNT(*) FROM anons WHERE author_id = ? AND id = ?) [selfchat],
+                            (SELECT COUNT(*) cnt FROM anons WHERE id = ?) [exists]`,
+                            socket.userId, anonsId, anonsId,
                         (err, result) => {
                             if (!err) {
-                                if (result.cnt === 0) {
-                                    socket.emit('new-chat-response', -1, -1, 'Advert does not exist');
+                                if (result.selfchat !== 0 || result.exists === 0) {
+                                    socket.emit('new-chat-response', -1, 'Cannot create chat');
                                 }
                                 else {
-                                    // można dodać nowy chat
-                                    let chatroom = anonsId + ':' + socket.userId;
-                                    socket.join(chatroom);
+                                    // można dodać nowy chat, lastChat => chatroom
+                                    ++lastChat;             
+                                    socket.join(lastChat);
                                 
-                                    con.run(`INSERT INTO ChatUsers (anons_id, chat_id, user_id) VALUES (?, ?, ?)`,
-                                        anonsId, socket.userId, socket.userId);
                                     con.run(`INSERT INTO ChatUsers (anons_id, chat_id, user_id)
-                                        SELECT id, ?, author_id FROM anons WHERE id = ?`, socket.userId, anonsId,
-                                        (err) => {
-                                            if (err) { console.log(err.name + " | " + err.message); }
-                                        });
+                                             VALUES (?, ?, ?)`, anonsId, lastChat, socket.userId);
+                                    con.run(`INSERT INTO ChatUsers (anons_id, chat_id, user_id)
+                                             SELECT id, ?, author_id FROM anons WHERE id = ?`, lastChat, anonsId,
+                                            (err) => {
+                                                if (err) { console.debug(err); }
+                                            });
 
-                                    socket.emit('new-chat-response', anonsId, socket.userId, 'Chat created');
+                                    socket.emit('new-chat-response', lastChat, 'Chat created');
                                 }
-                            } else { console.log('[new-chat] error: ', err.message); }
+                            } else { console.debug(err); }
                         });
                 }
-            } else { console.log('[new-chat] error: ', err.message); }
+            } else { console.debug(err); }
         });
     });
 
     ///////////////////////////////////////////////////////////
     // dołącza użytkownika do założonego wcześniej czatu
     // parametry:
-    //  - anonsId   : id anonsu z tabeli [anons]
     //  - chatId    : chat_id z tabeli [UserChats],
     //      zwracane po zapytanie [get-user-chats] 
     //      oraz przy zakładaniu nowego chat-u
     
-    socket.on("join-chat", (anonsId, chatId) => {
+    socket.on("join-chat", (chatId) => {
+        const chatroom = typeof chatId === 'number' ? chatId : parseInt(chatId);
 
         // czy user_id ma założony chat
-        con.get('SELECT COUNT(*) cnt FROM ChatUsers WHERE anons_id = ? AND chat_id = ? ', anonsId, chatId, 
-        (err, result) => {
-            if (!err) {
-                if (result.cnt > 0) {
-                    let chatroom = anonsId + ':' + chatId;
-
-                    socket.join(chatroom);
-                    socket.to(chatroom).emit('user-join', anonsId, chatId, socket.userName);
-                    socket.emit('join-chat-response', anonsId, chatId, 'Joined to chatroom');
+        con.get('SELECT COUNT(*) cnt FROM ChatUsers WHERE chat_id = ? AND user_id = ?', chatroom, socket.userId,
+            (err, result) => {
+                if (!err) {
+                    if (result.cnt > 0) {
+                        socket.join(chatroom);
+                        socket.to(chatroom).emit('user-join', chatroom, socket.userName);
+                        socket.emit('join-chat-response', chatroom, 'Joined to chatroom');
+                    }
+                    else {
+                        socket.emit('join-chat-response', -1, 'Not in chatroom');
+                    }
                 }
-                else {
-                    socket.emit('join-chat-response', -1, -1, 'No such chatroom');
-                }
-            }
-        })
+            });
     });
 
 
     ///////////////////////////////////////////////////////////
     // odłącza użytkownika od pokoju czatowego
     // parametry:
-    //  - anonsId   : id anonsu z tabeli [anons]
     //  - chatId    : chat_id z tabeli [UserChats],
     //      zwracane po zapytanie [get-user-chats] 
     //      oraz przy zakładaniu nowego chat-u
 
-    socket.on("leave-chat", (anonsId, chatId) => {
-        let chatroom = anonsId + ':' + chatId;
+    socket.on("leave-chat", (chatId) => {
+        const chatroom = typeof chatId === 'number' ? chatId : parseInt(chatId);
+
         if (socket.rooms.has(chatroom)) {
-            socket.to(chatroom).emit('user-leave', anonsId, chatId, socket.userName); 
+            socket.to(chatroom).emit('user-leave', chatroom, socket.userName); 
             socket.leave(chatroom);
 
-            socket.emit('leave-chat-response', anonsId, chatId, 'You have left the chatroom');
+            socket.emit('leave-chat-response', chatroom, 'You have left the chatroom');
 
             // Aktualizacja daty ostaniej wizyty w chatroomie
-            con.run('UPDATE ChatUsers SET last_seen_time = ? WHERE anons_id = ? AND chat_id = ? and user_id = ?',
-                Date.now(), anonsId, chatId, socket.userId
+            con.run('UPDATE ChatUsers SET last_seen_time = ? WHERE chat_id = ? and user_id = ?',
+                Date.now(), chatroom, socket.userId, (err) => {
+                    if (err) {console.debug(err)}
+                }
             );
         } else {
-            socket.emit('leave-chat-response', -1, -1, 'Not in chatroom');
+            socket.emit('leave-chat-response', -1, 'Not in chatroom');
         }
     });
 
@@ -271,28 +281,30 @@ io.on("connection", function (socket) {
     // odbiera od klienta i rozsyła do pozostałych członków czatu
     // wiadomość tekstową oraz zapisuję ją w bazie danych
     // parametry:
-    //  - anonsId   : id anonsu z tabeli [anons]
     //  - chatId    : chat_id z tabeli [UserChats],
     //      zwracane po zapytanie [get-user-chats] 
     //      oraz przy zakładaniu nowego chat-u
     // - msgText    : treść wiadomości tekstowej
 
-    socket.on("chat-msg", (anonsId, chatId, msgText) => {
+    socket.on("chat-msg", (chatId, msgText) => {
+        const chatroom = typeof chatId === 'number' ? chatId : parseInt(chatId);
 
         // wiadomość do użytkowników podłączonych do pokoju 
-        let chatroom = anonsId + ':' + chatId;
         if (!socket.rooms.has(chatroom)) {
-            socket.emit('chat-response', -1, "Not in chatrom");
+            socket.emit('chat-response', -1, "Not in chatroom");
             return;
         }
         
         let curDate = Date.now();
         ++lastMessage;
 
-        io.to(chatroom).emit('chat-msg', lastMessage, anonsId, chatId, socket.userName, curDate, msgText); 
+        io.to(chatroom).emit('chat-msg', lastMessage, chatroom, socket.userName, curDate, msgText); 
 
-        con.run(`INSERT INTO ChatMessages (message_id, anons_id, chat_id, user_id, message_date, message_text) VALUES
-                 (${lastMessage}, ${anonsId}, ${chatId}, ${socket.userId}, ${curDate}, "${msgText}")`);
+        con.run(`INSERT INTO ChatMessages (message_id, chat_id, user_id, message_date, message_text)
+                 VALUES (${lastMessage}, ${chatroom}, ${socket.userId}, ${curDate}, "${msgText}")`,
+            (err) => {
+                if (err) { console.debug(err); }
+            });
 
         // dodatkowo powinniśmy powiadomić wszystkich użytkowników (u nas jednego), których to dotyczy,
         // tj. podłączonych do serwera/aplikacji ale nie będących aktualnie w pokoju czatowym,
@@ -301,8 +313,8 @@ io.on("connection", function (socket) {
         // tabelę ChatUsers można wczytać do pamięci operacyjnej przy uruchamianiu serwera
         // żeby nie robić zapytań SQL przy każdej wiadomośc chat-owej
 
-        con.each('SELECT user_id FROM ChatUsers WHERE anons_id = ? AND chat_id = ? AND user_id <> ?',
-            anonsId, chatId, socket.userId, (err, user) => {
+        con.each('SELECT user_id FROM ChatUsers WHERE chat_id = ? AND user_id <> ?', chatroom, socket.userId,
+            (err, user) => {
                 if (!err) {
                     let sockid = userSocketMap.get(user.user_id);
                     if (sockid) {
@@ -311,7 +323,7 @@ io.on("connection", function (socket) {
                         // w pokoju czatowym
                         let sock = io.sockets.sockets.get(sockid)
                         if (!sock.rooms.has(chatroom)) {
-                            io.to(sockid).emit('new-msg-notification', lastMessage, anonsId, chatId, socket.userName, curDate, msgText);
+                            io.to(sockid).emit('new-msg-notification', lastMessage, chatroom, socket.userName, curDate, msgText);
                         }
                     }
                 }
@@ -324,7 +336,6 @@ io.on("connection", function (socket) {
     // wiadomość w postaci obrazu graficznego oraz zapisuje go
     // na dysku oraz w bazie danych
     // parametry:
-    //  - anonsId   : id anonsu z tabeli [anons]
     //  - chatId    : chat_id z tabeli [UserChats],
     //      zwracane po zapytanie [get-user-chats] 
     //      oraz przy zakładaniu nowego chat-u
@@ -332,25 +343,25 @@ io.on("connection", function (socket) {
     //  - imgType   : type MIME trreści pliku
     //  - imgData   : zawartość binarna pliku (pobrana z ArrayBuffer/Buffer)
     
-    socket.on("chat-img", (anonsId, chatId, imgName, imgType, imgData) => {
+    socket.on("chat-img", (chatId, imgName, imgType, imgData) => {
+        const chatroom = typeof chatId === 'number' ? chatId : parseInt(chatId);
 
-        let chatroom = anonsId + ':' + chatId;
         if (!socket.rooms.has(chatroom)) {
             socket.emit('chat-response', -1, "Not in chatrom");
             return;
         }
 
-        let curDate = Date.now();
+        const curDate = Date.now();
         ++lastImage;
         ++lastMessage;
 
-        io.to(chatroom).emit('chat-img', lastMessage, anonsId, chatId, socket.userName, curDate, lastImage, imgName, imgType, imgData);
+        io.to(chatroom).emit('chat-img', lastMessage, chatroom, socket.userName, curDate, lastImage, imgName, imgType);
 
-        let imgFileName = anonsId + '-' + lastImage + '!' + imgName;
-        let imgFilePath = path.resolve(__dirname, 'chatpictures', imgFileName);
+        const imgFileName = chatroom + '-' + lastImage + '!' + imgName;
+        const imgFilePath = path.resolve(__dirname, 'chatpictures', imgFileName);
 
         try {
-            let writer = fs.createWriteStream(imgFilePath);
+            const writer = fs.createWriteStream(imgFilePath);
             writer.write(imgData);
             writer.end();
             writer.on('finish', () => {
@@ -362,45 +373,50 @@ io.on("connection", function (socket) {
             console.debug(error)
         }
 
-        con.run(`INSERT INTO ChatMessages (message_id, anons_id, chat_id, user_id, message_date) VALUES
-                 (${lastMessage}, ${anonsId}, ${chatId},${socket.userId}, ${curDate})`);
-        con.run(`INSERT INTO ChatImages (image_id, message_id, user_id, path, type) VALUES
-                 (${lastImage}, ${lastMessage}, ${socket.userId}, "${imgFilePath}", "${imgType}")`);
+        con.run(`INSERT INTO ChatMessages (message_id, chat_id, user_id, message_date) VALUES
+                 (${lastMessage}, ${chatroom}, ${socket.userId}, ${curDate})`, (err) => {
+                    if (err) { console.debug(err); }
+                 });
+        con.run(`INSERT INTO ChatImages (image_id, message_id, user_id, filename, filepath, mimetype) VALUES
+                 (${lastImage}, ${lastMessage}, ${socket.userId}, "${imgFileName}", "${imgFilePath}", "${imgType}");`,
+            (err) => {
+                if (err) { console.debug(err); }
+            });
         
-        
-        con.each('SELECT user_id FROM ChatUsers WHERE anons_id = ? AND chat_id = ? AND user_id <> ?',
-            anonsId, chatId, socket.userId, (err, user) => {
-                if (!err) {
-                    const sockid = userSocketMap.get(user.user_id);
-                    if (sockid) {
-                        // znajdź socket po socket.id i sprawdź czy jest w pokoju,
-                        // jeśli nie to wyślij mu powiadomienie o nowej wiadomości 
-                        // w pokoju czatowym
-                        const sock = io.sockets.sockets.get(sockid)
-                        if (!sock.rooms.has(chatroom)) {
-                            io.to(sockid).emit('new-img-notification', lastMessage, anonsId, chatId, socket.userName, curDate, lastImage, imgName, imgType);
-                        }
+        con.each('SELECT user_id FROM ChatUsers WHERE chat_id = ? AND user_id <> ?',
+            chatroom, socket.userId, (err, user) => {
+            if (!err) {
+                const sockid = userSocketMap.get(user.user_id);
+                if (sockid) {
+                    // znajdź socket po socket.id i sprawdź czy jest w pokoju,
+                    // jeśli nie to wyślij mu powiadomienie o nowej wiadomości 
+                    // w pokoju czatowym
+                    const sock = io.sockets.sockets.get(sockid)
+                    if (!sock.rooms.has(chatroom)) {
+                        io.to(sockid).emit('new-img-notification', lastMessage, chatroom, socket.userName, curDate, lastImage, imgName, imgType);
                     }
                 }
-            });
+            }
+        });
     });
 
     socket.on('get-image', (imageId) => {
-        con.get('SELECT path, type FROM ChatImages WHERE image_id = ?', imageId, (err, result) => {
-            if (!err) {
-                if (result) {
-                    fs.readFile(result.path, (err, filedata) => {
-                        if (!err) {
-                            socket.emit('image', imageId, result.path, result.type, filedata);
-                        } else {
-                            console.debug(err);
-                        }
-                    });
+        con.get('SELECT filepath, mimetype FROM ChatImages WHERE image_id = ?', imageId,
+            (err, result) => {
+                if (!err) {
+                    if (result) {
+                        fs.readFile(result.filepath, (err, filedata) => {
+                            if (!err) {
+                                socket.emit('image', imageId, result.filename, result.mimetype, filedata);
+                            } else {
+                                console.debug(err);
+                            }
+                        });
+                    }
+                } else {
+                    console.debug(err);
                 }
-            } else {
-                console.debug(err);
-            }
-        });
+            });
     });
 });
 
