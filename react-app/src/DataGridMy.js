@@ -340,7 +340,7 @@ export default function DataGridMy() {
                                         <Typography variant="subtitle1">Zdjęcia</Typography>
                                         {announcementData.images && announcementData.images.map((element) => (
                                             <img style={{ width: "100px", height: "100px", objectFit: "cover", marginRight: 2, marginBottom: 2 }} src={'http://localhost:2400/anons/photo?name=' + element}
-                                                alt={announcementData.title} key={announcementData.id} onClick={handleImageClick} />
+                                                alt={announcementData.title} key={element} onClick={handleImageClick} />
                                         ))}
                                         <Divider />
                                     </span>

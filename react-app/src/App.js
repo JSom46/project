@@ -14,6 +14,9 @@ import Dashboard from './Dashboard';
 import Announcements from './Announcements';
 import Footer from './Footer';
 import ChangePassword from './ChangePassword';
+import ChatTesting from './ChatTesting';
+import Faq from './Faq';
+import Team from './Team';
 
 import MapTesting from './MapTesting'; //TEMP
 import { Box } from '@mui/material';
@@ -22,6 +25,11 @@ import { Box } from '@mui/material';
 
 function App() {
   const [auth, setAuth] = useState("");
+  const [anonsId, setAnonsId] = useState(-1);
+  const chatRedirect = (id) => {
+    // console.log(id);
+    setAnonsId(id);
+  }
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -69,7 +77,8 @@ function App() {
           <Switch>
             <Route exact path="/" render={() => { return (<Redirect to="/dashboard" />) }} />
             <Route path="/dashboard">
-              <Dashboard auth={auth} />
+              <Dashboard auth={auth} chatRedirect={chatRedirect}/>
+              {(anonsId !== -1) && <Redirect to={{pathname: "/chatTesting", state:{id:anonsId}}} />}
             </Route>
             <Route path="/announcements">
               <Announcements auth={auth} />
@@ -83,8 +92,18 @@ function App() {
             <Route path="/changePassword">
               <ChangePassword />
             </Route>
+            <Route path="/chatTesting" render={(props) => <ChatTesting id={props.location.state?.id}/>}/>
+            {/* <Route path="/chatTesting">
+              <ChatTesting />
+            </Route> */}
             <Route path="/maptest">
               <MapTesting />
+            </Route>
+            <Route path="/faq">
+              <Faq />
+            </Route>
+            <Route path="/team">
+              <Team />
             </Route>
             <Route path="/activate" children={<Activate />} />
             <Route path="/profile" children={<Profile auth={auth} />} />

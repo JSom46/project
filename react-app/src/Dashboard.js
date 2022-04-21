@@ -24,7 +24,8 @@ function createData(list) {
       image: element.image,
       create_date: element.create_date,
       lat: element.lat,
-      lng: element.lng
+      lng: element.lng,
+      distance: element.distance
     });
   });
   return rows;
@@ -39,25 +40,18 @@ function createFilters() {
     color: '',
     breed: '',
     location: null,
-    rad: -1
+    rad: 30
   }
 }
 
 export default function Dashboard(props) {
-  // const [addAnnoucmentShown, setAddAnnoucmentShown] = React.useState(false);
-  // const handleButtonClick = () => {
-  //   setAddAnnoucmentShown((prev) => !prev);
-  // };
 
   const [listData, setListData] = useState([]);
   const [updateListData, setUpdateListData] = useState(0);
 
-  //const [filterData, setFilterData] = useState(false);
   const [filters, setFilters] = useState(createFilters());
   const [filtersDialogOpen, setFiltersDialogOpen] = useState(false);
-
-  //const [filteredData, setFilteredData] = useState([]);
-  //const [updateFilteredData, setUpdateFilteredData] = useState(0);
+  const [showDistance, setShowDistance] = useState(false);
 
   const [announcementData, setAnnouncementData] = useState([]);
   const [announcementDialogOpen, setAnnouncementDialogOpen] = useState(false);
@@ -68,6 +62,10 @@ export default function Dashboard(props) {
   const [updateMap, setUpdateMap] = useState(0);
 
   const urldata = useLocation();
+
+  const chatRedirect = (id) => {
+    props.chatRedirect(id);
+  }
 
   //get map position from url params
   useEffect(() => {
@@ -138,7 +136,7 @@ export default function Dashboard(props) {
         url += addParam("rad=" + filters.rad, params);
         params++;
       }
-      //console.log(url);
+      console.log(url);
 
 
       try {
@@ -196,10 +194,15 @@ export default function Dashboard(props) {
     setUpdateListData(updateListData + 1);
   }
 
+  function listDistance(val) {
+    setShowDistance(val);
+    //TODO sortuj liste
+  }
+
   return (
     <BrowserRouter>
       <Grid container spacing={2} columns={16}>
-        <Grid item xs={11}>
+        <Grid item xs={10}>
           <MapOverview
             data={listData}
             center={mapCenter}
@@ -209,7 +212,7 @@ export default function Dashboard(props) {
             updateMap={updateMap}
           />
         </Grid>
-        <Grid container item xs={5}>
+        <Grid container item xs={6}>
           <Stack spacing={0} sx={{width: "100%"}}>
             <FiltersDialog
               open={filtersDialogOpen}
@@ -217,11 +220,13 @@ export default function Dashboard(props) {
               setOpen={setFiltersDialogOpen}
               handleAccept={updateFilters}
               showOnMap={showOnMap}
+              setShowDistance={listDistance}
             />
             <DataGridList
               data={listData}
               handleRowClick={openAnnouncementDialog}
               reload={refreshData}
+              showDistance={showDistance}
             />
 
           </Stack>
@@ -238,6 +243,7 @@ export default function Dashboard(props) {
         announcementData={announcementData}
         setOpen={setAnnouncementDialogOpen}
         showOnMap={showOnMap}
+        chatRedirect={chatRedirect}
       />
 
       {/*<button onClick={openFiltersDialog} >Filtry</button>*/}

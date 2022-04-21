@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+// import {  } from 'react-router-dom';
 import { Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, CircularProgress, Button } from '@mui/material';
 import { Stack } from '@mui/material';
 import { Typography } from '@mui/material';
 import { Divider } from '@mui/material';
 import { Snackbar, Alert } from '@mui/material';
+
+import { Redirect, Link } from 'react-router-dom/cjs/react-router-dom.min';
 
 import AddNotification from './AddNotification';
 
@@ -23,16 +26,16 @@ export default function AnnouncementDialog(props) {
     const notificationCallback = (event) => {
         if (event.status === 200) {
             setSnackbarData({
-              open: true,
-              message: "Pomyślnie wysłano powiadomienie",
-              severity: "success"
+                open: true,
+                message: "Pomyślnie wysłano powiadomienie",
+                severity: "success"
             });
-          }
-          else
+        }
+        else
             setSnackbarData({
-              open: true,
-              message: "Wystąpił błąd",
-              severity: "error"
+                open: true,
+                message: "Wystąpił błąd",
+                severity: "error"
             });
         setOpenAddNotificationDialog(false);
     }
@@ -89,6 +92,7 @@ export default function AnnouncementDialog(props) {
                         <DialogActions>
                             <Button onClick={() => (props.setOpen(false))}>Wróć</Button>
                             <Button color='secondary' hidden={props.announcementData.category === 1} onClick={() => setOpenAddNotificationDialog(true)}>Widziałem to zwierzę</Button>
+                            <Button color='secondary' onClick={() => props.chatRedirect(props.announcementData.id)} >Czat</Button>
                             <Button onClick={() => (props.showOnMap(props.announcementData.lat, props.announcementData.lng))}>Pokaż na mapie</Button>
                         </DialogActions>
                     </div>
@@ -111,6 +115,7 @@ export default function AnnouncementDialog(props) {
                     {snackbarData.message}
                 </Alert>
             </Snackbar>
+            {/* <Redirect to="/chatTesting" /> */}
         </div>
     );
 }
