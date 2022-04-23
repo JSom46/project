@@ -17,6 +17,7 @@ import MyProfileScreen from "../screens/MyProfileScreen";
 // import MyAnnouncementsScreen from './MyAnnouncementsScreen';
 import MyAnnouncementsScreen from "../screens/MyAnnouncementsScreen";
 // import AnnouncementView from './AnnouncementView';
+import AddAnnouncement from "../screens/Map/AddAnnouncement";
 
 import MyAnnouncementsStackScreen from "../screens/Announcements/MyAnnouncementsStackScreen";
 
@@ -26,8 +27,11 @@ import {
   Fontisto,
   AntDesign,
   Entypo,
+  Feather,
 } from "@expo/vector-icons";
 import axios from "axios";
+import ChatStackScreen from "../chat/ChatStack";
+import AboutAppScreen from "../screens/AboutAppScreen";
 
 const Drawer = createDrawerNavigator();
 
@@ -124,13 +128,23 @@ const DrawerComponent = ({ navigation, route }) => {
                 />
               ),
               headerRight: () => (
-                <AntDesign
+                <View style={{flexDirection: "row", marginRight: 10}} >
+                  <Ionicons
+                    name="refresh"
+                    size={30}
+                    onPress={() => {
+                      navigation.navigate("Mapa", {refresh: true});
+                    }}
+                    style={{marginRight: 20}}
+                  />
+                  <AntDesign
                   name="filter"
                   size={30}
                   onPress={() => {
                     navigation.navigate("Filtry");
                   }}
                 />
+                </View>
               ),
             }}
           />
@@ -153,6 +167,20 @@ const DrawerComponent = ({ navigation, route }) => {
                   onPress={() => {
                     navigation.navigate("Filtry");
                   }}
+                  style={{marginRight: 10}}
+                />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="O aplikacji"
+            component={AboutAppScreen}
+            options={{
+              drawerIcon: ({ focused, size }) => (
+                <Ionicons
+                  name="information-circle-outline"
+                  size={size}
+                  color={focused ? "#7cc" : "#ccc"}
                 />
               ),
             }}
@@ -173,13 +201,23 @@ const DrawerComponent = ({ navigation, route }) => {
                 />
               ),
               headerRight: () => (
-                <AntDesign
+                <View style={{flexDirection: "row", marginRight: 10}} >
+                  <Ionicons
+                    name="refresh"
+                    size={30}
+                    onPress={() => {
+                      navigation.navigate("Mapa", {refresh: true});
+                    }}
+                    style={{marginRight: 20}}
+                  />
+                  <AntDesign
                   name="filter"
                   size={30}
                   onPress={() => {
                     navigation.navigate("Filtry");
                   }}
                 />
+                </View>
               ),
             }}
           />
@@ -202,6 +240,7 @@ const DrawerComponent = ({ navigation, route }) => {
                   onPress={() => {
                     navigation.navigate("Filtry");
                   }}
+                  style={{marginRight: 10}}
                 />
               ),
             }}
@@ -209,6 +248,20 @@ const DrawerComponent = ({ navigation, route }) => {
           <Drawer.Screen
             name="Profil"
             component={MyProfileScreen}
+            initialParams={{ userData: userData }}
+            options={{
+              drawerIcon: ({ focused, size }) => (
+                <Ionicons
+                  name="person-outline"
+                  size={size}
+                  color={focused ? "#7cc" : "#ccc"}
+                />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="Moje Ogłoszenia"
+            component={MyAnnouncementsStackScreen}
             initialParams={{ userData: userData }}
             options={{
               drawerIcon: ({ focused, size }) => (
@@ -221,9 +274,18 @@ const DrawerComponent = ({ navigation, route }) => {
             }}
           />
           <Drawer.Screen
-            name="Moje Ogłoszenia"
-            component={MyAnnouncementsStackScreen}
+            name="Wiadomości"
+            component={ChatStackScreen}
             initialParams={{ userData: userData }}
+            options={{
+              drawerIcon: ({ focused, size }) => (
+                <Ionicons 
+                  name="chatbox-ellipses-outline" 
+                  size={size} 
+                  color={focused ? "#7cc" : "#ccc"}
+                />
+              ),
+            }}
           />
           <Drawer.Screen
             name="Powiadomienia"
@@ -239,10 +301,32 @@ const DrawerComponent = ({ navigation, route }) => {
               ),
             }}
           />
-          {/* <Drawer.Screen
-                  name="Dodaj Ogłoszenie"
-                  component={AddAnnouncement}
-                /> */}
+          <Drawer.Screen
+            name="Dodaj Ogłoszenie"
+            component={AddAnnouncement}
+            options={{
+              drawerIcon: ({ focused, size }) => (
+                <Ionicons
+                  name="add"
+                  size={size}
+                  color={focused ? "#7cc" : "#ccc"}
+                />
+              ),
+            }}
+          />
+          <Drawer.Screen
+            name="O aplikacji"
+            component={AboutAppScreen}
+            options={{
+              drawerIcon: ({ focused, size }) => (
+                <Ionicons
+                  name="information-circle-outline"
+                  size={size}
+                  color={focused ? "#7cc" : "#ccc"}
+                />
+              ),
+            }}
+          />
         </>
       )}
 

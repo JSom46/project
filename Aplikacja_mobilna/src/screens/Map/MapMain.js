@@ -7,6 +7,7 @@ import * as Location from "expo-location";
 
 import { AddingIcon, Colors } from "../../components/styles";
 
+import { StatusBar } from "expo-status-bar";
 import { MaterialIcons } from "@expo/vector-icons";
 import FilterContext from "../../components/Map/FilterContext";
 import { Svg, Image as ImageSvg } from "react-native-svg";
@@ -22,6 +23,8 @@ const MapMain = ({ navigation, route }) => {
     longitudeDelta: 0.0421,
   });
   const [hasLocationPermissions, setLocationPermission] = useState(false);
+
+  const testowazmienna = 232323;
 
   const [markerRefs, setMarkerRefs] = useState([]);
   const [focusRegion, setFocusRegion] = useState(null);
@@ -72,71 +75,72 @@ const MapMain = ({ navigation, route }) => {
     return str;
   }
 
+  const fetchData = async () => {
+    setTableData();
+    let url = "http://" + serwer + "/anons/list";
+    let params = 0;
+    if (filterData.category !== -1) {
+      url += addParam("category=" + filterData.category, params);
+      params++;
+    }
+    if (filterData.type !== "") {
+      url += addParam("type=" + filterData.type, params);
+      params++;
+    }
+    if (filterData.coat !== "") {
+      url += addParam("coat=" + filterData.coat, params);
+      params++;
+    }
+    if (filterData.color !== "") {
+      url += addParam("color=" + filterData.color, params);
+      params++;
+    }
+    if (filterData.breed !== "") {
+      url += addParam("breed=" + filterData.breed, params);
+      params++;
+    }
+    if (filterData.lat !== "") {
+      url += addParam("lat=" + filterData.lat.toString(), params);
+      params++;
+    }
+    if (filterData.lng !== "") {
+      url += addParam("lng=" + filterData.lng.toString(), params);
+      params++;
+    }
+    if (filterData.rad !== -1 && filterData.rad !== 30) {
+      url += addParam("rad=" + filterData.rad, params);
+      params++;
+    }
+    console.log(url);
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+      });
+      const json = await response.json();
+      const tabData = [];
+      json.list.forEach((element) => {
+        tabData.push(
+          createData(
+            element.id,
+            element.title,
+            element.category === 0 ? "Zaginięcie" : "Znalezienie",
+            element.description,
+            element.type,
+            element.lat,
+            element.lng,
+            element.image
+          )
+        );
+      });
+      setTableData(tabData);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
   useEffect(
     () => {
-      const fetchData = async () => {
-        setTableData();
-        let url = "http://" + serwer + "/anons/list";
-        let params = 0;
-        if (filterData.category !== -1) {
-          url += addParam("category=" + filterData.category, params);
-          params++;
-        }
-        if (filterData.type !== "") {
-          url += addParam("type=" + filterData.type, params);
-          params++;
-        }
-        if (filterData.coat !== "") {
-          url += addParam("coat=" + filterData.coat, params);
-          params++;
-        }
-        if (filterData.color !== "") {
-          url += addParam("color=" + filterData.color, params);
-          params++;
-        }
-        if (filterData.breed !== "") {
-          url += addParam("breed=" + filterData.breed, params);
-          params++;
-        }
-        if (filterData.lat !== "") {
-          url += addParam("lat=" + filterData.lat.toString(), params);
-          params++;
-        }
-        if (filterData.lng !== "") {
-          url += addParam("lng=" + filterData.lng.toString(), params);
-          params++;
-        }
-        if (filterData.rad !== -1 && filterData.rad !== 30) {
-          url += addParam("rad=" + filterData.rad, params);
-          params++;
-        }
-        console.log(url);
-        try {
-          const response = await fetch(url, {
-            method: "GET",
-            credentials: "include",
-          });
-          const json = await response.json();
-          const tabData = [];
-          json.list.forEach((element) => {
-            tabData.push(
-              createData(
-                element.id,
-                element.title,
-                element.category === 0 ? "Zaginięcie" : "Znalezienie",
-                element.description,
-                element.type,
-                element.lat,
-                element.lng,
-                element.image
-              )
-            );
-          });
-          setTableData(tabData);
-        } catch (error) {
-          console.log("error", error);
-        }
-      };
       fetchData();
       console.log("filterData");
       console.log(filterData);
@@ -167,6 +171,17 @@ const MapMain = ({ navigation, route }) => {
         mapRef.current.animateToRegion(tempRegion, 2000);
         //navigation.setParams({focusCoordinates: null});
         route.params.focusCoordinates = null;
+      }
+    }, [route.params])
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log(route.params);
+      if(route.params && route.params.refresh){
+        console.log("wywolano odswiezenie mapy");
+        fetchData();
+        route.params.refresh = false;
       }
     }, [route.params])
   );
