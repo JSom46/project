@@ -6,7 +6,7 @@ KLIENT			SERWER
 (username: string)
 
 	originator	<-- [auth-response]
-			(status: int, message: string)
+					(status: int, message: string)
 
 ---------------------------------------------------------------
 
@@ -14,16 +14,16 @@ KLIENT			SERWER
 ()	
 
 	originator	<-- [user-chats]
-			(length: int,  
-			[{anons_id:int, chat_id: int, AllMsgs: int, NewMsgs: int}]: array of objects)
+					(length: int,  
+					[{anons_id:int, chat_id: int, login: int, title: string AllMsgs: int, NewMsgs: int}]: array of objects)
 
 ---------------------------------------------------------------
 
 [get-chat-messages] -->
-(anons_id: int, chat_id: int)
+(chat_id: int)
 
 	originator	<-- [chat-messages]
-			(length: int, [{message_id: int, anons_id: int, chat_id: int, username: string, message_date: int, message_text: string}]: array of objects)
+					(length: int, [{message_id: int, chat_id: int, login: string, message_date: int, message_text: string}]: array of objects)
 
 ---------------------------------------------------------------
 
@@ -31,71 +31,73 @@ KLIENT			SERWER
 (anons_id: int)
 
 	originator	<-- [new-chat-response]
-			(anons_id: int, chat_id: int, message: string)
+					(chat_id: int, message: string)
 
 ---------------------------------------------------------------
 
 [join-chat] -->
-(anons_id: int, chat_id: int)
+(chat_id: int)
 
 	originator	<-- [join-chat-response]
-			(anons_id: int, chat_id: int, message: string)
+					(chat_id: int, message: string)
 			
 	chat users	<-- [user-join]
-	in room		(anons_id: int, chat_id: int, username: string)
+	in the room		(chat_id: int, login: string)
 
 ---------------------------------------------------------------
 
 [leave-chat] -->
-(anons_id: int, chat_id: int)
+(chat_id: int)
 
 	originator	<-- [leave-chat-response]
-			(anons_id: int, chat_id: int, message: string)
+					(chat_id: int, message: string)
 			
 	chat users	<-- [user-leave]
-	in room		(anons_id: int, chat_id: int, username: string)
+	in the room		(chat_id: int, login: string)
 
 ---------------------------------------------------------------
 
 [chat-msg] -->
-(anons_id: int, chat_id: int, message: string)
+(chat_id: int, message: string)
 
 	originator	<-- [chat-msg]
-			(message_id: int, anons_id: int, chat_id: int, username: string, datetime: int,  message: string)
+					(message_id: int, chat_id: int, login: string, datetime: int,  message: string)
 
 	chat users	<-- [chat-msg]
-	in room		(message_id: int, anons_id: int, chat_id: int, username: string, datetime: int,  message: string)
+	in the room		(message_id: int, chat_id: int, login: string, datetime: int,  message: string)
 
 	chat users	<-- [new-msg-notification]
-	logged in but	(message_id: int, anons_id: int, chat_id: int, username: string, datetime: int,  message: string)
-	not in room
+	logged in but	(message_id: int, chat_id: int, login: string, datetime: int,  message: string)
+	not in the room
 	
 	originator	<-- [chat-response]
-			(status: int, message: string)
+					(status: int, message: string)
 
 ---------------------------------------------------------------
 
 [chat-img] -->
-(anons_id: int, chat_id: int, img_name: string, img_type: string, img_data: buffer)
+(chat_id: int, img_name: string, img_type: string, img_data: buffer)
 
 	originator	<-- [chat-img]
-			(image_id: int, anons_id: int, chat_id: int, username: string, datetime: int,  img_name: string, img_type: string, img_data: buffer)
+					(message_id: int, chat_id: int, login: string, datetime: int,  image_id: int, img_name: string, img_type: string)
 
 	chat users	<-- [chat-img]
-	in room		(image_id: int, anons_id: int, chat_id: int, username: string, datetime: int,  img_name: string, img_type: string, img_data: buffer)
+	in the room		(message_id: int, chat_id: int, login: string, datetime: int,  image_id: int, img_name: string, img_type: string)
 
 	chat users	<-- [new-img-notification]
-	logged in but	(image_id: int, anons_id: int, chat_id: int, username: string, datetime: int,  img_name: string, img_type: string)
-	not in room
+	logged in but	(message_id: int, chat_id: int, login: string, datetime: int,  image_id: int, img_name: string, img_type: string)
+	not in the room
 
 	originator	<-- [chat-response]
-			(status: int, message: string)
+					(status: int, message: string)
 
 ---------------------------------------------------------------	
+
 [get-image] -->
+(image_id: int)
 
 	originator	<-- [image]
-			(image_id: int, img_name: string, img_type: string, img_data: buffer)
+					(image_id: int, img_name: string, img_type: string, img_data: buffer)
 
 ---------------------------------------------------------------	
 

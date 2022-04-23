@@ -7,11 +7,14 @@ export default function Footer() {
             <Box sx={{color: "text.primary", bgcolor: "text.secondary", padding:'20px'}}>
                 <Container maxWidth="sm">
                     <Stack direction="row" spacing={4} justifyContent="center" alignItems="center">
-                        <Link href="profile" color="inherit">
-                            Test
+                        <Link href="faq" color="inherit">
+                            FAQ
                         </Link>
-                        <Link href="profile" color="inherit">
-                            Test2
+                        <Link href="team" color="inherit">
+                            Zespół
+                        </Link>
+                        <Link href="https://strona-zespolxiv.herokuapp.com/index.html" target="_blank" color="inherit">
+                            Dokumentacja
                         </Link>
                     </Stack>
                 </Container>
