@@ -52,9 +52,10 @@ const Announcement = ({ title, image, category }) => (
     </View>
 );
 
-const MyAnnouncementsScreen = ({navigation}) => {
+const MyAnnouncementsScreen = ({navigation, route}) => {
     const [isLoading, setLoading] = useState(true);
     const [announcements, setAnnouncements] = useState([]);
+    const [userData, setUserData] = useState(route.params.userData);
 
     React.useEffect(() => {
         getAnnouncements().then(rows => setAnnouncements(rows)).finally(() => setLoading(false));
@@ -63,7 +64,7 @@ const MyAnnouncementsScreen = ({navigation}) => {
     //Ta funkcja renderuje ogloszenia - jest wywolywana dla kazdego elementu (item) na liscie
     const renderItem = ({ item }) => (
         <TouchableOpacity
-          onPress={() => navigation.navigate('Ogloszenie', {announcement: item})}  //onPress wyswietla konkretne ogloszenie - do Screena 'Ogloszenie' przekazywane jest cale ogloszenie w parametrze 'announcement'  
+          onPress={() => navigation.navigate('Ogloszenie', {announcement: item, userData: userData })}  //onPress wyswietla konkretne ogloszenie - do Screena 'Ogloszenie' przekazywane jest cale ogloszenie w parametrze 'announcement'  
         >
           <Announcement title={item.title} image={item.image} category={item.category}/>
         </TouchableOpacity>

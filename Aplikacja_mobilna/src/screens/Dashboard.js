@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, Button, StatusBar } from "react-native";
 // import {AuthContext} from './App'
 // import {stylesHome} from './styles';
@@ -13,15 +13,16 @@ import AnnouncementView from "./AnnouncementView";
 
 const MapAnnouncementsStack = createNativeStackNavigator();
 
-const Dashboard = ({ navigation }) => {
+const Dashboard = ({ navigation, route }) => {
   //const {logOut} = React.useContext(AuthContext);
+  const [userData, setUserData] = useState(route.params.userData);
 
   return (
     <MapAnnouncementsStack.Navigator
       style={{ flex: 1 }}
       screenOptions={{ headerShown: false }}
     >
-      <MapAnnouncementsStack.Screen name="Mapa" component={MapMain} />
+      <MapAnnouncementsStack.Screen name="Mapa" component={MapMain} initialParams={{ userData: userData }} />
       <MapAnnouncementsStack.Screen
         name="Ogloszenie"
         component={AnnouncementView}

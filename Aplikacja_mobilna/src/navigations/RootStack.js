@@ -155,7 +155,6 @@ const RootStack = () => {
             setUser(result);
           }
         })
-
         .catch((error) => {
           //console.log(error);
           console.log("Nie jesteś zalogowany");
@@ -226,7 +225,6 @@ const RootStack = () => {
             headerShown: false,
           }}
         />
-
         <Stack.Screen
           name="AddNotification"
           component={AddNotification}

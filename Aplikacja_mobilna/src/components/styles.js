@@ -440,11 +440,79 @@ export const categoryButton = {
   borderColor: "black",
 };
 
+export const announcementOptionsButton = {
+  padding: 1,
+  backgroundColor: "#ffffff",
+  justifyContent: "center",
+  alignItems: "center",
+  borderRadius: 15,
+  marginVertical: 5,
+  marginHorizontal: 20,
+  height: 40,
+  width: 150,
+  borderWidth: 1,
+  borderColor: "black",
+};
+
+export const dialogContainer = {
+  //margin: 20,
+  backgroundColor: "white",
+  borderRadius: 20,
+  padding: 15,
+  alignItems: "center",
+  shadowColor: "#000",
+  shadowOffset: {
+    width: 0,
+    height: 2
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 4,
+  elevation: 5,
+  //marginVertical: 80,
+  marginHorizontal: 20,
+  //alignSelf: "center"
+  top: "20%",
+};
+
+export const innerDialogContainer = {
+  margin: 10,
+  backgroundColor: "white",
+  padding: 5,
+  paddingVertical: 10,
+  alignItems: "center",
+  borderTopWidth: 1,
+  borderBottomWidth: 1,
+  borderColor: "gray"
+};
+
+export const innerDialogButtonsContainer = {
+  margin: 10,
+  backgroundColor: "white",
+  padding: 5,
+  flexDirection:"row",
+  alignItems: "center",
+  justifyContent: "space-between",
+};
+
 export const pickerStyle = {
   height: 50,
   width: "100%",
   backgroundColor: "#E5E7EB",
   marginVertical: 5,
+};
+
+export const dialogButton = {
+  padding: 1,
+  marginHorizontal: 20,
+  backgroundColor: "white",
+  flexDirection:"row",
+  justifyContent: "center",
+  alignItems: "center",
+  borderRadius: 15,
+  height: 40,
+  width: 120,
+  borderWidth: 1,
+  borderColor: "black",
 };
 
 export const stylesAnnouncements = StyleSheet.create({

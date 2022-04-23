@@ -7,9 +7,10 @@ import {
   FlatList,
   StyleSheet,
   Text,
-  StatusBar,
+  //StatusBar,
   TouchableOpacity,
   Image,
+  RefreshControl,
 } from "react-native";
 import { NavigationContainer, useIsFocused } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -20,6 +21,7 @@ import {
   announcementAddButton,
 } from "../../components/styles";
 import FilterContext from "./../../components/Map/FilterContext";
+import { StatusBar } from "expo-status-bar";
 // do testow listy
 // const DATA = [
 //     {
@@ -66,6 +68,7 @@ const AnnouncementsList = ({ navigation, route }) => {
   const [pageCount, setPageCount] = useState(1);
   const [userData, setUserData] = useState(route.params.userData);
   const isFocused = useIsFocused();
+  const [refreshing, setRefreshing] = useState(false);
   const [filterData, setfilterData] = useContext(FilterContext);
 
   function addParam(arg, params) {
@@ -81,7 +84,9 @@ const AnnouncementsList = ({ navigation, route }) => {
 
   async function getAnnouncements(filterData) {
     let url = "http://" + serwer + "/anons/list";
-    // let url = "http://" + serwer + "/anons/list?page=" + page + "&num=" + "20";
+    //let page = pageCount;
+    //let url = "http://" + serwer + "/anons/list?page=" + page + "&num=" + "10";
+    //let params = 2;
     let params = 0;
     if (filterData.category !== -1) {
       url += addParam("category=" + filterData.category, params);
@@ -138,10 +143,8 @@ const AnnouncementsList = ({ navigation, route }) => {
         );
         //console.log(element);
       });
-      // console.log(rows);
-      //  if (page == 1) {
-      //  setPageCount(page + 1);
-      // }
+
+      //setPageCount(page + 1);
       return rows;
     } catch (error) {
       console.error(error);
@@ -189,16 +192,35 @@ const AnnouncementsList = ({ navigation, route }) => {
   //   }
   // }, []);
 
-  React.useEffect(() => {
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    //console.log(filterData);
+    setAnnouncements([]);
+    //console.log("w odswiezaniu ",pageCount);
     getAnnouncements(filterData)
       .then((rows) => setAnnouncements(rows))
+      .finally(() => {
+        setRefreshing(false); 
+        setPageCount(pageCount + 1)});
+
+    //console.log("w odswiezaniu ",pageCount);
+    //console.log("odswiezono");
+    //console.log(announcements);
+  }, []);
+
+  React.useEffect(() => {
+    setPageCount(1);
+    //console.log("w useeffect ",pageCount);
+    getAnnouncements(filterData)
+      .then((rows) => setAnnouncements(rows))
+      //.then(() => setPageCount(pageCount + 1))
       .finally(() => setLoading(false));
   }, [filterData]);
 
   //Ta funkcja renderuje ogloszenia - jest wywolywana dla kazdego elementu (item) na liscie
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      onPress={() => navigation.navigate("Ogloszenie", { announcement: item })} //onPress wyswietla konkretne ogloszenie - do Screena 'Ogloszenie' przekazywane jest cale ogloszenie w parametrze 'announcement'
+      onPress={() => navigation.navigate("Ogloszenie", { announcement: item, userData: userData })} //onPress wyswietla konkretne ogloszenie - do Screena 'Ogloszenie' przekazywane jest cale ogloszenie w parametrze 'announcement'
     >
       <Announcement
         title={item.title}
@@ -210,6 +232,7 @@ const AnnouncementsList = ({ navigation, route }) => {
 
   return (
     <View style={{ flex: 1 }}>
+      <StatusBar style="dark"/>
       {userData.user_id == "guestId" ? (
         <TouchableOpacity
           onPress={() => navigation.navigate("Login")}
@@ -240,15 +263,20 @@ const AnnouncementsList = ({ navigation, route }) => {
             renderItem={renderItem}
             onEndReached={() => {
               //alert("prawei koniec");
-              getAnnouncements()
-                .then((rows) => setAnnouncements(announcements.concat(rows)))
-                .finally(() => {
-                  console.log("wczytano kolejna strone");
-                  console.log(pageCount);
-                  setPageCount(pageCount + 1);
-                });
+              // getAnnouncements(filterData)
+              //   .then((rows) => setAnnouncements(announcements.concat(rows)))
+              //   .finally(() => {
+              //     console.log("wczytano kolejna strone");
+              //     //console.log(pageCount);
+              //   });
             }}
             onEndReachedThreshold={0.8}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+              />
+            }
           />
         </SafeAreaView>
       )}

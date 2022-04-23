@@ -1,6 +1,21 @@
 import React, { useState } from "react";
-import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
-import { stylesAnnouncements } from "../components/styles";
+import {View, Text, Image, ScrollView, TouchableOpacity, Modal, Button } from "react-native";
+import {
+  stylesAnnouncements, 
+  ButtonView, 
+  announcementOptionsButton, 
+  dialogContainer, 
+  innerDialogContainer, 
+  innerDialogButtonsContainer, 
+  dialogButton,
+} from "../components/styles";
+import {
+  Octicons,
+  Ionicons,
+  Fontisto,
+  AntDesign,
+  Entypo,
+} from "@expo/vector-icons";
 import axios from "axios";
 import Swiper from "react-native-swiper";
 
@@ -10,8 +25,15 @@ import SplashScreen from "./SplashScreen";
 
 const AnnouncementView = ({ route, navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  const [userData, setUserData] = useState(route.params.userData);
   const [announcement, setAnnouncement] = useState();
   const [date, setDate] = useState();
+
+  React.useEffect(() => {
+    setUserData(route.params.userData);
+  },[route.params.userData]);
 
   //pobieranie szczegolowych informacji o ogloszeniu
   React.useEffect(() => {
@@ -40,12 +62,100 @@ const AnnouncementView = ({ route, navigation }) => {
     getAnnouncement(route.params.announcement.id);
   }, []);
 
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+
+  const handleDelete = () => {
+    var data = JSON.stringify({
+      id: announcement.id
+    });
+    var config = {
+      method: "delete",
+      url: "http://" + serwer + "/anons/",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: data,
+      credentials: 'same-origin',
+    };
+    axios(config)
+      .then((response) => {
+        try {
+          const result = response.data;
+          console.log("dostalem");
+          console.log(result);
+          if (response.status == "200") {
+            console.log("usunieto ogloszenie");
+            alert("Pomyślnie usunięto ogłoszenie");
+            setModalVisible(!isModalVisible);
+            navigation.goBack();
+          } else {
+            console.log("nie udalo sie usunac ogloszenia");
+            alert("Nie udało się usunąć ogłoszenia");
+            setModalVisible(!isModalVisible);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      })
+      .catch((error) => {
+        console.log(error.response.data.msg);
+      });
+  };
+
   return (
     <View style={{ flex: 1 }}>
       {isLoading ? (
         <SplashScreen />
       ) : (
         <ScrollView style={stylesAnnouncements.announcementContainer}>
+          {userData.user_id === announcement.author_id ? (
+            <ButtonView>
+            <TouchableOpacity style={announcementOptionsButton} onPress={() => alert("Jak bedzie w pełni dzialajace dodawanie to przerobi się je też na modyfikowanie")}>
+              <Text style={{ fontSize: 18, color: "black" }}>
+                Edytuj
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={announcementOptionsButton} onPress={toggleModal}>
+              <Text style={{ fontSize: 18, color: "black" }}>
+                Usuń
+              </Text>
+            </TouchableOpacity>
+
+            <Modal visible={isModalVisible} transparent={true} onRequestClose={() => {setModalVisible(!isModalVisible)}}>
+              <View style={dialogContainer}>
+                <Text style={{ fontSize: 24, color: "black", fontWeight: "bold"}}>Potwierdź</Text>
+                <View style={innerDialogContainer}>
+                  <Text style={{ fontSize: 18, color: "black", textAlign: "center" }}>Czy na pewno chcesz usunąć to ogłoszenie?</Text>
+                  <Text style={{ fontSize: 18, color: "black", marginTop: 20}}>{announcement.title}</Text>
+                  <Text style={{ fontSize: 14, color: "black"}}>{date.toLocaleDateString("pl-PL")}</Text>
+                </View>
+                <View style={innerDialogButtonsContainer}>
+                  <TouchableOpacity style={dialogButton} onPress={toggleModal}>
+                    <Text style={{ fontSize: 18, color: "black" }}>
+                      Anuluj
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[dialogButton, {backgroundColor: "red", borderWidth: 1, borderColor: "red"}]} onPress={handleDelete}>
+                    <Ionicons
+                      name="trash-outline"
+                      size={24}
+                      color={"white"}
+                    />
+                    <Text style={{ fontSize: 18, color: "white", marginLeft: 5 }}>
+                      Tak
+                    </Text>
+                    
+                  </TouchableOpacity>
+                </View>
+                
+              </View>
+          </Modal>
+          </ButtonView>
+          ):(
+            <></>
+          )}
           <Text style={stylesAnnouncements.announcementTitle}>
             {announcement.category == 0 ? "Zaginięcie" : "Znalezienie"}
           </Text>
@@ -105,7 +215,12 @@ const AnnouncementView = ({ route, navigation }) => {
           </View>
 
           <TouchableOpacity
-            onPress={() => alert("jescze nie zaimplementowane")}
+            onPress={() => navigation.navigate("Mapa", {
+              focusCoordinates: {
+                lat: announcement.lat,
+                lng: announcement.lng
+              }
+            })}
             style={{
               backgroundColor: "white",
               alignItems: "center",
@@ -115,7 +230,7 @@ const AnnouncementView = ({ route, navigation }) => {
               borderWidth: 1,
               borderColor: "black",
               marginHorizontal: 20,
-              marginBottom: 20,
+              marginBottom: 10,
             }}
           >
             <Text style={{ fontSize: 20, fontWeight: "600" }}>
@@ -126,7 +241,7 @@ const AnnouncementView = ({ route, navigation }) => {
           <TouchableOpacity
             onPress={() => {
               navigation.navigate("AddNotification", {
-                anons_id: route.params.announcement.id,
+                anons_id: announcement.id,
                 photos: "",
               });
             }}

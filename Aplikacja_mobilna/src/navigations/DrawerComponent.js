@@ -75,7 +75,7 @@ const DrawerComponent = ({ navigation, route }) => {
       });
   };
 
-  console.log("w drawerze: ", userData);
+  //console.log("w drawerze: ", userData);
 
   return (
     //Customizowanie DrawerNavigatora przez dodanie DrawerItem - przycisku do wylogowania
@@ -111,11 +111,51 @@ const DrawerComponent = ({ navigation, route }) => {
     >
       {userData.user_id == "guestId" ? (
         <>
-          <Drawer.Screen name="Strona domowa" component={Dashboard} />
+          <Drawer.Screen 
+            name="Strona domowa"
+            component={Dashboard} 
+            initialParams={{ userData: userData }}
+            options={{
+              drawerIcon: ({ focused, size }) => (
+                <Ionicons
+                  name="md-home"
+                  size={size}
+                  color={focused ? "#7cc" : "#ccc"}
+                />
+              ),
+              headerRight: () => (
+                <AntDesign
+                  name="filter"
+                  size={30}
+                  onPress={() => {
+                    navigation.navigate("Filtry");
+                  }}
+                />
+              ),
+            }}
+          />
           <Drawer.Screen
             name="Ogłoszenia"
             component={AnnouncementsScreen}
             initialParams={{ userData: userData }}
+            options={{
+              drawerIcon: ({ focused, size }) => (
+                <Entypo
+                  name="list"
+                  size={size}
+                  color={focused ? "#7cc" : "#ccc"}
+                />
+              ),
+              headerRight: () => (
+                <AntDesign
+                  name="filter"
+                  size={30}
+                  onPress={() => {
+                    navigation.navigate("Filtry");
+                  }}
+                />
+              ),
+            }}
           />
         </>
       ) : (
@@ -123,6 +163,7 @@ const DrawerComponent = ({ navigation, route }) => {
           <Drawer.Screen
             name="Strona domowa"
             component={Dashboard}
+            initialParams={{ userData: userData }}
             options={{
               drawerIcon: ({ focused, size }) => (
                 <Ionicons
@@ -182,10 +223,12 @@ const DrawerComponent = ({ navigation, route }) => {
           <Drawer.Screen
             name="Moje Ogłoszenia"
             component={MyAnnouncementsStackScreen}
+            initialParams={{ userData: userData }}
           />
           <Drawer.Screen
             name="Powiadomienia"
             component={NotificationsScreen}
+            initialParams={{ userData: userData }}
             options={{
               drawerIcon: ({ focused, size }) => (
                 <Ionicons

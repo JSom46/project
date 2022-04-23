@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { Marker, Callout } from "react-native-maps";
+import { useFocusEffect, useLinkProps } from '@react-navigation/native';
 import MapView from "react-native-map-clustering";
 import * as Location from "expo-location";
 
@@ -21,6 +22,10 @@ const MapMain = ({ navigation, route }) => {
     longitudeDelta: 0.0421,
   });
   const [hasLocationPermissions, setLocationPermission] = useState(false);
+
+  const [markerRefs, setMarkerRefs] = useState([]);
+  const [focusRegion, setFocusRegion] = useState(null);
+  const [userData, setUserData] = useState(route.params.userData);
 
   //dane z ogloszen
   const [tableData = [], setTableData] = useState();
@@ -146,6 +151,26 @@ const MapMain = ({ navigation, route }) => {
     mapRef.current.animateToRegion(mapRegion, 2000);
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      //console.log("WYWOLALO SJE");
+      console.log(route.params);
+      if(route.params && route.params.focusCoordinates != null){
+        console.log("sa parametry: ", route.params.focusCoordinates);
+        const tempRegion = {
+          latitude: route.params.focusCoordinates.lat,
+          longitude: route.params.focusCoordinates.lng,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }
+        
+        mapRef.current.animateToRegion(tempRegion, 2000);
+        //navigation.setParams({focusCoordinates: null});
+        route.params.focusCoordinates = null;
+      }
+    }, [route.params])
+  );
+
   return (
     <View style={styles.body}>
       <MapView
@@ -158,7 +183,14 @@ const MapMain = ({ navigation, route }) => {
           <Marker
             key={marker.id}
             coordinate={{ latitude: marker.lat, longitude: marker.lng }}
-            pinColor={marker.category == "Znalezienie" ? "#0F0" : "#F00"}
+            pinColor={marker.category == "Znalezienie" ? "#0F0" : "#00F"}
+            ref={ref => {markerRefs[marker.id] = ref}}
+            onPress={() => {
+              setTimeout(() => {
+                markerRefs[marker.id].hideCallout();
+                markerRefs[marker.id].showCallout();
+              }, 100);
+            }}
           >
             <Callout
               style={stylesMap.callout}

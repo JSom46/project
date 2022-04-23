@@ -19,16 +19,20 @@ import MyAnnouncementsScreen from "../MyAnnouncementsScreen";
 const MyAnnouncementsStack = createNativeStackNavigator();
 
 const MyAnnouncementsStackScreen = ({ route, navigation }) => {
+  const [userData, setUserData] = useState(route.params.userData);
+
   return (
     //<NavigationContainer>
     <MyAnnouncementsStack.Navigator screenOptions={{ headerShown: false }}>
       <MyAnnouncementsStack.Screen
         name="Lista moich ogloszen"
         component={MyAnnouncementsScreen}
+        initialParams={{ userData: userData }}
       />
       <MyAnnouncementsStack.Screen
         name="Ogloszenie"
         component={AnnouncementView}
+        initialParams={{ userData: userData }}
       />
       <MyAnnouncementsStack.Screen
         name="Dodaj Ogloszenie"

@@ -6,8 +6,8 @@ import RootStack from "./src/navigations/RootStack";
 // Context dla filtrow
 import { FilterProvider } from "./src/components/Map/FilterContext";
 
-global.serwer = "192.168.0.16:2400";
-//global.serwer = "192.168.31.47:2400";
+//global.serwer = "192.168.0.16:2400";
+global.serwer = "192.168.31.47:2400";
 global.guestData = {
   user_id: "guestId",
   email: "guest@email",
