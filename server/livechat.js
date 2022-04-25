@@ -155,15 +155,16 @@ io.on("connection", function (socket) {
 
     socket.on('get-chat-messages', (chatId) => {
         // wysyłamy do użytkownika wiadomości z konkretnego chatu
-        con.all(`WITH Chats (anons_id, chat_id, user_id) AS (
+        con.all(`WITH Chats (anons_id, chat_id, user_id) as (
             SELECT anons_id, chat_id, user_id
             FROM ChatUsers WHERE user_id = ?)
-            SELECT cm.message_id, ch.chat_id, users.login,
-                   cm.message_date, cm.message_text, ci.image_id
-            FROM Chats ch JOIN users ON users.id = ch.user_id
-                JOIN ChatMessages cm ON cm.chat_id = ch.chat_id
+            SELECT cm.message_id, ch.anons_id, cm.chat_id, users.login, cm.message_date,
+                cm.message_text, ci.message_id
+            FROM ChatMessages cm JOIN users ON cm.user_id = users.id
+                JOIN Chats ch ON ch.chat_id = cm.chat_id
                 LEFT JOIN ChatImages ci ON ci.message_id = cm.message_id
-            WHERE ch.chat_id = ?`, socket.userId, chatId,
+            WHERE cm.chat_id = ?
+            ORDER BY cm.message_date ASC`, socket.userId, chatId,
                 (err, result) => {
                     if (!err) {
                         socket.emit('chat-messages', result.length, result);
