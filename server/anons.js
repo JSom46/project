@@ -276,9 +276,10 @@ router.get('/list', (req, res) => {
         }
         // zdefiniowano parametry lat i lng - obliczamy odleglosc od zadanego punktu w pelnych kilometrach
         if(!isNaN(parseFloat(req.query.lat)) && !isNaN(parseFloat(req.query.lng))){
+            //odleglosc w kilometrach
             row.distance = parseInt(distance({lat: req.query.lat, lng: req.query.lng}, {lat: row.lat, lng: row.lng}) / 1000);
             //odfiltrowujemy zbyt oddalone ogloszenia
-            if(row.distance < ((isNaN(parseInt(req.query.rad))) ? 30000 : req.query.rad * 1000)){
+            if(row.distance < ((isNaN(parseInt(req.query.rad))) ? 30000 : req.query.rad)){
                 arr.push(row);
             }
         }
