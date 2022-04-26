@@ -158,8 +158,8 @@ io.on("connection", function (socket) {
         con.all(`WITH Chats (anons_id, chat_id, user_id) as (
             SELECT anons_id, chat_id, user_id
             FROM ChatUsers WHERE user_id = ?)
-            SELECT cm.message_id, ch.anons_id, cm.chat_id, users.login, cm.message_date,
-                cm.message_text, ci.message_id
+            SELECT cm.message_id, cm.chat_id, users.login, cm.message_date,
+                cm.message_text, ci.image_id
             FROM ChatMessages cm JOIN users ON cm.user_id = users.id
                 JOIN Chats ch ON ch.chat_id = cm.chat_id
                 LEFT JOIN ChatImages ci ON ci.message_id = cm.message_id
