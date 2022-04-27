@@ -280,9 +280,7 @@ router.get('/list', (req, res) => {
             row.distance = parseInt(distance({lat: req.query.lat, lng: req.query.lng}, {lat: row.lat, lng: row.lng}) / 1000);
             //odfiltrowujemy zbyt oddalone ogloszenia
             if(req.query.rad > 0){
-                console.log('ez');
                 if(row.distance < req.query.rad){
-                    console.log('hwdp');
                     arr.push(row);
                 }
             }
