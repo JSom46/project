@@ -515,6 +515,19 @@ export const dialogButton = {
   borderColor: "black",
 };
 
+export const chatListItem = {
+  backgroundColor: "white",
+  padding: 4,
+  paddingVertical: 8,
+  marginVertical: 1,
+  marginHorizontal: 8,
+  borderBottomWidth: 1,
+  borderRightWidth: 2,
+  borderColor: "lightgray",
+  flex: 1,
+  flexDirection: "row",
+};
+
 export const stylesAnnouncements = StyleSheet.create({
   listContainer: {
     flex: 1,

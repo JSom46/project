@@ -7,7 +7,11 @@ import RootStack from "./src/navigations/RootStack";
 import { FilterProvider } from "./src/components/Map/FilterContext";
 
 //global.serwer = "192.168.0.16:2400";
+//global.serwerIP = "192.168.0.16";
+
 global.serwer = "192.168.31.47:2400";
+global.serwerIP = "192.168.31.47";
+
 global.guestData = {
   user_id: "guestId",
   email: "guest@email",

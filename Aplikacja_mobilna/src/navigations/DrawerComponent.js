@@ -92,7 +92,7 @@ const DrawerComponent = ({ navigation, route }) => {
             {userData.user_id == "guestId" ? (
               <DrawerItem
                 label={({ focused, size }) => (
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <View style={{ flexDirection: "row", alignItems: "center"}}>
                     <Text style={{ color: "gray" }}>Zaloguj się</Text>
                   </View>
                 )}

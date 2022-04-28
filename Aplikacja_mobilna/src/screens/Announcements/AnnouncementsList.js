@@ -7,7 +7,6 @@ import {
   FlatList,
   StyleSheet,
   Text,
-  //StatusBar,
   TouchableOpacity,
   Image,
   RefreshControl,

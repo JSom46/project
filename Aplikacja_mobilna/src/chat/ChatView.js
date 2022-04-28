@@ -3,6 +3,11 @@ import SplashScreen from "../screens/SplashScreen";
 
 const ChatView = ({ route, navigation }) => {
     const [userData, setUserData] = useState(route.params.userData);
+    
+
+    React.useEffect(() => {
+        console.log("dfdf");
+    },[]);
 
     return(
         <SplashScreen/>

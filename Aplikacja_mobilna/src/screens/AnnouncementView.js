@@ -110,7 +110,7 @@ const AnnouncementView = ({ route, navigation }) => {
         <SplashScreen />
       ) : (
         <ScrollView style={stylesAnnouncements.announcementContainer}>
-          {userData.user_id === announcement.author_id ? (
+          {userData.user_id === announcement.author_id || userData.is_admin == 1 ? (
             <ButtonView>
             <TouchableOpacity style={announcementOptionsButton} onPress={() => alert("Jak bedzie w pełni dzialajace dodawanie to przerobi się je też na modyfikowanie")}>
               <Text style={{ fontSize: 18, color: "black" }}>
