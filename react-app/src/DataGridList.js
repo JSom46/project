@@ -9,6 +9,11 @@ import { Typography } from '@mui/material';
 import { Divider } from '@mui/material';
 import AnnouncementDialog from './AnnouncementDialog';*/
 
+import moment from 'moment';
+import 'moment/locale/pl';
+
+moment.locale('pl');
+
 const theme = createTheme({
 },
   plPL,
@@ -32,32 +37,58 @@ const columns = [
   {
     field: 'title',
     headerName: 'Tytuł',
+    description: 'Tytuł',
     flex: 1,
   },
   {
     field: 'category',
-    headerName: 'Kategoria',
+    headerName: 'Rodzaj',
+    description: 'Rodzaj ogłoszenia',
     flex: 0.2,
   },
   {
     field: 'type',
-    headerName: 'Typ',
+    headerName: 'Zwierze',
+    description: 'Typ zwierzecia',
     flex: 0.15,
   },
   {
     field: 'distance',
     headerName: 'Odległość',
+    description: 'Odległość w km od wybranej lokacji',
     flex: 0.2,
   },
   {
     field: 'create_date',
-    headerName: 'Data dodania',
+    headerName: 'Dodane',
+    description: 'Data dodania ogłoszenia',
     type: 'dateTime',
     flex: 0.5,
+    valueFormatter: formatDate
   },
 ];
 function createData(id, title, category, type, createDate) {
   return { id, title, category, type, createDate };
+}
+
+/*function formatData(data) {
+  moment.locale('pl');
+  let newData = data.map((el) => {
+    let newDate = moment(el.create_date).fromNow();
+    return {
+      id: el.id,
+      title: el.title,
+      category: el.category,
+      type: el.type,
+      distance: el.distance,
+      create_date: newDate
+    }
+  });
+  return newData;
+}*/
+
+function formatDate(el) {
+  return moment(el.value).fromNow();
 }
 
 
@@ -94,13 +125,13 @@ export default function DataGridList(props) {
     <div style={{ height: '100%', width: '100%' }}>
       <ThemeProvider theme={theme}>
         <StyledDataGrid
-          rows={props.data}
+          rows={((props.data === undefined || props.data === null) ? ([]) : (props.data))}
           columns={columns}
           pageSize={15}
           rowsPerPageOptions={[15]}
           onRowClick={handleRowClick}
           disableSelectionOnClick
-          loading={props.data === undefined || props.data.length === 0}
+          loading={props.data === undefined || props.data === null}
           components={{
             // Toolbar: CustomToolbar,
             Footer: CustomFooter,
@@ -108,6 +139,7 @@ export default function DataGridList(props) {
           columnVisibilityModel={{
             distance: props.showDistance
           }}
+          disableColumnMenu
         />
       </ThemeProvider>
     </div>

@@ -1,14 +1,53 @@
 import React, { useState } from 'react';
 // import {  } from 'react-router-dom';
-import { Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, CircularProgress, Button } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, CircularProgress, Button, Grid } from '@mui/material';
 import { Stack } from '@mui/material';
 import { Typography } from '@mui/material';
 import { Divider } from '@mui/material';
 import { Snackbar, Alert } from '@mui/material';
 
-import { Redirect, Link } from 'react-router-dom/cjs/react-router-dom.min';
+//import { Redirect, Link } from 'react-router-dom/cjs/react-router-dom.min';
 
 import AddNotification from './AddNotification';
+import MapSimple from './MapSimple';
+
+import moment from 'moment';
+import 'moment/locale/pl';
+
+moment.locale('pl');
+
+function GetDate(props) {
+    if (props.date === undefined) return null;
+    let date = moment.unix(props.date).format('MMMM Do YYYY, h:mm:ss a');
+    return (
+        <DialogContentText>
+            {date}
+        </DialogContentText>
+    );
+}
+
+function ControlButtons(props) {
+    if (props.isMy) {
+        return (
+            <DialogActions>
+                <Button onClick={() => (props.setOpen(false))}>Wróć</Button>
+                <Button color='warning' onClick={() => (props.setOpenEditDialog(true))}>Edytuj</Button>
+                <Button color='error' onClick={() => (props.setOpenDeleteDialog(true))}>Usuń</Button>
+                <Button onClick={() => (
+                    window.location.href = "/dashboard" + "?lat=" + props.announcementData.lat + "&lng=" + props.announcementData.lng
+                )}>Pokaż na mapie</Button>
+            </DialogActions>
+        )
+    }
+    return (
+        <DialogActions>
+            <Button onClick={() => (props.setOpen(false))}>Wróć</Button>
+            <Button color='secondary' hidden={props.announcementData.category === 1} onClick={() => props.setOpenAddNotificationDialog(true)}>Widziałem to zwierzę</Button>
+            <Button color='secondary' onClick={() => props.chatRedirect(props.announcementData.id)} >Czat</Button>
+            <Button onClick={() => (props.showOnMap(props.announcementData.lat, props.announcementData.lng))}>Pokaż na mapie</Button>
+        </DialogActions>
+    )
+}
 
 export default function AnnouncementDialog(props) {
     const [openImageDialog, setOpenImageDialog] = useState({ open: false });
@@ -42,7 +81,7 @@ export default function AnnouncementDialog(props) {
     return (
         <div>
             <Dialog open={props.open} onClose={() => props.setOpen(false)} maxWidth="md" fullWidth={true}>
-                {(props.announcementData === undefined || props.announcementData.length === 0) ? (
+                {(props.announcementData === undefined || props.announcementData === null || props.announcementData.length === 0) ? (
                     <Stack alignItems="center" m={3}>
                         <CircularProgress />
                     </Stack>
@@ -55,11 +94,22 @@ export default function AnnouncementDialog(props) {
                                 {props.announcementData.description}
                             </DialogContentText>
                             <Divider />
-                            <Typography variant="subtitle1">Zdjęcia</Typography>
-                            {props.announcementData.images && props.announcementData.images.map((element) => (
-                                <img style={{ width: "100px", height: "100px", objectFit: "cover", margin: 4 }} src={'http://localhost:2400/anons/photo?name=' + element}
-                                    alt={props.announcementData.title} key={props.announcementData.id} onClick={handleImageClick} />
-                            ))}
+
+                            <Grid container columns={16}>
+                                <Grid item md={10} xs={16}>
+                                    <Typography variant="subtitle1">Zdjęcia</Typography>
+                                    {props.announcementData.images && props.announcementData.images.map((element) => (
+                                        <img style={{ width: "100px", height: "100px", objectFit: "cover", margin: 4 }} src={'http://localhost:2400/anons/photo?name=' + element}
+                                            alt={props.announcementData.title} key={element} onClick={handleImageClick} />
+                                    ))}
+                                </Grid>
+                                <Grid item md={6} sm={8} xs={14} sx={{ pb: '10px' }}>
+                                    <Typography variant="subtitle1">Lokacja</Typography>
+                                    <MapSimple loc={[props.announcementData.lat, props.announcementData.lng]} />
+                                </Grid>
+                            </Grid>
+
+
                             <Divider />
                             <Stack justifyContent="space-between" direction="row" alignContent="center" spacing={2}>
                                 <span>
@@ -88,18 +138,16 @@ export default function AnnouncementDialog(props) {
                                 </span>
                             </Stack>
                             <Divider />
+                            <Typography variant="subtitle1">Data zgłoszenia</Typography>
+                            <GetDate date={props.announcementData.create_date} />
+                            <Divider />
                         </DialogContent>
-                        <DialogActions>
-                            <Button onClick={() => (props.setOpen(false))}>Wróć</Button>
-                            <Button color='secondary' hidden={props.announcementData.category === 1} onClick={() => setOpenAddNotificationDialog(true)}>Widziałem to zwierzę</Button>
-                            <Button color='secondary' onClick={() => props.chatRedirect(props.announcementData.id)} >Czat</Button>
-                            <Button onClick={() => (props.showOnMap(props.announcementData.lat, props.announcementData.lng))}>Pokaż na mapie</Button>
-                        </DialogActions>
+                        <ControlButtons {...props} setOpenAddNotificationDialog={setOpenAddNotificationDialog}/>                        
                     </div>
                 )}
             </Dialog>
             <Dialog open={openImageDialog.open} onClose={() => (setOpenImageDialog((prev) => ({ open: false, src: prev.src })))} fullWidth>
-                <img src={openImageDialog.src} alt={props.title} />
+                <img src={openImageDialog.src} alt={props.announcementData.title} />
             </Dialog>
             <Dialog open={openAddNotifcationDialog} onClose={() => (setOpenAddNotificationDialog(false))} fullWidth>
                 <DialogTitle>Wyślij powiadomienie</DialogTitle>

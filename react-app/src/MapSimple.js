@@ -6,18 +6,20 @@ import { MapContainer, TileLayer, Marker, LayerGroup, Popup } from 'react-leafle
 import MapAnnouncementPopup from './MapAnnouncementPopup';
 
 /*
-    Mapa wyswietlajaca jedna lub wiecej lokalizacji.
+    Mapa wyswietlajaca jedna lokacje
 */
 
 function LocationMarker(props) {
-    let marker_key = 0;
-    const markers = props.tab.map((loc) =>
-        <Marker position = {[loc.lat, loc.lng]} key={marker_key++}>
-            <Popup>
-                <MapAnnouncementPopup />
-            </Popup>
-        </Marker>
-    );
+    let markers = null;
+    if (props.loc !== undefined && props.loc !== null && props.loc.length === 2) {
+        return (
+            <Marker position={props.loc}>
+                <Popup>
+                    <MapAnnouncementPopup />
+                </Popup>
+            </Marker>
+        );
+    }
     return (
         <LayerGroup>
             {markers}
@@ -26,13 +28,19 @@ function LocationMarker(props) {
 }
 
 export default function MapSimple(props) {
+    let center = [52.25, 19.35];
+    let zoom = 5;
+    if (props.loc !== undefined && props.loc !== null && props.loc.length === 2) {
+        center = props.loc;
+        zoom = 11;
+    }
     return (
-        <MapContainer className="map_simple" center={[52.25, 19.35]} zoom={5}>
+        <MapContainer className="map_simple" center={center} zoom={zoom}>
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            <LocationMarker tab = {props.tab} />
+            <LocationMarker loc={props.loc} />
         </MapContainer>
     )
 }

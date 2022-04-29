@@ -12,6 +12,12 @@ import { Typography } from '@mui/material';
 import { Divider } from '@mui/material';
 import EditAnnouncement from './EditAnnouncement';
 import AnnouncementNotifications from './AnnouncementNotifications';
+import AnnouncementDialog from './AnnouncementDialog';
+
+import moment from 'moment';
+import 'moment/locale/pl';
+
+moment.locale('pl');
 
 const theme = createTheme(
     {},
@@ -30,6 +36,10 @@ const StyledDataGrid = styled(DataGrid)(() => ({
 }));
 function createData(id, title, category, type, createDate, notifications_count) {
     return { id, title, category, type, createDate, notifications_count };
+}
+
+function formatDate(el) {
+    return moment(el.value).fromNow();
 }
 
 export default function DataGridMy() {
@@ -147,7 +157,7 @@ export default function DataGridMy() {
                     'Content-Type': 'application/json'
                 },
                 credentials: 'include',
-                body: JSON.stringify({ 'id': announcementData })
+                body: JSON.stringify({ 'id': announcementData }) //TODO this doesnt work?
             })
             return response;
         } catch (error) {
@@ -261,23 +271,28 @@ export default function DataGridMy() {
                                 {
                                     field: 'title',
                                     headerName: 'Tytuł',
+                                    description: 'Tytuł',
                                     flex: 1,
                                 },
                                 {
                                     field: 'category',
-                                    headerName: 'Kategoria',
+                                    headerName: 'Rodzaj',
+                                    description: 'Rodzaj ogłoszenia',
                                     flex: 0.2,
                                 },
                                 {
                                     field: 'type',
-                                    headerName: 'Typ',
+                                    headerName: 'Zwierze',
+                                    description: 'Typ zwierzecia',
                                     flex: 0.2,
                                 },
                                 {
                                     field: 'createDate',
-                                    headerName: 'Data dodania',
+                                    headerName: 'Dodane',
+                                    description: 'Data dodania ogłoszenia',
                                     type: 'dateTime',
                                     flex: 0.5,
+                                    valueFormatter: formatDate
                                 },
                                 {
                                     field: '',
@@ -316,11 +331,12 @@ export default function DataGridMy() {
                                 // Toolbar: CustomToolbar,
                                 Footer: CustomFooter,
                             }}
+                            disableColumnMenu
                         />
                     )}
 
             </ThemeProvider>
-            <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth={true}>
+            {/*<Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth={true}>
                 <Box sx={{ width: '100%' }}>
                     {announcementData.length === 0 ? (
                         <Stack alignItems="center" m={3}>
@@ -384,7 +400,15 @@ export default function DataGridMy() {
                         </div>
                     )}
                 </Box>
-            </Dialog>
+            </Dialog>*/}
+            <AnnouncementDialog
+                isMy={true}
+                open={open}
+                announcementData={announcementData}
+                setOpen={setOpen}
+                setOpenEditDialog={setOpenEditDialog}
+                setOpenDeleteDialog={setOpenDeleteDialog}
+            />
             <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)} maxWidth="md" fullWidth={true}>
                 {inDeletionProcess ? <LinearProgress /> : null}
                 <DialogTitle>Potwierdź usuwanie ogłoszenia</DialogTitle>

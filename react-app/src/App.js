@@ -18,7 +18,7 @@ import Chat from './Chat';
 import Faq from './Faq';
 import Team from './Team';
 
-import MapTesting from './MapTesting'; //TEMP
+//import MapTesting from './MapTesting'; //TEMP
 import { Box } from '@mui/material';
 
 
@@ -71,7 +71,7 @@ function App() {
   }, []);
   return (
     <div>
-      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', }}>
         <BrowserRouter>
           <MenuAppBar auth={auth} />
           <Switch>
@@ -95,10 +95,10 @@ function App() {
             <Route path="/chat" render={(props) => <Chat id={props.location.state?.id}/>}/>
             {/* <Route path="/chatTesting">
               <Chat />
-            </Route> */}
+            </Route>
             <Route path="/maptest">
               <MapTesting />
-            </Route>
+            </Route>*/}
             <Route path="/faq">
               <Faq />
             </Route>
@@ -108,11 +108,13 @@ function App() {
             <Route path="/activate" children={<Activate />} />
             <Route path="/profile" children={<Profile auth={auth} />} />
             <Route path="/account" children={<Account auth={auth} />} />
+            <Route path="*" render={() => { return (<Redirect to="/dashboard" />) }} />
           </Switch>
         </BrowserRouter>
       </Box>
       <Footer />
     </div>
+
   );
 }
 export default App;
