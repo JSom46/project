@@ -14,7 +14,7 @@ import Dashboard from './Dashboard';
 import Announcements from './Announcements';
 import Footer from './Footer';
 import ChangePassword from './ChangePassword';
-import ChatTesting from './ChatTesting';
+import Chat from './Chat';
 import Faq from './Faq';
 import Team from './Team';
 
@@ -78,7 +78,7 @@ function App() {
             <Route exact path="/" render={() => { return (<Redirect to="/dashboard" />) }} />
             <Route path="/dashboard">
               <Dashboard auth={auth} chatRedirect={chatRedirect}/>
-              {(anonsId !== -1) && <Redirect to={{pathname: "/chatTesting", state:{id:anonsId}}} />}
+              {(anonsId !== -1) && <Redirect to={{pathname: "/chat", state:{id:anonsId}}} />}
             </Route>
             <Route path="/announcements">
               <Announcements auth={auth} />
@@ -92,9 +92,9 @@ function App() {
             <Route path="/changePassword">
               <ChangePassword />
             </Route>
-            <Route path="/chatTesting" render={(props) => <ChatTesting id={props.location.state?.id}/>}/>
+            <Route path="/chat" render={(props) => <Chat id={props.location.state?.id}/>}/>
             {/* <Route path="/chatTesting">
-              <ChatTesting />
+              <Chat />
             </Route> */}
             <Route path="/maptest">
               <MapTesting />
