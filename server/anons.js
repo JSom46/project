@@ -220,8 +220,8 @@ router.get('/', (req, res) => {
 // jesli ktorys z tych parametrow zostanie pominiety, oznacza to, ze wlasciwosc ta moze byc dowolna (w tym niezdefiniowana)
 // jesli wlasciwosc moze przyjac kilka wartosci, nalezy ja podac po przecinku (wartosc1,wartosc2,...)
 // jesli lat lub lng nie jest podany, ignorowane sa oba
-// w przeciwnym wypadku zwracane sa tylko ogloszenia oddalone od punktu (lat, lng) o rad kilometrow
-// jesli rad nie jest zdefiniowany, przyjmuje wartosc 30
+// w przeciwnym wypadku do kazdego ogloszenia jest dodana informacja o odleglosci od punktu (lat, lng)
+// jesli dodatkowo zdefiniowano rad i jest on wiekszy od 0, to zwracane sa tylko ogloszenia oddalone od punktu (lat, lng) o nie wiecej niz rad kilometrow 
 router.get('/list', (req, res) => {
     // filtry do zapytania
     let filters = [];
@@ -276,11 +276,18 @@ router.get('/list', (req, res) => {
         }
         // zdefiniowano parametry lat i lng - obliczamy odleglosc od zadanego punktu w pelnych kilometrach
         if(!isNaN(parseFloat(req.query.lat)) && !isNaN(parseFloat(req.query.lng))){
+            //odleglosc w kilometrach
             row.distance = parseInt(distance({lat: req.query.lat, lng: req.query.lng}, {lat: row.lat, lng: row.lng}) / 1000);
             //odfiltrowujemy zbyt oddalone ogloszenia
-            if(row.distance < ((isNaN(parseInt(req.query.rad))) ? 30000 : req.query.rad * 1000)){
+            if(req.query.rad > 0){
+                if(row.distance < req.query.rad){
+                    arr.push(row);
+                }
+            }
+            else{
                 arr.push(row);
             }
+            
         }
         else{
             arr.push(row);
