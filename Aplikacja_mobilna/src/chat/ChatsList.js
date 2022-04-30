@@ -100,31 +100,36 @@ const ChatList = ({ route, navigation }) => {
                 // }
                 console.log("W tym ifie");
                 if (route?.params?.createNewChat !== undefined && route?.params?.createNewChat !== null) {
+                    console.log("jakies tam paramtry sa");
                     socket.emit('new-chat', route?.params?.createNewChat);
                     console.log("TWORZRE NOWY CZAT");
-                    setCreateNewChat(null);
-                    route.params.createNewChat = null;
+                    //setCreateNewChat(null);
+                    //route.params.createNewChat = null;
+                    socket.once("new-chat-response", (chat_id, message) => {
+                        //console.log(chat_id);
+                        //console.log(message);
+                        if (message === 'Chat already exists' || 'Chat created') {
+                            //etChatId(chat_id);
+
+                            //socket.emit('get-user-chats');
+    
+                            //route.params.createNewChat = null;
+                            //setCreateNewChat(null);
+                            
+                            navigation.navigate("Rozmowa", {item: {chat_id: chat_id}});
+                            console.log("----------TYLKO TU MOGLO SIE PRZELACZYC----------");
+                            
+                            //
+                            // socket.emit("get-chat-messages", chat_id);
+                            // socket.emit("join-chat", chat_id);
+                        }
+                        else {
+                            console.log("Nie udało się utworzyć czatu");
+                            //route.params.createNewChat = null;
+                        }
+                    });
                 }
-                socket.on("new-chat-response", (chat_id, message) => {
-                    console.log(chat_id);
-                    console.log(message);
-                    if (message === 'Chat already exists' || 'Chat created') {
-                        //etChatId(chat_id);
-                        socket.emit('get-user-chats');
-
-                        route.params.createNewChat = null;
-                        setCreateNewChat(null);
-
-                        navigation.navigate("Rozmowa", {item: {chat_id: chat_id}});
-                        
-                        //
-                        // socket.emit("get-chat-messages", chat_id);
-                        // socket.emit("join-chat", chat_id);
-                    }
-                    else {
-                        console.log("Nie udało się utworzyć czatu");
-                    }
-                });
+                
                 socket.on("user-chats", (count, userChats) => {
                     //console.log(userChats);
                     setUserChats(userChats);
@@ -224,37 +229,42 @@ const ChatList = ({ route, navigation }) => {
             //         // route.params.createNewChat = null;
             //     }
             // }
-
+            // return () => {
+            //     if (socket != null){
+            //     socket.removeAllListeners();
+            //     route.params.createNewChat = null;
+            // }}
+            //return () => socket.removeListener("new-chat-response");
         }, [])
     );
 
-    useFocusEffect(
-        React.useCallback(() => {
-            if (connected && authenticated) {
-                console.log("JESTESMY TU");
-                console.log("newchat: ",route?.params?.createNewChat);
-                console.log("newchatstate: ",createNewChat);
-                setCreateNewChat(route?.params?.createNewChat);
+    // useFocusEffect(
+    //     React.useCallback(() => {
+    //         if (connected && authenticated) {
+    //             console.log("JESTESMY TU");
+    //             console.log("newchat: ",route?.params?.createNewChat);
+    //             console.log("newchatstate: ",createNewChat);
+    //             setCreateNewChat(route?.params?.createNewChat);
 
-                // if (createNewChat !== undefined && createNewChat !== null) {
-                //     // socket.emit('new-chat', route?.params?.createNewChat);
-                //     // console.log("TWORZRE NOWY CZAT");
-                //     // setCreateNewChat(null);
-                //     //alert("nowy czat");
-                //     // route.params.createNewChat = null;
-                //     console.log("W SRODKU");
-                // }
-                // if (route?.params?.createNewChat !== undefined && route?.params?.createNewChat !== null) {
-                //     socket.emit('new-chat', route?.params?.createNewChat);
-                //     console.log("TWORZRE NOWY CZAT");
-                //     // setCreateNewChat(null);
-                //     console.log("W SRODKU");
-                //     // route.params.createNewChat = null;
-                // }
-            }
+    //             // if (createNewChat !== undefined && createNewChat !== null) {
+    //             //     // socket.emit('new-chat', route?.params?.createNewChat);
+    //             //     // console.log("TWORZRE NOWY CZAT");
+    //             //     // setCreateNewChat(null);
+    //             //     //alert("nowy czat");
+    //             //     // route.params.createNewChat = null;
+    //             //     console.log("W SRODKU");
+    //             // }
+    //             // if (route?.params?.createNewChat !== undefined && route?.params?.createNewChat !== null) {
+    //             //     socket.emit('new-chat', route?.params?.createNewChat);
+    //             //     console.log("TWORZRE NOWY CZAT");
+    //             //     // setCreateNewChat(null);
+    //             //     console.log("W SRODKU");
+    //             //     // route.params.createNewChat = null;
+    //             // }
+    //         }
 
-        }, [])
-    );
+    //     }, [])
+    // );
 //
     const renderItem = ({ item }) => (
         <TouchableOpacity

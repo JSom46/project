@@ -23,7 +23,7 @@ const ChatStackScreen = ({ route, navigation }) => {
                 <ChatStack.Screen
                     name="Lista rozmów"
                     component={ChatList}
-                    initialParams={{ userData: userData, createNewChat: route.params?.createNewChat }}
+                    initialParams={{ userData: userData}}
                 />
                 <ChatStack.Screen
                     name="Rozmowa"
