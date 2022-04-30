@@ -20,8 +20,8 @@ import { SocketContext } from "./ChatStack";
 import { stylesAnnouncements, chatListItem, chatMessageInput, chatListItemIncoming, chatListItemOutgoing, chatListItemOutgoingMessage, chatListItemIncomingMessage, chatListItemOutgoingContainer, chatListItemIncomingContainer } from "../components/styles";
 
 const convertDate = (data) => {
-  const newDate = new Date(data * 1000);
-  return newDate.getDate() + "." + newDate.getMonth() + "." + newDate.getUTCFullYear() + " " + newDate.getHours() + ":" + newDate.getMinutes() + ":" + newDate.getSeconds();
+  const newDate = new Date(data);
+  return newDate.getDate() + "." + (newDate.getUTCMonth() + 1) + "." + newDate.getUTCFullYear() + " " + (newDate.getHours() + newDate.getTimezoneOffset()/60) + ":" + newDate.getMinutes() + ":" + newDate.getSeconds();
   //return newDate.toLocaleString("de-DE");
 }
 
