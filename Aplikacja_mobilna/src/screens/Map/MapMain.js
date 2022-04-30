@@ -210,7 +210,7 @@ const MapMain = ({ navigation, route }) => {
             <Callout
               style={stylesMap.callout}
               onPress={() =>
-                navigation.navigate("Ogloszenie", { announcement: marker })
+                navigation.navigate("Ogloszenie", { announcement: marker, userData: userData })
               }
             >
               <View style={{ justifyContent: "center", alignItems: "center" }}>

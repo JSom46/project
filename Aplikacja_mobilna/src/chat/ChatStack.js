@@ -4,21 +4,26 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { io } from "socket.io-client";
 import ChatList from "./ChatsList";
 import ChatView from "./ChatView";
+//import { SocketContext, socket} from "./SocketContext";
 
 const ChatStack = createNativeStackNavigator();
-// const socket = io("http://" + serwerIP + ":2300");
-// const SocketContext = React.createContext();
+//const socket = null;//io("http://" + "192.168.31.47" + ":2300");
+export const SocketContext = React.createContext();
 
 const ChatStackScreen = ({ route, navigation }) => {
     const [userData, setUserData] = useState(route.params.userData);
+    const [socket, setSocket] = useState(null);
+    const [connected, setConnected] = useState(false);
+    const [authenticated, setAuthenticated] = useState(false);
+    const socketContextData = {socket: socket, setSocket: setSocket};
 
     return(
-        //<SocketContext.Provider value={socket}>
+        <SocketContext.Provider value={socketContextData}>
             <ChatStack.Navigator screenOptions={{ headerShown: false }}>
                 <ChatStack.Screen
                     name="Lista rozmów"
                     component={ChatList}
-                    initialParams={{ userData: userData }}
+                    initialParams={{ userData: userData, createNewChat: route.params?.createNewChat }}
                 />
                 <ChatStack.Screen
                     name="Rozmowa"
@@ -26,7 +31,7 @@ const ChatStackScreen = ({ route, navigation }) => {
                     initialParams={{ userData: userData }}
                 />
             </ChatStack.Navigator>
-        //</SocketContext.Provider>
+        </SocketContext.Provider>
     );
 };
 

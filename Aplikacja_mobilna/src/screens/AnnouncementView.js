@@ -8,6 +8,7 @@ import {
   innerDialogContainer, 
   innerDialogButtonsContainer, 
   dialogButton,
+  announcementViewButton,
 } from "../components/styles";
 import {
   Octicons,
@@ -221,17 +222,7 @@ const AnnouncementView = ({ route, navigation }) => {
                 lng: announcement.lng
               }
             })}
-            style={{
-              backgroundColor: "white",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 5,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: "black",
-              marginHorizontal: 20,
-              marginBottom: 10,
-            }}
+            style={announcementViewButton}
           >
             <Text style={{ fontSize: 20, fontWeight: "600" }}>
               Zobacz na mapie
@@ -245,20 +236,24 @@ const AnnouncementView = ({ route, navigation }) => {
                 photos: "",
               });
             }}
-            style={{
-              backgroundColor: "white",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 5,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: "black",
-              marginHorizontal: 20,
-              marginBottom: 20,
-            }}
+            style={announcementViewButton}
           >
             <Text style={{ fontSize: 20, fontWeight: "600" }}>
               Widziałem to zwierzę
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("Wiadomości", {
+                screen: 'Lista rozmów',
+                params: {createNewChat: announcement.id},
+              });
+            }}
+            style={announcementViewButton}
+          >
+            <Text style={{ fontSize: 20, fontWeight: "600" }}>
+              Czat
             </Text>
           </TouchableOpacity>
         </ScrollView>
