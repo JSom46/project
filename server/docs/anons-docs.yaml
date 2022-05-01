@@ -298,6 +298,7 @@ paths:
       - name: title
         in: path
         description: "przesłane zostaną tylko ogłoszenia, których tytuł zawiera podany ciąg znaków"
+        required: false
         type: string
       - name: type
         in: path
@@ -321,20 +322,19 @@ paths:
         type: string
       - name: lat
         in: path
-        description: "szerokość geograficzna w stopniach punktu, od którego liczona ma być odległość - jeśli podano razem z lng, zwrówcone zostaną tylko ogłoszenia oddalone o rad km od punktu (lat, lng)"
+        description: "szerokość geograficzna w stopniach punktu, od którego liczona ma być odległość - jeśli podano razem z parametrem lng, do kazdego ogloszenia jest dodana informacja o odleglosci od punktu (lat, lng); jeśli podano razem z parametrami lng i rad, zwrócone zostaną tylko ogłoszenia oddalone o rad km od punktu (lat, lng)"
         required: false
         type: number
         format: float
       - name: lng
         in: path
-        description: "długość geograficzna w stopniach punktu, od którego liczona ma być odległość - jeśli podano razem z lat, zwrówcone zostaną tylko ogłoszenia oddalone o rad km od punktu (lat, lng)"
+        description: "długość geograficzna w stopniach punktu, od którego liczona ma być odległość - jeśli podano razem z parametrem lat, do kazdego ogloszenia jest dodana informacja o odleglosci od punktu (lat, lng); jeśli podano razem z parametrami lat i rad, zwrócone zostaną tylko ogłoszenia oddalone o rad km od punktu (lat, lng)"
         required: false
         type: number
         format: float
       - name: rad
         in: path
-        default: 30
-        description: "jaśli podano parametry lat i lng, przesłane zostaną tylko ogłoszenia, których lokalizacja jest oddalona od punktu (lat, lng) o nie więcej niż rad kilometrów."
+        description: "jeśli podano także parametry lat i lng, przesłane zostaną tylko ogłoszenia, których lokalizacja jest oddalona od punktu (lat, lng) o nie więcej niż rad kilometrów, musi być większy niż 0"
         type: integer
       responses:
         '200':

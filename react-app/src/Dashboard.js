@@ -11,9 +11,12 @@ import Item from '@mui/material/ListItem';
 import MapOverview from './MapOverview';
 import AnnouncementDialog from './AnnouncementDialog';
 import FiltersDialog from './FiltersDialog';
-import { Stack } from '@mui/material';
+import { Stack, Box } from '@mui/material';
+
+
 
 function createData(list) {
+  if (list === undefined || list === null) return null;
   let rows = [];
   list.forEach(element => {
     rows.push({
@@ -40,13 +43,13 @@ function createFilters() {
     color: '',
     breed: '',
     location: null,
-    rad: 30
+    rad: ''
   }
 }
 
 export default function Dashboard(props) {
 
-  const [listData, setListData] = useState([]);
+  const [listData, setListData] = useState(null);
   const [updateListData, setUpdateListData] = useState(0);
 
   const [filters, setFilters] = useState(createFilters());
@@ -132,7 +135,7 @@ export default function Dashboard(props) {
         url += addParam("lng=" + filters.location.lng.toString(), params);
         params++;
       }
-      if (filters.rad !== -1) {
+      if (!isNaN(filters.rad) && filters.rad > 0) {
         url += addParam("rad=" + filters.rad, params);
         params++;
       }
@@ -151,6 +154,7 @@ export default function Dashboard(props) {
       }
     }
     await fetchData();
+    //console.log(json);
     setListData(createData(json.list));
   }, [updateListData]);
 
@@ -163,6 +167,7 @@ export default function Dashboard(props) {
         credentials: 'include'
       });
       const json = await response.json();
+      console.log(url);
       setAnnouncementData(json);
     } catch (error) {
       console.log("error", error);
@@ -170,6 +175,8 @@ export default function Dashboard(props) {
   };
 
   function refreshData() {
+    setAnnouncementData([]);
+    setListData(null);
     setUpdateListData(updateListData + 1);
   }
 
@@ -191,7 +198,8 @@ export default function Dashboard(props) {
 
   function updateFilters(_filters) {
     setFilters(_filters);
-    setUpdateListData(updateListData + 1);
+    refreshData();
+    //setUpdateListData(updateListData + 1);
   }
 
   function listDistance(val) {
@@ -201,8 +209,8 @@ export default function Dashboard(props) {
 
   return (
     <BrowserRouter>
-      <Grid container spacing={2} columns={16}>
-        <Grid item xs={10}>
+      <Grid container spacing={2} columns={16} sx={{px: '20px'}}>
+        <Grid item lg={10} md={16} xs={16}>
           <MapOverview
             data={listData}
             center={mapCenter}
@@ -211,9 +219,10 @@ export default function Dashboard(props) {
             goToPos={goToPos}
             updateMap={updateMap}
           />
+
         </Grid>
-        <Grid container item xs={6}>
-          <Stack spacing={0} sx={{width: "100%"}}>
+        <Grid container item lg={6} md={16} xs={16}>
+          <Stack spacing={0} sx={{width: "100%", minHeight: '600px'}}>
             <FiltersDialog
               open={filtersDialogOpen}
               filters={filters}

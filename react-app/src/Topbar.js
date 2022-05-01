@@ -12,9 +12,11 @@ import { Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { indigo } from '@mui/material/colors';
 import { Dialog, DialogTitle } from '@mui/material';
+import { Tooltip } from '@mui/material';
 import Snackbar from '@mui/material/Snackbar';
-import { Alert, Stack } from '@mui/material';
+import { Alert } from '@mui/material';
 import AddAnnouncement from './AddAnnouncement';
+import ChatIcon from '@mui/icons-material/Chat';
 // import MUIDrawer from './Drawer'
 import Divider from '@mui/material/Divider';
 // import { FormGroup,FormControlLabel,Switch } from '@mui/material';
@@ -119,11 +121,38 @@ export default function MenuAppBar(props) {
               PZ-XIV
             </Typography>
           </Button>
-          <Button sx={{ my: 2, color: "white", display: "flex" }} onClick={handleAddAnnouncementButton}> Dodaj ogłoszenie </Button>
+          <Tooltip title={sessionStorage.getItem('login') === null ? "Dodawanie ogłoszeń jest tylko dla zalogowanych użytkowników" : ""}>
+            <span>
+              <Button disabled={sessionStorage.getItem('login') === null} sx={{ my: 2, color: "white", display: "flex" }} onClick={handleAddAnnouncementButton}>
+                Dodaj ogłoszenie
+              </Button>
+            </span>
+          </Tooltip>
+          <Tooltip title={sessionStorage.getItem('login') === null ? "Czat jest tylko dla zalogowanych użytkowników" : ""} >
+            <span>
+              <Button disabled={sessionStorage.getItem('login') === null} sx={{ my: 2, color: "white", display: "flex" }} onClick={() => window.location.href = "/chat"} endIcon={<ChatIcon />}>
+                Czat
+              </Button>
+            </span>
+          </Tooltip>
         </Box>
         {(props.auth?.login && (
           <div>
-            <IconButton
+            <Badge badgeContent={notificationsCount} color="error">
+              <Button
+                size="small"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={handleMenu}
+                color="inherit"
+                endIcon={<AccountCircle />}
+              >
+                {/* <Typography variant='subtitle2'>{sessionStorage.getItem('login')}&nbsp;</Typography> */}
+                {sessionStorage.getItem('login')}
+              </Button>
+            </Badge>
+            {/* <IconButton
               size="large"
               aria-label="account of current user"
               aria-controls="menu-appbar"
@@ -135,7 +164,7 @@ export default function MenuAppBar(props) {
               <Badge badgeContent={notificationsCount} color="error">
                 <AccountCircle />
               </Badge>
-            </IconButton>
+            </IconButton> */}
             <Menu
               id="menu-appbar"
               anchorEl={accountAnchor}
@@ -157,7 +186,7 @@ export default function MenuAppBar(props) {
                 </Badge>
               </MenuItem>
               <MenuItem onClick={function (event) { handleAccountClose(); window.location.href = "/account" }}>Moje konto</MenuItem>
-              <MenuItem onClick={function (event) { handleAccountClose(); window.location.href = "/chatTesting" }}>Czat</MenuItem>
+              <MenuItem onClick={function (event) { handleAccountClose(); window.location.href = "/chat" }}>Czat</MenuItem>
               <Divider />
               <MenuItem onClick={function (event) { logout() }}>Wyloguj</MenuItem>
             </Menu>

@@ -80,7 +80,7 @@ export default function FiltersDialog(props) {
 
     function handleSubmit() {
         const newFilters = createFilters(category, anonTitle, type, coat, color, breed, location, rad);
-        if (newFilters.location !== null && (filters.location === null || newFilters.location.lat != location.lat || newFilters.location.lng != location.lng)) {
+        if (newFilters.location !== null) {
             //props.showOnMap(newFilters.location.lat, newFilters.location.lng);
             props.setShowDistance(true);
         }
@@ -88,7 +88,7 @@ export default function FiltersDialog(props) {
             props.setShowDistance(false);
         }
         setFilters(newFilters);
-        console.log(newFilters);
+        //console.log(newFilters);
         props.handleAccept(newFilters);
         props.setOpen(false);
     }
@@ -170,7 +170,7 @@ export default function FiltersDialog(props) {
 
     function clearLocation() {
         setLocation(null);
-        setRad(-1);
+        setRad('');
     }
 
     /*function clearRad() {
@@ -226,8 +226,8 @@ export default function FiltersDialog(props) {
     return (
         <div>
             <Grid container spacing={1} columns={16} alignItems="center" justifyContent="center">
-                <Grid container item direction="column" xs={10}>
-                    <Grid item>
+                <Grid container item direction="column" sm={10} xs={16} >
+                    <Grid>
                         <FormControl variant="standard" style={{ width: '100%' }}>
                             <InputLabel id="category">Rodzaj zgłoszenia</InputLabel>
                             <Select value={(category != -1) ? category : ''} labelId="category" id="category" label="Kategoria" onChange={handleCategoryChange}>
@@ -245,10 +245,10 @@ export default function FiltersDialog(props) {
 
                     </Grid>
                 </Grid>
-                <Grid container item xs={3}>
+                <Grid container item sm={3} xs={8} >
                     <Button variant="contained" type="submit" onClick={clearAll}>Wyczyść</Button>
                 </Grid>
-                <Grid container item xs={3}>
+                <Grid container item sm={3} xs={8} >
                     <Button variant="contained" type="submit" onClick={handleSubmit}>Filtruj</Button>
                 </Grid>
             </Grid>

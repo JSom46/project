@@ -23,7 +23,7 @@ import {
     ConversationHeader,
 } from "@chatscope/chat-ui-kit-react";
 
-export default function ChatTesting(props) {
+export default function Chat(props) {
     const [socket, setSocket] = useState(null);
     const [connected, setConnected] = useState(false);
     const [authenticated, setAuthenticated] = useState(false);
@@ -37,7 +37,6 @@ export default function ChatTesting(props) {
 
     const fileInput = React.useRef(null);
 
-    const [anonsId, setAnonsId] = useState(-1);
     const [header, setHeader] = useState(null);
     const [chatId, setChatId] = useState(-1); 
     const [createNewChat, setCreateNewChat] = useState(props?.id); 
@@ -73,15 +72,18 @@ export default function ChatTesting(props) {
                 });
             }
             if (connected && !authenticated) {
-                socket.on("auth-response", (event) => {
-                    setAuthenticated(true);
-                    socket.emit('get-user-chats');
-                    setSnackbarData((prev) => ({
-                        open: true,
-                        message: "Połączono i uwierzytelniono",
-                        severity: "success",
-                        loading: true
-                    }));
+                socket.on("auth-response", (status) => {
+                    if(status === -1) window.location.href = "/login";
+                    else {
+                        setAuthenticated(true);
+                        socket.emit('get-user-chats');
+                        setSnackbarData((prev) => ({
+                            open: true,
+                            message: "Połączono i uwierzytelniono",
+                            severity: "success",
+                            loading: true
+                        }));
+                    }
                     // console.log("auth");
                 });
                 socket.emit('auth-request', login);
@@ -118,6 +120,11 @@ export default function ChatTesting(props) {
                     setChatMessages(chatMsg);
                 });
                 socket.on("chat-msg", (message_id, chat_id, username, datatime, message) => {
+                    // console.log(message_id);
+                    // console.log(chat_id);
+                    // console.log(username);
+                    // console.log(datatime);
+                    // console.log(message);
                     var msg = {
                         message_id: message_id,
                         chat_id: chat_id,
@@ -141,7 +148,7 @@ export default function ChatTesting(props) {
                         message_id: image_id,
                         chat_id: chat_id,
                         image_id: lastImage,
-                        username: username,
+                        login: username,
                         message_date: datetime,
                     }
                     if (chat_id === chatId) setChatMessages((prev) => [...prev, msg])
@@ -172,7 +179,7 @@ export default function ChatTesting(props) {
             }
             return () => socket.off();
         }
-    }, [socket, connected, authenticated, anonsId, chatId, login, props.id]);
+    }, [socket, connected, authenticated, chatId, login, createNewChat]);
     const handleChatClick = (login, chat_id) => {
         // console.log(anons_id);
         // console.log(chat_id);

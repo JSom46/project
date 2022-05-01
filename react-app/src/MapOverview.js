@@ -25,7 +25,14 @@ function MapController(props) {
         popupAnchor: [1, -34],
         shadowSize: [41, 41]
     });
-    const icon_missing = new L.Icon.Default();
+    const icon_missing = new L.Icon({
+        iconUrl: './marker-icon-missing.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
     //console.log(icon_found);
 
     function goToPos(pos, zoom) {
@@ -37,6 +44,10 @@ function MapController(props) {
             goToPos(props.goToPos, 13);
         }
     }, [props.updateMap]);
+
+    if (props.data === undefined || props.data === null || props.data.length <= 0) {
+        return null;
+    }
     
     const markers = props.data.map((anon) =>
         <Marker
@@ -56,7 +67,7 @@ function MapController(props) {
 
 export default function MapOverview(props) {
     return (
-        <div id='mapController'>
+        <div id='mapController' >
             <MapContainer className="map_overview" center={props.center} zoom={props.zoom}>
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

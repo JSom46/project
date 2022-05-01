@@ -3,8 +3,19 @@
 
 .map_picker { height: 320px; }
 
-.map_overview { height: 800px; }
+.map_overview { height: 400px; }
 
-.map_simple {width: 300px; height: 300px; }
+.map_simple {height: 240px; }
 
 .anonPopup img {width: 100px; height: 100px; padding: 10px; }
+
+@media (min-width: 600px) {
+    .map_overview { height: 600px; }
+}
+
+@media (min-width: 1200px) {
+    .map_overview { height: 800px; }
+}
+
+
+
