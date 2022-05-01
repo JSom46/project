@@ -41,7 +41,8 @@ import {
   );
 
 const ChatList = ({ route, navigation }) => {
-    const [userData, setUserData] = useState(route.params.userData);
+    //const [userData, setUserData] = useState(route.params.userData);
+    const {userData, setUserData} = React.useContext(userDataContext);
     const [isLoading, setLoading] = useState(true);
     const [connected, setConnected] = useState(false);
     const [authenticated, setAuthenticated] = useState(false);
@@ -53,7 +54,8 @@ const ChatList = ({ route, navigation }) => {
     const [chatId, setChatId] = useState(-1); 
     const [createNewChat, setCreateNewChat] = useState(route?.params?.createNewChat); 
 
-    const login = route.params.userData.login;
+    //const login = route.params.userData.login;
+    const login = userData.login;
 
     const {socket, setSocket} = React.useContext(SocketContext);
     

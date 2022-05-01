@@ -6,17 +6,23 @@ import {stylesHome, stylesAnnouncements} from '../../components/styles';
 import AnnouncementsList from './AnnouncementsList';
 import AnnouncementView from '../AnnouncementView';
 import AddAnnouncement from '../Map/AddAnnouncement';
+import { userDataContext } from '../UserDataContext';
 
 
 const AnnouncementsStack = createNativeStackNavigator();
 
 const AnnouncementsScreen = ({ route, navigation }) => {
-  const [userData, setUserData] = useState(route.params.userData);
+  //const [userData, setUserData] = useState(route.params.userData);
+  const {userData, setUserData} = React.useContext(userDataContext);
 
     return(
       //<NavigationContainer>
         <AnnouncementsStack.Navigator screenOptions={{headerShown: false}}>
-          <AnnouncementsStack.Screen name="Lista" component={AnnouncementsList} initialParams={{userData: userData}}/>
+          <AnnouncementsStack.Screen 
+            name="Lista" 
+            component={AnnouncementsList} 
+            //initialParams={{userData: userData}}
+          />
           <AnnouncementsStack.Screen name="Ogloszenie" component={AnnouncementView}/>
           <AnnouncementsStack.Screen name="Dodaj Ogloszenie" component={AddAnnouncement}/>
         </AnnouncementsStack.Navigator>

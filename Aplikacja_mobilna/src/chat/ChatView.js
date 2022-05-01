@@ -35,7 +35,8 @@ const ChatItem = ({message, user}) => (
   );
 
 const ChatView = ({ route, navigation }) => {
-    const [userData, setUserData] = useState(route.params.userData);
+    //const [userData, setUserData] = useState(route.params.userData);
+    const {userData, setUserData} = React.useContext(userDataContext);
     //const [socket, setSocket] = useState(React.useContext(SocketContext));
     const [chatMessages, setChatMessages] = useState([]);
     const {socket, setSocket} = React.useContext(SocketContext);
@@ -100,7 +101,7 @@ const ChatView = ({ route, navigation }) => {
         
           <ChatItem
             message={item}
-            user={route.params.userData}
+            user={userData}
           />
         // </TouchableOpacity>
     );

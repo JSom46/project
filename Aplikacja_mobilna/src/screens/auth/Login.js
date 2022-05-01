@@ -28,7 +28,7 @@ import {
 } from "../../components/styles";
 import { StatusBar } from "expo-status-bar";
 
-//import {AuthContext} from "../../navigations/RootStack";
+import { userDataContext } from "../UserDataContext";
 
 const { brand, darkLight, black, primary, facebook } = Colors;
 
@@ -39,7 +39,7 @@ const Login = ({ navigation }) => {
   const [hidePassword, setHidedPassword] = useState(true);
   const [message, setMessage] = useState();
   const [messageType, setMessageType] = useState();
-  const guestData = {user_id: "guestId", email: "guest@email", login: "guest", is_admin: 0};
+  const {userData, setUserData} = React.useContext(userDataContext);
 
   // const {handleLogin} = React.useContext(AuthContext);
   // const {LoginGoogleFunc} = React.useContext(AuthContext);
@@ -139,6 +139,7 @@ const Login = ({ navigation }) => {
           if (response.status == "200") {
             console.log("zalogowano");
             console.log(result);
+            setUserData(result);
             navigation.replace('Nawigator', {userData: result});
           } else {
             console.log("nie zalogowano");

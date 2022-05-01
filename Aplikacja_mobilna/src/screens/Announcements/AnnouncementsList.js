@@ -20,6 +20,7 @@ import {
   announcementAddButton,
 } from "../../components/styles";
 import FilterContext from "./../../components/Map/FilterContext";
+import { userDataContext } from "../UserDataContext";
 import { StatusBar } from "expo-status-bar";
 // do testow listy
 // const DATA = [
@@ -65,10 +66,11 @@ const AnnouncementsList = ({ navigation, route }) => {
   const [isLoading, setLoading] = useState(true);
   const [announcements, setAnnouncements] = useState([]);
   const [pageCount, setPageCount] = useState(1);
-  const [userData, setUserData] = useState(route.params.userData);
+  //const [userData, setUserData] = useState(route.params.userData);
   const isFocused = useIsFocused();
   const [refreshing, setRefreshing] = useState(false);
   const [filterData, setfilterData] = useContext(FilterContext);
+  const {userData, setUserData} = React.useContext(userDataContext);
 
   function addParam(arg, params) {
     let str = "";
@@ -219,7 +221,10 @@ const AnnouncementsList = ({ navigation, route }) => {
   //Ta funkcja renderuje ogloszenia - jest wywolywana dla kazdego elementu (item) na liscie
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      onPress={() => navigation.navigate("Ogloszenie", { announcement: item, userData: userData })} //onPress wyswietla konkretne ogloszenie - do Screena 'Ogloszenie' przekazywane jest cale ogloszenie w parametrze 'announcement'
+      onPress={() => navigation.navigate("Ogloszenie", { 
+        announcement: item,
+        //userData: userData 
+      })} //onPress wyswietla konkretne ogloszenie - do Screena 'Ogloszenie' przekazywane jest cale ogloszenie w parametrze 'announcement'
     >
       <Announcement
         title={item.title}

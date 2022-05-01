@@ -19,6 +19,7 @@ import {
 } from "@expo/vector-icons";
 import axios from "axios";
 import Swiper from "react-native-swiper";
+import { userDataContext } from "./UserDataContext";
 
 import SplashScreen from "./SplashScreen";
 
@@ -28,13 +29,15 @@ const AnnouncementView = ({ route, navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalVisible, setModalVisible] = useState(false);
 
-  const [userData, setUserData] = useState(route.params.userData);
+  //const [userData, setUserData] = useState(route.params.userData);
+  const {userData, setUserData} = React.useContext(userDataContext);
+
   const [announcement, setAnnouncement] = useState();
   const [date, setDate] = useState();
 
-  React.useEffect(() => {
-    setUserData(route.params.userData);
-  },[route.params.userData]);
+  // React.useEffect(() => {
+  //   setUserData(route.params.userData);
+  // },[route.params.userData]);
 
   //pobieranie szczegolowych informacji o ogloszeniu
   React.useEffect(() => {

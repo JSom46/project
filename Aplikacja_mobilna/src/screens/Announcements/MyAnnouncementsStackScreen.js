@@ -15,11 +15,13 @@ import AnnouncementsList from "./AnnouncementsList";
 import AnnouncementView from "../AnnouncementView";
 import AddAnnouncement from "../Map/AddAnnouncement";
 import MyAnnouncementsScreen from "../MyAnnouncementsScreen";
+import { userDataContext } from "../UserDataContext";
 
 const MyAnnouncementsStack = createNativeStackNavigator();
 
 const MyAnnouncementsStackScreen = ({ route, navigation }) => {
-  const [userData, setUserData] = useState(route.params.userData);
+  //const [userData, setUserData] = useState(route.params.userData);
+  const {userData, setUserData} = React.useContext(userDataContext);
 
   return (
     //<NavigationContainer>
@@ -27,12 +29,12 @@ const MyAnnouncementsStackScreen = ({ route, navigation }) => {
       <MyAnnouncementsStack.Screen
         name="Lista moich ogloszen"
         component={MyAnnouncementsScreen}
-        initialParams={{ userData: userData }}
+        //initialParams={{ userData: userData }}
       />
       <MyAnnouncementsStack.Screen
         name="Ogloszenie"
         component={AnnouncementView}
-        initialParams={{ userData: userData }}
+        //initialParams={{ userData: userData }}
       />
       <MyAnnouncementsStack.Screen
         name="Dodaj Ogloszenie"

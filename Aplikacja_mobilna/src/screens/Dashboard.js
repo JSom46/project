@@ -10,19 +10,24 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 //import MainMap from './MainMap';
 import MapMain from "./Map/MapMain";
 import AnnouncementView from "./AnnouncementView";
+import { userDataContext } from "./UserDataContext";
 
 const MapAnnouncementsStack = createNativeStackNavigator();
 
 const Dashboard = ({ navigation, route }) => {
-  //const {logOut} = React.useContext(AuthContext);
-  const [userData, setUserData] = useState(route.params.userData);
+  //const [userData, setUserData] = useState(route.params.userData);
+  const {userData, setUserData} = React.useContext(userDataContext);
 
   return (
     <MapAnnouncementsStack.Navigator
       style={{ flex: 1 }}
       screenOptions={{ headerShown: false }}
     >
-      <MapAnnouncementsStack.Screen name="Mapa" component={MapMain} initialParams={{ userData: userData }} />
+      <MapAnnouncementsStack.Screen
+        name="Mapa" 
+        component={MapMain} 
+        //initialParams={{ userData: userData }} 
+      />
       <MapAnnouncementsStack.Screen
         name="Ogloszenie"
         component={AnnouncementView}

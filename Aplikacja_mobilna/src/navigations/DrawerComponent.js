@@ -32,12 +32,13 @@ import {
 import axios from "axios";
 import ChatStackScreen from "../chat/ChatStack";
 import AboutAppScreen from "../screens/AboutAppScreen";
+import { userDataContext } from "../screens/UserDataContext";
 
 const Drawer = createDrawerNavigator();
 
 const DrawerComponent = ({ navigation, route }) => {
-  //const {logOut} = React.useContext(AuthContext);
-  const [userData, setUserData] = useState(route.params.userData);
+  //const [userData, setUserData] = useState(route.params.userData);
+  const {userData, setUserData} = React.useContext(userDataContext);
 
   const handleLogout = (credentials) => {
     console.log(credentials);
@@ -118,7 +119,7 @@ const DrawerComponent = ({ navigation, route }) => {
           <Drawer.Screen 
             name="Strona domowa"
             component={Dashboard} 
-            initialParams={{ userData: userData }}
+            //initialParams={{ userData: userData }}
             options={{
               drawerIcon: ({ focused, size }) => (
                 <Ionicons
@@ -151,7 +152,7 @@ const DrawerComponent = ({ navigation, route }) => {
           <Drawer.Screen
             name="Ogłoszenia"
             component={AnnouncementsScreen}
-            initialParams={{ userData: userData }}
+            //initialParams={{ userData: userData }}
             options={{
               drawerIcon: ({ focused, size }) => (
                 <Entypo
@@ -191,7 +192,7 @@ const DrawerComponent = ({ navigation, route }) => {
           <Drawer.Screen
             name="Strona domowa"
             component={Dashboard}
-            initialParams={{ userData: userData }}
+            //initialParams={{ userData: userData }}
             options={{
               drawerIcon: ({ focused, size }) => (
                 <Ionicons
@@ -224,7 +225,7 @@ const DrawerComponent = ({ navigation, route }) => {
           <Drawer.Screen
             name="Ogłoszenia"
             component={AnnouncementsScreen}
-            initialParams={{ userData: userData }}
+            //initialParams={{ userData: userData }}
             options={{
               drawerIcon: ({ focused, size }) => (
                 <Entypo
@@ -248,7 +249,7 @@ const DrawerComponent = ({ navigation, route }) => {
           <Drawer.Screen
             name="Profil"
             component={MyProfileScreen}
-            initialParams={{ userData: userData }}
+            //initialParams={{ userData: userData }}
             options={{
               drawerIcon: ({ focused, size }) => (
                 <Ionicons
@@ -262,7 +263,7 @@ const DrawerComponent = ({ navigation, route }) => {
           <Drawer.Screen
             name="Moje Ogłoszenia"
             component={MyAnnouncementsStackScreen}
-            initialParams={{ userData: userData }}
+            //initialParams={{ userData: userData }}
             options={{
               drawerIcon: ({ focused, size }) => (
                 <AntDesign
@@ -276,7 +277,7 @@ const DrawerComponent = ({ navigation, route }) => {
           <Drawer.Screen
             name="Wiadomości"
             component={ChatStackScreen}
-            initialParams={{ userData: userData }}
+            //initialParams={{ userData: userData }}
             options={{
               drawerIcon: ({ focused, size }) => (
                 <Ionicons 
@@ -290,7 +291,7 @@ const DrawerComponent = ({ navigation, route }) => {
           <Drawer.Screen
             name="Powiadomienia"
             component={NotificationsScreen}
-            initialParams={{ userData: userData }}
+            //initialParams={{ userData: userData }}
             options={{
               drawerIcon: ({ focused, size }) => (
                 <Ionicons
