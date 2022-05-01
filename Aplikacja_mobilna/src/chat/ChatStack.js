@@ -4,11 +4,11 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { io } from "socket.io-client";
 import ChatList from "./ChatsList";
 import ChatView from "./ChatView";
-//import { SocketContext, socket} from "./SocketContext";
+import { SocketContext } from "./SocketContext";
 
 const ChatStack = createNativeStackNavigator();
 //const socket = null;//io("http://" + "192.168.31.47" + ":2300");
-export const SocketContext = React.createContext();
+//export const SocketContext = React.createContext();
 
 const ChatStackScreen = ({ route, navigation }) => {
     const [userData, setUserData] = useState(route.params.userData);

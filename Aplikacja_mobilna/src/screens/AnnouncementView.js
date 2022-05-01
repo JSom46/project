@@ -229,33 +229,41 @@ const AnnouncementView = ({ route, navigation }) => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("AddNotification", {
-                anons_id: announcement.id,
-                photos: "",
-              });
-            }}
-            style={announcementViewButton}
-          >
-            <Text style={{ fontSize: 20, fontWeight: "600" }}>
-              Widziałem to zwierzę
-            </Text>
-          </TouchableOpacity>
+          {userData.user_id === "guestId" ? (
+            <></>
+          ):(
+            <>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("AddNotification", {
+                  anons_id: announcement.id,
+                  photos: "",
+                });
+              }}
+              style={announcementViewButton}
+            >
+              <Text style={{ fontSize: 20, fontWeight: "600" }}>
+                Widziałem to zwierzę
+              </Text>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("Wiadomości", {
-                screen: 'Lista rozmów',
-                params: {createNewChat: announcement.id},
-              });
-            }}
-            style={announcementViewButton}
-          >
-            <Text style={{ fontSize: 20, fontWeight: "600" }}>
-              Czat
-            </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Wiadomości", {
+                  screen: 'Lista rozmów',
+                  params: {createNewChat: announcement.id},
+                });
+              }}
+              style={announcementViewButton}
+            >
+              <Text style={{ fontSize: 20, fontWeight: "600" }}>
+                Czat
+              </Text>
+            </TouchableOpacity>
+            </>
+          )}
+
+          
         </ScrollView>
       )}
     </View>
