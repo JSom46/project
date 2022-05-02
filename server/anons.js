@@ -129,7 +129,7 @@ router.post('/', upload.array('pictures'), (req, res) => {
     });
 
     //dodanie ogloszenia
-    con.run(`INSERT INTO anons(
+    con.get(`INSERT INTO anons(
                 title, 
                 description, 
                 category, 
@@ -143,9 +143,10 @@ router.post('/', upload.array('pictures'), (req, res) => {
                 color, 
                 breed, 
                 is_active) 
-            VALUES(?, ?, ?, ?, ?, (SELECT strftime ("%s", "now")), ?, ?, ?, ?, ?, ?, 1);`, 
+            VALUES(?, ?, ?, ?, ?, (SELECT strftime ("%s", "now")), ?, ?, ?, ?, ?, ?, 1)
+            RETURNING id;`, 
     req.body.title, req.body.description, req.body.category, pictures, req.session.user_id, req.body.lat, req.body.lng, req.body.type, req.body.coat, 
-    req.body.color, req.body.breed, function(err){
+    req.body.color, req.body.breed, (err, row) => {
         if(err){
             //dodanie ogloszenia sie nie powiodlo - kasujemy powiazane z nim zdjecia
             req.files.forEach((e) => {
@@ -158,7 +159,7 @@ router.post('/', upload.array('pictures'), (req, res) => {
             log.debug(err);
             return res.sendStatus(500);
         }
-        return res.status(200).json({id: this.lastID});
+        return res.status(200).json({id: row.id});
     });
 });
 
@@ -224,6 +225,7 @@ router.get('/', (req, res) => {
 // w przeciwnym wypadku do kazdego ogloszenia jest dodana informacja o odleglosci od punktu (lat, lng)
 // jesli dodatkowo zdefiniowano rad i jest on wiekszy od 0, to zwracane sa tylko ogloszenia oddalone od punktu (lat, lng) o nie wiecej niz rad kilometrow 
 router.get('/list', (req, res) => {
+    log.trace(req.query);
     // filtry do zapytania
     let filters = [];
     // wartosci filtrow
@@ -287,8 +289,7 @@ router.get('/list', (req, res) => {
             }
             else{
                 arr.push(row);
-            }
-            
+            } 
         }
         else{
             arr.push(row);

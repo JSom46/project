@@ -3,10 +3,12 @@ import { View, Text, TouchableOpacity, TextInput, ScrollView} from 'react-native
 import { Formik } from 'formik';
 import axios from 'axios';
 import { stylesHome, stylesMyProfileContainer, stylesMyProfileButton, stylesMyProfileTextInput } from '../components/styles';
+import { userDataContext } from './UserDataContext';
 
 const MyProfileScreen = ({navigation, route}) => {
     const [message, setMessage] = useState("");
-    const [userData, setUserData] = useState(route.params.userData);
+    //const [userData, setUserData] = useState(route.params.userData);
+    const {userData, setUserData} = React.useContext(userDataContext);
     const loginFormRef = useRef();
     const passwordFormRef = useRef()
 

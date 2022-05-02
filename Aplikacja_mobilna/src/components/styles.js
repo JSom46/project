@@ -515,6 +515,83 @@ export const dialogButton = {
   borderColor: "black",
 };
 
+export const chatListItem = {
+  backgroundColor: "white",
+  padding: 4,
+  paddingVertical: 8,
+  marginVertical: 1,
+  marginHorizontal: 8,
+  borderBottomWidth: 1,
+  borderRightWidth: 2,
+  borderColor: "lightgray",
+  flex: 1,
+  flexDirection: "row",
+};
+
+export const chatListItemIncomingMessage = {
+  backgroundColor: "#c6e3fa",
+  //flexDirection: "row",
+  //alignSelf: "flex-start",
+  padding: 12,
+  paddingVertical: 15,
+  borderTopRightRadius: 15,
+  borderBottomRightRadius: 15,
+  marginVertical: 1,
+  maxWidth: "75%"
+};
+
+export const chatListItemIncomingContainer = {
+  //backgroundColor: "#c6e3fa",
+  //flexDirection: "row",
+  alignSelf: "flex-start",
+  marginVertical: 8,
+  textAlign: "left",
+};
+
+export const chatListItemOutgoingMessage = {
+  backgroundColor: "#6ea9d7",
+  //flexDirection: "row",
+  //alignSelf: "flex-end",
+  padding: 12,
+  paddingVertical: 15,
+  borderTopLeftRadius: 15,
+  borderBottomLeftRadius: 15,
+  marginVertical: 1,
+  maxWidth: "75%",
+};
+
+export const chatListItemOutgoingContainer = {
+  //backgroundColor: "#6ea9d7",
+  //flexDirection: "row",
+  alignSelf: "flex-end",
+  marginVertical: 8,
+  textAlign: "right",
+};
+
+export const chatMessageInput = {
+  height: 40,
+  margin: 12,
+  //borderWidth: 1,
+  padding: 10,
+  alignSelf: "stretch",
+  //width: "80%"
+  borderRadius: 15,
+  flex: 1,
+  backgroundColor: "#c6e3fa",
+};
+
+export const announcementViewButton = {
+  backgroundColor: "white",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 5,
+  borderRadius: 10,
+  borderWidth: 1,
+  borderColor: "black",
+  marginHorizontal: 20,
+  marginBottom: 10,
+};
+
 export const stylesAnnouncements = StyleSheet.create({
   listContainer: {
     flex: 1,

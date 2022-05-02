@@ -3,6 +3,7 @@ import { View, Text} from 'react-native';
 import { Button } from 'react-native-paper';
 import { stylesHome } from '../components/styles';
 
+
 const NotificationsScreen = ({navigation}) => {
 
     return(

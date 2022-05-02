@@ -8,6 +8,7 @@ import {
   innerDialogContainer, 
   innerDialogButtonsContainer, 
   dialogButton,
+  announcementViewButton,
 } from "../components/styles";
 import {
   Octicons,
@@ -18,6 +19,7 @@ import {
 } from "@expo/vector-icons";
 import axios from "axios";
 import Swiper from "react-native-swiper";
+import { userDataContext } from "./UserDataContext";
 
 import SplashScreen from "./SplashScreen";
 
@@ -27,13 +29,15 @@ const AnnouncementView = ({ route, navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalVisible, setModalVisible] = useState(false);
 
-  const [userData, setUserData] = useState(route.params.userData);
+  //const [userData, setUserData] = useState(route.params.userData);
+  const {userData, setUserData} = React.useContext(userDataContext);
+
   const [announcement, setAnnouncement] = useState();
   const [date, setDate] = useState();
 
-  React.useEffect(() => {
-    setUserData(route.params.userData);
-  },[route.params.userData]);
+  // React.useEffect(() => {
+  //   setUserData(route.params.userData);
+  // },[route.params.userData]);
 
   //pobieranie szczegolowych informacji o ogloszeniu
   React.useEffect(() => {
@@ -110,7 +114,7 @@ const AnnouncementView = ({ route, navigation }) => {
         <SplashScreen />
       ) : (
         <ScrollView style={stylesAnnouncements.announcementContainer}>
-          {userData.user_id === announcement.author_id ? (
+          {userData.user_id === announcement.author_id || userData.is_admin == 1 ? (
             <ButtonView>
             <TouchableOpacity style={announcementOptionsButton} onPress={() => alert("Jak bedzie w pełni dzialajace dodawanie to przerobi się je też na modyfikowanie")}>
               <Text style={{ fontSize: 18, color: "black" }}>
@@ -221,46 +225,48 @@ const AnnouncementView = ({ route, navigation }) => {
                 lng: announcement.lng
               }
             })}
-            style={{
-              backgroundColor: "white",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 5,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: "black",
-              marginHorizontal: 20,
-              marginBottom: 10,
-            }}
+            style={announcementViewButton}
           >
             <Text style={{ fontSize: 20, fontWeight: "600" }}>
               Zobacz na mapie
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("AddNotification", {
-                anons_id: announcement.id,
-                photos: "",
-              });
-            }}
-            style={{
-              backgroundColor: "white",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 5,
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: "black",
-              marginHorizontal: 20,
-              marginBottom: 20,
-            }}
-          >
-            <Text style={{ fontSize: 20, fontWeight: "600" }}>
-              Widziałem to zwierzę
-            </Text>
-          </TouchableOpacity>
+          {userData.user_id === "guestId" ? (
+            <></>
+          ):(
+            <>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("AddNotification", {
+                  anons_id: announcement.id,
+                  photos: "",
+                });
+              }}
+              style={announcementViewButton}
+            >
+              <Text style={{ fontSize: 20, fontWeight: "600" }}>
+                Widziałem to zwierzę
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("Wiadomości", {
+                  screen: 'Lista rozmów',
+                  params: {createNewChat: announcement.id},
+                });
+              }}
+              style={announcementViewButton}
+            >
+              <Text style={{ fontSize: 20, fontWeight: "600" }}>
+                Czat
+              </Text>
+            </TouchableOpacity>
+            </>
+          )}
+
+          
         </ScrollView>
       )}
     </View>

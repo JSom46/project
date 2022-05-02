@@ -12,6 +12,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import FilterContext from "../../components/Map/FilterContext";
 import { Svg, Image as ImageSvg } from "react-native-svg";
 import { stylesMap } from "../../components/styles";
+import { userDataContext } from "../UserDataContext";
 
 const { brand, darkLight, black, primary } = Colors;
 
@@ -28,7 +29,8 @@ const MapMain = ({ navigation, route }) => {
 
   const [markerRefs, setMarkerRefs] = useState([]);
   const [focusRegion, setFocusRegion] = useState(null);
-  const [userData, setUserData] = useState(route.params.userData);
+  //const [userData, setUserData] = useState(route.params.userData);
+  const {userData, setUserData} = React.useContext(userDataContext);
 
   //dane z ogloszen
   const [tableData = [], setTableData] = useState();
@@ -158,7 +160,8 @@ const MapMain = ({ navigation, route }) => {
   useFocusEffect(
     React.useCallback(() => {
       //console.log("WYWOLALO SJE");
-      console.log(route.params);
+      console.log("useEffect1", route.params);
+      console.log("userData: ", userData);
       if(route.params && route.params.focusCoordinates != null){
         console.log("sa parametry: ", route.params.focusCoordinates);
         const tempRegion = {
@@ -177,7 +180,7 @@ const MapMain = ({ navigation, route }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log(route.params);
+      console.log("useEffect2", route.params);
       if(route.params && route.params.refresh){
         console.log("wywolano odswiezenie mapy");
         fetchData();
@@ -210,7 +213,10 @@ const MapMain = ({ navigation, route }) => {
             <Callout
               style={stylesMap.callout}
               onPress={() =>
-                navigation.navigate("Ogloszenie", { announcement: marker })
+                navigation.navigate("Ogloszenie", { 
+                  announcement: marker, 
+                  //userData: userData 
+                })
               }
             >
               <View style={{ justifyContent: "center", alignItems: "center" }}>

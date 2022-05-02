@@ -4,6 +4,7 @@ import SplashScreen from './SplashScreen';
 import {stylesHome, stylesAnnouncements} from '../components/styles';
 import axios from "axios";
 import { Button } from 'react-native-paper';
+import { userDataContext } from './UserDataContext';
 
 function createData(id, title, category, image, lat, lng, type, create_date) {
     return { id, title, category, image, lat, lng, type, create_date };
@@ -55,7 +56,8 @@ const Announcement = ({ title, image, category }) => (
 const MyAnnouncementsScreen = ({navigation, route}) => {
     const [isLoading, setLoading] = useState(true);
     const [announcements, setAnnouncements] = useState([]);
-    const [userData, setUserData] = useState(route.params.userData);
+    //const [userData, setUserData] = useState(route.params.userData);
+    const {userData, setUserData} = React.useContext(userDataContext);
 
     React.useEffect(() => {
         getAnnouncements().then(rows => setAnnouncements(rows)).finally(() => setLoading(false));
@@ -64,7 +66,10 @@ const MyAnnouncementsScreen = ({navigation, route}) => {
     //Ta funkcja renderuje ogloszenia - jest wywolywana dla kazdego elementu (item) na liscie
     const renderItem = ({ item }) => (
         <TouchableOpacity
-          onPress={() => navigation.navigate('Ogloszenie', {announcement: item, userData: userData })}  //onPress wyswietla konkretne ogloszenie - do Screena 'Ogloszenie' przekazywane jest cale ogloszenie w parametrze 'announcement'  
+          onPress={() => navigation.navigate('Ogloszenie', {
+              announcement: item, 
+              //userData: userData 
+            })}  //onPress wyswietla konkretne ogloszenie - do Screena 'Ogloszenie' przekazywane jest cale ogloszenie w parametrze 'announcement'  
         >
           <Announcement title={item.title} image={item.image} category={item.category}/>
         </TouchableOpacity>

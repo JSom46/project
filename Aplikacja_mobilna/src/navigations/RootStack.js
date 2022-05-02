@@ -20,6 +20,7 @@ import DrawerComponent from "./DrawerComponent";
 import Filter from "../screens/Map/Filter";
 import ImageBrowser from "../screens/ImageBrowserScreen";
 import AddNotification from "../screens/Announcements/AddNotification";
+import { userDataContext } from "../screens/UserDataContext";
 
 const Stack = createStackNavigator();
 
@@ -28,113 +29,10 @@ const Stack = createStackNavigator();
 const RootStack = () => {
   //const [userToken, setUserToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState();
+  const [userData, setUserData] = useState(guestData);
+  const userDataContextValues = {userData: userData, setUserData: setUserData};
   //const [initialRoute, setInitialRoute] = useState("Nawigator");
   //const guestData = {user_id: "guestId", email: "guest@email", login: "guest", is_admin: 0};
-
-  // const authContextData = React.useMemo(() => ({
-  //   LoginGoogle: async () => {
-  //     const data = await fetch("http://" + serwer + "/auth/google/url", {
-  //       method: "GET",
-  //       credentials: "include",
-  //     });
-  //     return await data.json();
-  //   },
-
-  //   LoginGoogleFunc: async (e) => {
-  //     e.preventDefault();
-  //     const response = await LoginGoogle();
-  //     console.log(response.url);
-  //     Linking.openURL(response.url).catch((err) =>
-  //       console.error("Couldn't load page", err)
-  //     );
-  //   },
-
-  //   LoginFacebook: async () => {
-  //     const data = await fetch("http://" + serwer + "/auth/facebook/url", {
-  //       method: "GET",
-  //       credentials: "include",
-  //     });
-  //     return await data.json();
-  //   },
-
-  //   LoginFacebookFunc: async (e) => {
-  //     e.preventDefault();
-  //     const response = await LoginFacebook();
-  //     console.log(response.url);
-  //     Linking.openURL(response.url).catch((err) =>
-  //       console.error("Couldn't load page", err)
-  //     );
-  //   },
-
-  //   handleMessage: (message, type = "FALSE") => {
-  //     setMessage(message);
-  //     setMessageType(type);
-  //   },
-
-  //   handleLogin: (credentials) => {
-  //     handleMessage(null);
-  //     var data = JSON.stringify({
-  //       //email: "matmar@loremipsummail.com",
-  //       //password: "noweHaslo12",
-  //       email: "admin@trash-mail.com",
-  //       password: "admin",
-  //     });
-  //     var config = {
-  //       method: "post",
-  //       url: "http://" + serwer + "/auth/login",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       data: data,
-  //     };
-  //     console.log(data);
-  //     axios(config)
-  //       .then((response) => {
-  //         try {
-  //           const result = response.data;
-  //           const { message, status, data } = result;
-  //           console.log("dostalem");
-  //           // console.log(response.status);
-  //           if (response.status == "200") {
-  //             console.log("zalogowano");
-  //             //navigation.navigate("Welcome");
-  //             setUserToken("token");
-  //           } else {
-  //             console.log("nie zalogowano");
-  //           }
-  //         } catch (error) {
-  //           console.log(error);
-  //         }
-  //       })
-  //       .catch((error) => {
-  //         console.log(error.response.data.msg);
-  //         if (error.response.data.msg == "account not active") {
-  //           handleMessage("Konto nieaktywne");
-  //         } else handleMessage("Podany email i/lub hasło są nieprawidłowe.");
-  //       });
-  //   },
-
-  //   handleLogout: (credentials) => {
-  //     const url = "http://" + serwer + "/auth/logout";
-
-  //     axios
-  //       .get(url)
-  //       .then((response) => {
-  //         const result = response.data;
-  //         const { message, status, data } = result;
-  //         if (response.status == "200") {
-  //           console.log("wylogowano");
-  //         }
-  //       })
-  //       .catch((error) => {
-  //         //setSubmitting(false);
-  //         console.log(error.response);
-  //       });
-  //   },
-  // }),
-  // []
-  // )
 
   //sprawdzanie po wlaczeniu aplikacji czy uzytkownik jest zalogowany
   React.useEffect(() => {
@@ -152,14 +50,14 @@ const RootStack = () => {
             console.log(result.email);
             //navigation.replace('Nawigator', {userData: result});
             //setInitialRouteName("");
-            setUser(result);
+            setUserData(result);
           }
         })
         .catch((error) => {
           //console.log(error);
           console.log("Nie jesteś zalogowany");
           //navigation.replace('Nawigator', {userData: guestData});
-          setUser(guestData);
+          setUserData(guestData);
         })
         .finally(() => setIsLoading(false));
     };
@@ -167,6 +65,7 @@ const RootStack = () => {
   }, []);
 
   return (
+    <userDataContext.Provider value={userDataContextValues}>
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
@@ -190,7 +89,7 @@ const RootStack = () => {
               options={{ headerShown: false }}
               name="Nawigator"
               component={DrawerComponent}
-              initialParams={{ userData: user }}
+              //initialParams={{ userData: user }}
             />
             <Stack.Screen
               options={{
@@ -252,6 +151,7 @@ const RootStack = () => {
           /> */}
       </Stack.Navigator>
     </NavigationContainer>
+    </userDataContext.Provider>
   );
 };
 export default RootStack;
