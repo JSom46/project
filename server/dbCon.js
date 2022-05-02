@@ -150,6 +150,8 @@ con.serialize(() => {
         user_id INT,
         filename TEXT,
         filepath TEXT,
+        thumbpath TEXT,
+        
         mimetype TEXT,
         CONSTRAINT Images_FK_message_id FOREIGN KEY (message_id) REFERENCES ChatMessages (message_id)
         CONSTRAINT Images_FK_user_id FOREIGN KEY (user_id) REFERENCES users (id)

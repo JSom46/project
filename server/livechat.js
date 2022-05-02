@@ -5,9 +5,11 @@ const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const app = express();
+const sharp = require('sharp');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const httpServer = createServer(app);
+
 
 const con = require('./dbCon.js');
 const { resourceUsage } = require('process');
@@ -356,10 +358,37 @@ io.on("connection", function (socket) {
         ++lastImage;
         ++lastMessage;
 
-        io.to(chatroom).emit('chat-img', lastMessage, chatroom, socket.userName, curDate, lastImage, imgName, imgType);
-
         const imgFileName = chatroom + '-' + lastImage + '!' + imgName;
         const imgFilePath = path.resolve(__dirname, 'chatpictures', imgFileName);
+
+        const thumbName = chatroom + '-' + lastImage + 'thumb!' + imgName;
+        const thumbPath = path.resolve(__dirname, 'chatthumbs', imgFileName)
+
+       var thumbBuff;
+       sharp(imgData)
+       .resize({height: process.env.THUMBHEIGHT})
+       .toBuffer()
+       .then(data =>{
+            io.to(chatroom).emit('chat-img', lastMessage, chatroom, socket.userName, curDate, lastImage, imgName, imgType, data);
+            try{
+                const writer = fs.createWriteStream(thumbPath);
+                writer.write(data);
+                writer.end();
+                writer.on('finish', () => {
+                    // zapis do pliku na dysku zokończony
+                    console.log('Thumbnail saved to: ', thumbPath);
+                });
+                }
+                catch (error) {
+                    console.debug(error)
+                }   
+            })
+       .catch(err => {
+        io.to(chatroom).emit('chat-img', lastMessage, chatroom, socket.userName, curDate, lastImage, imgName, imgType, null);
+        console.debug(err);
+        })
+
+        
 
         try {
             const writer = fs.createWriteStream(imgFilePath);
