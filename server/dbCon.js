@@ -124,8 +124,8 @@ con.serialize(() => {
         )`,
         (err) => {
             if (err) {
-                console.debug(err)
-                throw err
+                log.error(err);
+                throw err;
             }
         });
     
@@ -139,8 +139,8 @@ con.serialize(() => {
         )`,
         (err) => {
             if (err) {
-                console.debug(err)
-                throw err
+                log.error(err);
+                throw err;
             }
         });
 
@@ -158,14 +158,14 @@ con.serialize(() => {
         )`,
         (err) => {
             if (err) {
-                console.debug(err)
-                throw err
+                log.error(err);
+                throw err;
             }
         });
 });
 
 
-// usuwanie przedawnionych notyfikacji i dezaktywowanie przeterminowanych ogłoszeni w okreslonym interwale
+// usuwanie przedawnionych notyfikacji i dezaktywowanie przeterminowanych ogłoszen w okreslonym interwale
 setInterval(() => {
     //usuniecie przedawnionych notyfikacji
     con.run('DELETE FROM notifications WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.NOTIFICATION_TTL), (err) => {
@@ -175,7 +175,7 @@ setInterval(() => {
         }
     });
 
-    //dezaktywacja przeterminowanych ogloszen
+    /*//dezaktywacja przeterminowanych ogloszen
     con.run('UPDATE anons SET is_active = 0 WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.ANON_TTL), (err) => {
         if(err){
             log.error('deactivating expired anons: ', err);
@@ -189,7 +189,7 @@ setInterval(() => {
             log.error('deleting anons inactive for too long: ', err);
             throw err;
         }
-    });
+    });*/
 }, parseInt(process.env.INTERVAL));
 
 

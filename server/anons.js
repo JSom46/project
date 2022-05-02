@@ -1,4 +1,5 @@
 "use strict";
+
 require('dotenv').config();
 const express = require('express');
 const router = express.Router();
@@ -8,6 +9,16 @@ const path = require('path');
 const distance = require('./distance.js');
 const types = require('./db/types.json').types;
 const log = require('loglevel');
+
+const mailOptions = require('./mailOptions');
+const nodemailer = require("nodemailer");
+const transporter = nodemailer.createTransport({
+    service: process.env.EMAIL_SERVICE,
+    auth: {
+        user: process.env.EMAIL_ADDR,
+        pass: process.env.EMAIL_PASSWD
+    }
+});
 
 let date = BigInt(Date.now());
 // funkcja generujaca unikalne nazwy dla plikow
@@ -104,7 +115,7 @@ router.get('/messages', authorize);
 //color - umaszczenie   - niewymagane
 //breed - rasa - niewymagane
 router.post('/', upload.array('pictures'), (req, res) => {
-    log.trace('/ : post\nfiles:', req.files, '\nbody:', req.body);
+    log.debug('/ : post\nfiles:', req.files, '\nbody:', req.body);
     //brakuje ktoregos z niezbednych pol lub ktores z pol zawiera niepoprawne dane - ogloszenie nie moze zostac dodane
     if(!(req.body.title && req.body.description && req.body.category && req.body.lat && req.body.lng && req.body.type) || 
     (req.body.category != 0 && req.body.category != 1) || isNaN(parseFloat(req.body.lat)) || isNaN(parseFloat(req.body.lng))){
@@ -112,7 +123,7 @@ router.post('/', upload.array('pictures'), (req, res) => {
         req.files.forEach((e) => {
             fs.unlink('./pictures/' + e.filename, (err) => {
                 if(err){
-                    log.error('unlink: ', err);
+                    log.debug('unlink: ', err);
                 }          
             });
         });
@@ -152,7 +163,7 @@ router.post('/', upload.array('pictures'), (req, res) => {
             req.files.forEach((e) => {
                 fs.unlink('./pictures/' + e.filename, (err) => {
                     if(err){
-                        log.error('unlink: ', err);
+                        log.debug('unlink: ', err);
                     } 
                 });
             });
@@ -225,7 +236,7 @@ router.get('/', (req, res) => {
 // w przeciwnym wypadku do kazdego ogloszenia jest dodana informacja o odleglosci od punktu (lat, lng)
 // jesli dodatkowo zdefiniowano rad i jest on wiekszy od 0, to zwracane sa tylko ogloszenia oddalone od punktu (lat, lng) o nie wiecej niz rad kilometrow 
 router.get('/list', (req, res) => {
-    log.trace(req.query);
+    log.debug(req.query);
     // filtry do zapytania
     let filters = [];
     // wartosci filtrow
@@ -322,14 +333,14 @@ router.get('/list', (req, res) => {
 //aktualizuje informacje o ogloszeniu o podanym id - użytkownik musi być zalogowany i byc autorem ogloszenia
 //req = {id : int, title : string, description : string, category : int, pictures : file[], lat : float, lng : float, type : string, coat : string, color : string, breed : string}
 router.put('/', upload.array('pictures'), (req, res) => {
-    log.trace('/ : put\nfiles:', req.files, '\nbody:', req.body);
+    log.debug('/ : put\nfiles:', req.files, '\nbody:', req.body);
     //brakuje ktoregos z niezbednych pol lub ktores z pol zawiera niepoprawne dane - ogloszenie nie moze zostac zaktualizowane
     if(!(req.body.id && req.body.title && req.body.description && req.body.category && req.body.lat && req.body.lng && req.body.type) || 
     (req.body.category != 0 && req.body.category != 1) || isNaN(parseFloat(req.body.lat)) || isNaN(parseFloat(req.body.lng))){
         req.files.forEach((e) => {
             fs.unlink('./pictures/' + e.filename, (err) => {
                 if(err){
-                    log.error('unlink: ', err);
+                    log.debug('unlink: ', err);
                 } 
             });
         });
@@ -387,7 +398,7 @@ router.put('/', upload.array('pictures'), (req, res) => {
                 req.files.filename.forEach((e) => {
                     fs.unlink('./pictures/' + e.filename, (err) => {
                         if(err){
-                            log.error('unlink: ', err);
+                            log.debug('unlink: ', err);
                         } 
                     });
                 });
@@ -399,7 +410,7 @@ router.put('/', upload.array('pictures'), (req, res) => {
                 row.images.split('#').forEach((e) => {
                     fs.unlink('./pictures/' + e, (err) => {
                         if(err){
-                            log.error('unlink: ', err);
+                            log.debug('unlink: ', err);
                         } 
                     });
                 });
@@ -448,7 +459,7 @@ router.delete('/', (req, res) => {
             row.images.split('#').forEach((e) => {
                 fs.unlink('./pictures/' + e, (err) => {
                     if(err){
-                        log.error('unlink: ', err);
+                        log.debug('unlink: ', err);
                     } 
                 });
             });
@@ -630,35 +641,50 @@ router.post('/notifications', singleUpload.single('picture'), (req, res) => {
         if(req.file){
             fs.unlink('./pictures/' + req.file.filename, (err) => {
                 if(err){
-                    log.error('unlink: ', err);
+                    log.debug('unlink: ', err);
                 } 
             });
         }       
         return res.status(400).json({msg: 'required field is empty/contain invalid data'});
     }
 
-    // dodanie notyfikacji
-    con.run(`INSERT INTO notifications(
+    // dodanie notyfikacji i pobranie adresu email autora ogloszenia
+    con.get(`INSERT INTO notifications(
                 anon_id, 
                 image, 
                 lat, 
                 lng, 
                 is_new, 
                 create_date) 
-            VALUES(?, ?, ?, ?, 1, (SELECT strftime ("%s", "now")));`, 
-    req.body.anon_id, (req.file ? req.file.filename : ''), req.body.lat, req.body.lng, (err) => {
+            VALUES(?, ?, ?, ?, 1, (SELECT strftime ("%s", "now")))
+            RETURNING 
+                (SELECT email FROM users WHERE id = (SELECT author_id FROM anons WHERE id = ?)) email;`, 
+    req.body.anon_id, (req.file ? req.file.filename : ''), req.body.lat, req.body.lng, req.body.anon_id, (err, row) => {
         if(err){
             // dodanie notyfikacji sie nie udalo - usuwanie przeslanych zdjec
             if(req.file){
                 fs.unlink('./pictures/' + req.file.filename, (err) => {
                     if(err){
-                        log.error('unlink: ', err);
+                        log.debug('unlink: ', err);
                     } 
                 });
             }
             log.debug(err);
             return res.sendStatus(500);
         }
+
+        let mailOpt = mailOptions(
+            process.env.EMAIL_ADDR, 
+            row.email, 
+            'Ktoś widział twoje zwierzę', 
+            `Witaj!\n\nKtoś właśnie zgłosił, że widział zwierzę, które pasuje do opisu z twojego ogłoszenia.\nWejdź na stronę ${process.env.WEB_APP_ROOT_URI} i zaloguj się, aby zobaczyć zgłoszenie.`);
+        
+        transporter.sendMail(mailOpt, (err, info) => {
+            if(err){
+                log.debug(err);
+            }
+        });
+
         return res.sendStatus(200);
     });
 });

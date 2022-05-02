@@ -50,7 +50,7 @@ router.post('/signup', (req, res) => {
     //sprawdzenie, czy mail nie jest już w uzyciu
     con.get(`SELECT "x" FROM users WHERE email = ?;`, req.body.email, (err, row) => {
         if(err){
-            log.trace(err);
+            log.debug(err);
             return res.sendStatus(500);
         }
         if(row){
@@ -64,7 +64,7 @@ router.post('/signup', (req, res) => {
         //haslo jest dostatecznie silne, zaszyfruj je
         bcrypt.hash(req.body.password, 10, (err, hash) => {
             if(err){
-                log.trace(err);
+                log.debug(err);
                 return res.sendStatus(500);
             }
 
@@ -98,7 +98,7 @@ router.post('/signup', (req, res) => {
                         is_admin) 
                     VALUES (?, ?, ?, ?, 0, 1, 0);`, req.body.login, hash, req.body.email, code, (err, result) => {
                 if(err){
-                    log.trace(err);
+                    log.debug(err);
                     return res.sendStatus(500);
                 }
 
@@ -120,7 +120,7 @@ router.post('/activate', (req, res) => {
     //aktywuj konto
     con.run(`UPDATE users SET is_activated = 1 WHERE is_activated = 0 AND activation_code = ?`, req.body.code, (err, info) => {
         if(err){
-            log.trace(err);
+            log.debug(err);
             return res.sendStatus(500);
         }
         res.sendStatus(200);
@@ -137,7 +137,7 @@ router.post('/login', (req, res) => {
     //pobranie informacji o koncie z bazy danych
     con.get(`SELECT * FROM users WHERE email = ?;`, req.body.email, (err, row) => {
         if(err){
-            log.trace(err);
+            log.debug(err);
             return res.sendStatus(500);
         }
         if(!row){
@@ -154,7 +154,7 @@ router.post('/login', (req, res) => {
         }
         bcrypt.compare(req.body.password, row.password, (err, match) => {
             if(err){
-                log.trace(err);
+                log.debug(err);
                 return res.sendStatus(500);
             }
             if(!match){
@@ -190,7 +190,7 @@ router.get('/google', async (req, res) => {
     //sprawdzenie czy konto juz istnieje
     con.get(`SELECT * FROM users WHERE email = ?;`, user.email, (err, row) => {
         if(err){
-            log.trace(err);
+            log.debug(err);
             return res.sendStatus(500);
         }
         //konto nie istnieje - utworzenie nowego konta przy pomocy pobranych danych
@@ -204,7 +204,7 @@ router.get('/google', async (req, res) => {
                     VALUES (?, ?, ?, 1, 0, 0)
                     RETURNING id;`, user.name, user.id, user.email, (err, result) => {
                 if(err){
-                    log.trace(err);
+                    log.debug(err);
                     return res.sendStatus(500);
                 }
 
@@ -254,7 +254,7 @@ router.get('/facebook', async (req, res) => {
     //sprawdzenie, czy konto istnieje
     con.get('SELECT * FROM users WHERE email = ?;', user.email, (err, row) => {
         if(err){
-            log.trace(err);
+            log.debug(err);
             return res.sendStatus(500);
         }
         //konto nie istnieje - utworzenie nowego konta przy pomocy pobranych danych
@@ -269,7 +269,7 @@ router.get('/facebook', async (req, res) => {
                     VALUES(?, ?, ?, 1, 0, 0)
                     RETURNING id;`, user.name, user.id, user.email, (err, result) => {
                 if(err){
-                    log.trace(err);
+                    log.debug(err);
                     return res.sendStatus(500);
                 }
 
@@ -337,7 +337,7 @@ router.get('/user', (req, res) => {
                 WHERE 
                     id = ?;`, req.query.id, (err, row) => {
             if(err){
-                log.trace(err);
+                log.debug(err);
                 return res.sendStatus(500);
             }
             if(!row){
@@ -374,7 +374,7 @@ router.post('/requestPasswordChange', (req, res)=> {
             WHERE 
                 email = ?;`, req.body.email, (err, row) => {
         if(err){
-            log.trace(err);
+            log.debug(err);
             return res.sendStatus(500);
         }
         if(!row){
@@ -386,7 +386,7 @@ router.post('/requestPasswordChange', (req, res)=> {
         //zaszyfruj token
         bcrypt.hash(code, 10, (err, hash) => {
             if(err){
-                log.trace(err);
+                log.debug(err);
                 return res.sendStatus(500);
             }
             con.run(`UPDATE 
@@ -397,7 +397,7 @@ router.post('/requestPasswordChange', (req, res)=> {
                     WHERE 
                         id = ?;`, hash, row.id, (err) => {
                 if(err){
-                    log.trace(err);
+                    log.debug(err);
                     return res.sendStatus(500);
                 }    
                 let mailOpt = mailOptions(
@@ -437,7 +437,7 @@ router.patch('/passwordChange', (req, res) => {
             WHERE 
                 id = ? AND password_token_expiration > (? / 1000);`, req.body.id, Date.now(), (err, row) => {
         if(err){
-            log.trace(err);
+            log.debug(err);
             return res.sendStatus(500);
         }
         if(!row){
@@ -447,7 +447,7 @@ router.patch('/passwordChange', (req, res) => {
         // porownaj przeslany token z tym w bazie danych
         bcrypt.compare(req.body.token, row.password_change_token, (err, match) => {
             if(err){
-                log.trace(err);
+                log.debug(err);
                 return res.sendStatus(500);
             }
             if(!match){
@@ -457,7 +457,7 @@ router.patch('/passwordChange', (req, res) => {
             // token jest prawidlowy, zaszyfruj nowe haslo
             bcrypt.hash(req.body.password, 10, (err, hash) => {
                 if(err){
-                    log.trace(err);
+                    log.debug(err);
                     return res.sendStatus(500);
                 }
                 // zmien haslo w bazie i uniewaznij token
@@ -469,7 +469,7 @@ router.patch('/passwordChange', (req, res) => {
                         WHERE 
                             id = ?;`, hash, req.body.id, (err) => {
                     if(err){
-                        log.trace(err);
+                        log.debug(err);
                         return res.sendStatus(500);
                     }
                     return res.sendStatus(200);
@@ -541,7 +541,7 @@ router.patch('/user', (req, res) => {
             WHERE 
                 id = ?;`, req.body.new_login, req.session.user_id, (err) => {
         if(err){
-            log.trace(err);
+            log.debug(err);
             return res.sendStatus(500);
         }
         req.session.login = req.body.new_login;

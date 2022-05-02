@@ -10,6 +10,7 @@ log.setLevel((new Set(['trace', 'debug', 'info', 'warn', 'error', 'silent'])).ha
 const authRoute = require('./auth.js');
 const anonsRoute = require('./anons.js');
 const apiDocs = require('./api-docs.js');
+const httpServer = require('./livechat.js');
 
 const cors = require('cors');
 const sqliteStoreFactory = require('express-session-sqlite').default;
@@ -23,7 +24,6 @@ app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(session({
     store: new SqliteStore({
         driver: sqlite3.Database,
-        //path: './db/sessiondb.db',
         path: ':memory:',
         ttl: 12 * 60 * 60 * 1000,
     }),
@@ -47,12 +47,10 @@ app.use('/auth', authRoute);
 app.use('/anons', anonsRoute);
 app.use('/api-docs', apiDocs);
 
-const httpServer = require('./livechat.js');
-
 httpServer.listen(2300, () => {
 	log.info('Chat server started\nport: 2300');
 });
 
 app.listen(2400, () => {
-  log.info('Server started\nport: 2400');
+    log.info('Server started\nport: 2400');
 });
