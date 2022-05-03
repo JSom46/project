@@ -3,7 +3,7 @@
 const axios = require('axios');
 
 exports.getFacebookAuthURL = function getFacebookAuthURL() {
-    return `https://www.facebook.com/dialog/oauth?client_id=${process.env.FB_CLIENT_ID}&redirect_uri=http://localhost:2400/auth/facebook&scope=email,public_profile`;
+    return `https://www.facebook.com/dialog/oauth?client_id=${process.env.FB_CLIENT_ID}&redirect_uri=${process.env.SERVER_ROOT_URI}/auth/facebook&scope=email,public_profile`;
 }
 
 exports.getFacebookUser = async function getFacebookUser(code) {

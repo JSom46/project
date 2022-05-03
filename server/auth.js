@@ -17,7 +17,9 @@ const router = express.Router();
 
 const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE,
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
         user: process.env.EMAIL_ADDR,
         pass: process.env.EMAIL_PASSWD
@@ -34,7 +36,6 @@ const authorize = (req, res, next) => {
 }
 
 // klient musi być zalogowany, by móc korzystać z poniższych endpointow
-router.patch('/user/password', authorize);
 router.patch('/user', authorize);
 
 //rejestracja req = {login : string, password : string, email : string}
@@ -103,7 +104,11 @@ router.post('/signup', (req, res) => {
                 }
 
                 //wyslij maila z kodem aktywacyjnym
-                transporter.sendMail(mailOpt, (err, info) => {});
+                transporter.sendMail(mailOpt, (err, info) => {
+                    if(err){
+                        log.debug(err);
+                    }
+                });
                 res.status(201).json({msg: 'account created'});
             });
         });
@@ -479,48 +484,6 @@ router.patch('/passwordChange', (req, res) => {
     });
 });
 
-/*
-//aktualizuje haslo uzytkownika, na ktorego zalogowany jest klient - wymaga zalogowania
-//req.body = {password : string, new_password : string}
-//password - aktualne haslo uzytkownika
-//new_password - nowe haslo uzytkownika
-router.patch('/user/password', (req, res) => {
-    if(!(req.body.password && req.body.new_password)){
-        //nie podano wymaganych danych
-        return res.status(400).json({msg: 'required fields empty'});
-    }
-    if(!passwordValidator(req.body.new_password).isValid){
-        //nowe haslo jest za slabe
-        return res.status(400).json({msg: 'password too weak', err: passwdValidation.errors});
-    }
-    //pobranie hasla uzytkowanika z bazy danych
-    con.get('SELECT password FROM users WHERE id = ?;', req.session.user_id, (err, row) => {
-        if(err){
-            return res.sendStatus(500);
-        }      
-        bcrypt.compare(req.body.password, row.password, (err, match) => {
-            if(err){
-                return res.sendStatus(500);
-            }
-            if(!match){
-                //niepoprawne haslo
-                return res.status(400).json({msg: 'invalid password'});
-            }
-            bcrypt.hash(req.body.new_password, 10, (err, hash) => {
-                if(err){
-                    return res.sendStatus(500);
-                }
-                con.run('UPDATE users SET password = ? WHERE id = ?', hash, req.session.user_id, (err) => {
-                    if(err){
-                        return res.sendStatus(500);
-                    }
-                    return res.sendStatus(200);
-                });
-            });   
-        });
-    });
-});
-*/
 
 //aktualizuje dane, inne niz haslo, uzytkownika, na ktorego zalogowany jest klient - wymaga zalogowania
 //req.body = {new_login : string}

@@ -43,7 +43,7 @@ var userSocketMap = new Map();
 
 const io = new Server(httpServer, {
     cors: {
-        origin: process.env.WEB_APP_ROOT_URI,
+        origin: true,
         credentials: true
       }
 });
@@ -478,4 +478,4 @@ io.on("connection", function (socket) {
 });
 
 
-module.exports = httpServer;
+module.exports = {httpServer: httpServer, app: app};
