@@ -165,7 +165,7 @@ io.on("connection", function (socket) {
             SELECT anons_id, chat_id, user_id
             FROM ChatUsers WHERE user_id = ?)
             SELECT cm.message_id, cm.chat_id, users.login, cm.message_date,
-                cm.message_text, ci.image_id, ci.thumbpath
+                cm.message_text, ci.image_id, ci.mimetype, ci.thumbpath
             FROM ChatMessages cm JOIN users ON cm.user_id = users.id
                 JOIN Chats ch ON ch.chat_id = cm.chat_id
                 LEFT JOIN ChatImages ci ON ci.message_id = cm.message_id
@@ -173,20 +173,28 @@ io.on("connection", function (socket) {
             ORDER BY cm.message_date ASC`, socket.userId, chatId,
                 async (err, result) => {
                     if (!err) {
+                        console.debug(result);
+
+                        let msgs_list = [];
                         for (let chat of result) {
                             if (chat.thumbpath) {
-                                const thumbpath = chat.thumbpath;
-                                delete chat.thumbpath;
-
                                 try {
-                                    chat.thumbnail = await fspromise.readFile(thumbpath);
+                                    msgs_list.push({message_id: chat.message_id, chat_id: chat.chat_id, login: chat.login,
+                                        message_date: chat.message_date, message_text: chat.message_text,
+                                        image_id: chat.image_id, mimetype: chat.mimetype, 
+                                        thumbnail: await fspromise.readFile(chat.thumbpath)});
                                 }
                                 catch (e) {
                                     console.debug(e);
                                 }
                             }
+                            else {
+                                msgs_list.push({message_id: chat.message_id, chat_id: chat.chat_id, login: chat.login,
+                                    message_date: chat.message_date, message_text: chat.message_text,
+                                    image_id: null});
+                            }
                         }
-                        socket.emit('chat-messages', result.length, result);
+                        socket.emit('chat-messages', msgs_list.length, msgs_list);
                     } else {
                         console.debug(err);
                     }
@@ -375,6 +383,9 @@ io.on("connection", function (socket) {
         ++lastImage;
         ++lastMessage;
 
+        const thumbName = chatroom + '-' + lastImage + '!thumb!' + imgName;
+        const thumbPath = path.resolve(__dirname, process.env.CHATTHUMBS, thumbName)
+
         sharp(imgData)
             .resize({height: THUMBHEIGHT})
             .toBuffer()
@@ -382,8 +393,6 @@ io.on("connection", function (socket) {
                 io.to(chatroom).emit('chat-img', lastMessage, chatroom, socket.userName, curDate
                       , lastImage, imgName, imgType, data);
                 try {
-                    const thumbName = chatroom + '-' + lastImage + '!thumb!' + imgName;
-                    const thumbPath = path.resolve(__dirname, process.env.CHATTHUMBS, thumbName)
                    
                     const writer = fs.createWriteStream(thumbPath);
                     writer.write(data);
@@ -425,8 +434,8 @@ io.on("connection", function (socket) {
                  (${lastMessage}, ${chatroom}, ${socket.userId}, ${curDate})`, (err) => {
                     if (err) { console.debug(err); }
                  });
-        con.run(`INSERT INTO ChatImages (image_id, message_id, user_id, filename, filepath, mimetype) VALUES
-                 (${lastImage}, ${lastMessage}, ${socket.userId}, "${imgFileName}", "${imgFilePath}", "${imgType}");`,
+        con.run(`INSERT INTO ChatImages (image_id, message_id, user_id, filename, filepath, thumbpath, mimetype) VALUES
+                 (${lastImage}, ${lastMessage}, ${socket.userId}, "${imgFileName}", "${imgFilePath}", "${thumbPath}", "${imgType}");`,
             (err) => {
                 if (err) { console.debug(err); }
             });
