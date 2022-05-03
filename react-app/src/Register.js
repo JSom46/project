@@ -14,7 +14,7 @@ import { Grid } from '@mui/material';
 async function registerUser(credentials) {
   credentials.password = credentials.password.value;
   // console.log(credentials);
-    return fetch('http://localhost:2400/auth/signup', {
+    return fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/auth/signup', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

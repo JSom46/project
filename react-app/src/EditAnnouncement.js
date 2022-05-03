@@ -111,7 +111,7 @@ export default function EditAnnoucment(props) {
                         let nameguess = imname.slice(imname.length - 3);
                         if (nameguess == "jpg") imtype += "jpeg";
                         else imtype += "png";
-                        const response = await (fetch("http://localhost:2400/anons/photo?name=" + imname));
+                        const response = await (fetch(process.env.REACT_APP_SERVER_ROOT_URL + imname));
                         const blob = await (response.blob());
                         const file = new File([blob], imname, { type: imtype });
                         kformData.append(i, file);
@@ -288,7 +288,7 @@ export default function EditAnnoucment(props) {
         formData.append('color', color);
         formData.append('breed', breed);
         try {
-            const response = await fetch('http://localhost:2400/anons/', {
+            const response = await fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/anons/', {
                 method: 'PUT',
                 credentials: 'include',
                 body: formData
@@ -309,7 +309,7 @@ export default function EditAnnoucment(props) {
 
     useEffect(() => {
         const fetchTypes = async (type) => {
-            let url = 'http://localhost:2400/anons/types';
+            let url = process.env.REACT_APP_SERVER_ROOT_URL + '/anons/types';
             try {
                 const response = await fetch(url, {
                     method: 'GET',

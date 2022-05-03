@@ -5,7 +5,7 @@ import { CircularProgress } from '@mui/material';
 
 
 async function activateAccount(userData) {
-  const data = fetch('http://localhost:2400/auth/activate', {
+  const data = fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/auth/activate', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

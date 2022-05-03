@@ -14,7 +14,7 @@ export default function MapTesting() {
     useEffect(() => {
         const fetchData = async () => {
             let pageToFetch = 1;
-            let url_list = 'http://localhost:2400/anons/list?page=' + (pageToFetch);
+            let url_list = process.env.REACT_APP_SERVER_ROOT_URL + '/anons/list?page=' + (pageToFetch);
             try {
                 const response_list = await fetch(url_list, {
                     method: 'GET',
@@ -24,7 +24,7 @@ export default function MapTesting() {
                 //console.log(json_list);
                 const tmp = [];
                 json_list.list.forEach(async el => {
-                    let url = 'http://localhost:2400/anons?id=' + el.id;
+                    let url = process.env.REACT_APP_SERVER_ROOT_URL + '/anons?id=' + el.id;
                     const response = await fetch(url, {
                         method: 'GET',
                         credentials: 'include'

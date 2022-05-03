@@ -102,7 +102,7 @@ export default function Dashboard(props) {
 
     const fetchData = async () => {
       //console.log("FetchData");
-      let url = 'http://localhost:2400/anons/list';
+      let url = process.env.REACT_APP_SERVER_ROOT_URL + '/anons/list';
 
       //apply filters
       let params = 0;
@@ -160,7 +160,7 @@ export default function Dashboard(props) {
 
   //fetch announcement data
   const fetchAnnouncementData = async (id) => {
-    let url = 'http://localhost:2400/anons?id=' + id;
+    let url = process.env.REACT_APP_SERVER_ROOT_URL + '/anons?id=' + id;
     try {
       const response = await fetch(url, {
         method: 'GET',

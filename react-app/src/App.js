@@ -33,7 +33,7 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        await fetch('http://localhost:2400/auth/user', {
+        await fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/auth/user', {
           method: 'GET',
           credentials: 'include'
         }).then(response => {

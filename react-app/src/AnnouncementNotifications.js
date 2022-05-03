@@ -42,7 +42,7 @@ export default function AnnouncementNotifications(props) {
                                     {row.image === null ? <Typography variant='caption'>Brak zdjęcia</Typography>
                                         :
                                         <img
-                                            src={'http://localhost:2400/anons/photo?name=' + row.image}
+                                            src={process.env.REACT_APP_SERVER_ROOT_URL + '/anons/photo?name=' + row.image}
                                             style={{ width: "300px", height: "300px", objectFit: "cover", cursor: "pointer" }}
                                             alt={row.anon_id}
                                             onClick={handleImageClick}>

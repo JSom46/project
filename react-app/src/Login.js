@@ -19,13 +19,13 @@ import './login.css'
 function logout() {
   sessionStorage.clear();
   window.location.assign("/");
-  fetch('http://localhost:2400/auth/logout', {
+  fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/auth/logout', {
     credentials: 'include',
     method: 'GET',
   });
 }
 async function LoginGoogle() {
-  const data = await fetch('http://localhost:2400/auth/google/url?type=web', {
+  const data = await fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/auth/google/url?type=web', {
     method: 'GET',
     credentials: 'include'
   });
@@ -39,7 +39,7 @@ const LoginGoogleFunc = async e => {
   window.location.assign(response.url);
 }
 async function LoginFacebook() {
-  const data = await fetch('http://localhost:2400/auth/facebook/url?type=web', {
+  const data = await fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/auth/facebook/url?type=web', {
     method: 'GET',
     credentials: 'include'
   });
@@ -68,7 +68,7 @@ export default function Login(props) {
   async function loginUser(userData) {
     setLoading(true);
     try {
-      const data = await fetch('http://localhost:2400/auth/login', {
+      const data = await fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -107,7 +107,7 @@ export default function Login(props) {
   async function handleRequestPasswordChange() {
     setLoading(true);
     try {
-      fetch('http://localhost:2400/auth/requestPasswordChange', {
+      fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/auth/requestPasswordChange', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

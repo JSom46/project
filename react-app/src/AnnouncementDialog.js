@@ -99,7 +99,7 @@ export default function AnnouncementDialog(props) {
                                 <Grid item md={10} xs={16}>
                                     <Typography variant="subtitle1">Zdjęcia</Typography>
                                     {props.announcementData.images && props.announcementData.images.map((element) => (
-                                        <img style={{ width: "100px", height: "100px", objectFit: "cover", margin: 4 }} src={'http://localhost:2400/anons/photo?name=' + element}
+                                        <img style={{ width: "100px", height: "100px", objectFit: "cover", margin: 4 }} src={process.env.REACT_APP_SERVER_ROOT_URL + '/anons/photo?name=' + element}
                                             alt={props.announcementData.title} key={element} onClick={handleImageClick} />
                                     ))}
                                 </Grid>

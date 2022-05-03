@@ -253,7 +253,7 @@ export default function AddAnnoucment(props) {
     formData.append('color', color);
     formData.append('breed', breed);
     try {
-      const response = await fetch('http://localhost:2400/anons/', {
+      const response = await fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/anons/', {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -277,7 +277,7 @@ export default function AddAnnoucment(props) {
   //get types, breeds, etc.
   useEffect(() => {
     const fetchTypes = async () => {
-      let url = 'http://localhost:2400/anons/types';
+      let url = process.env.REACT_APP_SERVER_ROOT_URL + '/anons/types';
       try {
         const response = await fetch(url, {
           method: 'GET',

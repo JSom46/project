@@ -3,12 +3,13 @@ import io from 'socket.io-client';
 
 import { Typography } from '@mui/material';
 import { Divider } from '@mui/material';
-import { Button } from '@mui/material';
-import { Dialog } from '@mui/material';
+import { Button, IconButton } from '@mui/material';
+import { Dialog, DialogTitle, DialogActions } from '@mui/material';
 import { LinearProgress } from '@mui/material';
 import { Snackbar, Alert } from '@mui/material';
 
 import ImageIcon from '@mui/icons-material/Image';
+import ClearIcon from '@mui/icons-material/Clear';
 
 import styles from "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import {
@@ -27,6 +28,7 @@ export default function Chat(props) {
     const [socket, setSocket] = useState(null);
     const [connected, setConnected] = useState(false);
     const [authenticated, setAuthenticated] = useState(false);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [openImageDialog, setOpenImageDialog] = useState({ open: false });
     const [snackbarData, setSnackbarData] = useState({
         open: false,
@@ -38,9 +40,10 @@ export default function Chat(props) {
     const fileInput = React.useRef(null);
 
     const [header, setHeader] = useState(null);
-    const [chatId, setChatId] = useState(-1); 
-    const [createNewChat, setCreateNewChat] = useState(props?.id); 
-    
+    const [chatId, setChatId] = useState(-1);
+    const [chatDeleteId, setChatDeleteId] = useState(-1);
+    const [createNewChat, setCreateNewChat] = useState(props?.id);
+
     const [userChats, setUserChats] = useState([]);
     const [chatMessages, setChatMessages] = useState([]);
 
@@ -48,7 +51,7 @@ export default function Chat(props) {
 
     React.useEffect(() => {
         if (socket === null) {
-            const newSocket = io("http://localhost:2300");
+            const newSocket = io('http://localhost:2400');
             setSocket(newSocket);
             setSnackbarData({
                 open: true,
@@ -73,7 +76,7 @@ export default function Chat(props) {
             }
             if (connected && !authenticated) {
                 socket.on("auth-response", (status) => {
-                    if(status === -1) window.location.href = "/login";
+                    if (status === -1) window.location.href = "/login";
                     else {
                         setAuthenticated(true);
                         socket.emit('get-user-chats');
@@ -116,7 +119,7 @@ export default function Chat(props) {
                     setUserChats(userChats);
                 });
                 socket.on("chat-messages", (count, chatMsg) => {
-                    // console.log(chatMsg);
+                    console.log(chatMsg);
                     setChatMessages(chatMsg);
                 });
                 socket.on("chat-msg", (message_id, chat_id, username, datatime, message) => {
@@ -136,7 +139,7 @@ export default function Chat(props) {
                     // console.log(msg);
                     if (chat_id === chatId) setChatMessages((prev) => [...prev, msg])
                 });
-                socket.on("chat-img", (image_id, chat_id, username, datetime, lastImage, img_name, img_type) => {
+                socket.on("chat-img", (image_id, chat_id, username, datetime, lastImage, img_name, img_type, data) => {
                     // console.log(image_id);
                     // console.log(chat_id);
                     // console.log(username);
@@ -150,6 +153,8 @@ export default function Chat(props) {
                         image_id: lastImage,
                         login: username,
                         message_date: datetime,
+                        mimetype: img_type,
+                        thumbnail: data
                     }
                     if (chat_id === chatId) setChatMessages((prev) => [...prev, msg])
                 });
@@ -230,6 +235,11 @@ export default function Chat(props) {
                                         <Typography variant="caption">{"Wszystkich wiadomości: " + item.AllMsgs}</Typography>
                                     } */}
                                 </Conversation.Content>
+                                <Conversation.Operations>
+                                    <IconButton onClick={(e) => { e.stopPropagation(); setOpenDeleteDialog(true); setChatDeleteId(item.chat_id) }} >
+                                        <ClearIcon />
+                                    </IconButton>
+                                </Conversation.Operations>
                             </Conversation>
                         ))}
                     </ConversationList>
@@ -251,14 +261,19 @@ export default function Chat(props) {
                                 }}>
                                 {item.image_id !== null ?
                                     <Message.CustomContent>
-                                        <Button
+                                        <img
+                                            src={URL.createObjectURL(new Blob([item.thumbnail], { type: item.mimetype }))}
+                                            onClick={() => { setOpenImageDialog({ open: true, src: null }); socket.emit("get-image", item.image_id) }}
+                                            style={{ borderRadius: "5%", cursor: "pointer" }}
+                                        />
+                                        {/* <Button
                                             onClick={() => { setOpenImageDialog({ open: true, src: null }); socket.emit("get-image", item.image_id) }}
                                             color="inherit"
                                             size="small"
-                                            endIcon={<ImageIcon/>}
+                                            endIcon={<ImageIcon />}
                                         >
                                             ZDJĘCIE
-                                        </Button>
+                                        </Button> */}
                                     </Message.CustomContent> : null}
                                 {/* <Message.Header>{item.login}</Message.Header> */}
                                 <Message.Footer>{new Date(item.message_date).toLocaleString('pl-PL')}</Message.Footer>
@@ -290,6 +305,13 @@ export default function Chat(props) {
                     {snackbarData.message}
                 </Alert>
             </Snackbar>
+            <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)} fullWidth>
+                <DialogTitle>Czy na pewno chcesz usunąć ten czat?</DialogTitle>
+                <DialogActions>
+                    <Button onClick={() => setOpenDeleteDialog(false)}>Anuluj</Button>
+                    <Button color='error' onClick={() => /*socket.emit("", chatDeleteId)*/ console.log(chatDeleteId)}>Usuń</Button>
+                </DialogActions>
+            </Dialog>
         </div>
     )
 }

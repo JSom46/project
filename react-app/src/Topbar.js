@@ -52,7 +52,7 @@ export default function MenuAppBar(props) {
   React.useEffect(() => {
     function fetchNotifications() {
       try {
-        fetch('http://localhost:2400/anons/notifications/count', {
+        fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/anons/notifications/count', {
           method: 'GET',
           credentials: 'include'
         }).then(response => {
@@ -78,7 +78,7 @@ export default function MenuAppBar(props) {
   function logout() {
     sessionStorage.clear();
     window.location.assign("/");
-    fetch('http://localhost:2400/auth/logout', {
+    fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/auth/logout', {
       credentials: 'include',
       method: 'GET',
     });

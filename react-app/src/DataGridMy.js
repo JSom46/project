@@ -64,7 +64,7 @@ export default function DataGridMy() {
     useEffect(() => {
         const fetchData = async () => {
             setData([]);
-            let url = 'http://localhost:2400/anons/my';
+            let url = process.env.REACT_APP_SERVER_ROOT_URL + '/anons/my';
             try {
                 const response = await fetch(url, {
                     method: 'GET',
@@ -97,7 +97,7 @@ export default function DataGridMy() {
         fetchData();
     }, [reload]);
     const fetchAnnouncementData = async (id) => {
-        let url = 'http://localhost:2400/anons?id=' + id;
+        let url = process.env.REACT_APP_SERVER_ROOT_URL + '/anons?id=' + id;
         try {
             const response = await fetch(url, {
                 method: 'GET',
@@ -110,7 +110,7 @@ export default function DataGridMy() {
         }
     };
     const fetchNotificationsData = async (id) => {
-        let url = 'http://localhost:2400/anons/notifications?id=' + id;
+        let url = process.env.REACT_APP_SERVER_ROOT_URL + '/anons/notifications?id=' + id;
         setLoading(true);
         try {
             const response = await fetch(url, {
@@ -126,7 +126,7 @@ export default function DataGridMy() {
         }
     };
     // const fetchNotificationsData = async (id) => {
-    //     let url = 'http://localhost:2400/notifications?id=' + id;
+    //     let url = process.env.REACT_APP_SERVER_ROOT_URL + '/notifications?id=' + id;
     //     try {
     //         const response = await fetch(url, {
     //             method: 'GET',
@@ -151,7 +151,7 @@ export default function DataGridMy() {
     }
     async function deleteAnnouncement(announcementData) {
         try {
-            const response = await fetch('http://localhost:2400/anons/', {
+            const response = await fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/anons/', {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
@@ -355,7 +355,7 @@ export default function DataGridMy() {
                                     <span>
                                         <Typography variant="subtitle1">Zdjęcia</Typography>
                                         {announcementData.images && announcementData.images.map((element) => (
-                                            <img style={{ width: "100px", height: "100px", objectFit: "cover", marginRight: 2, marginBottom: 2 }} src={'http://localhost:2400/anons/photo?name=' + element}
+                                            <img style={{ width: "100px", height: "100px", objectFit: "cover", marginRight: 2, marginBottom: 2 }} src={process.env.REACT_APP_SERVER_ROOT_URL + '/anons/photo?name=' + element}
                                                 alt={announcementData.title} key={element} onClick={handleImageClick} />
                                         ))}
                                         <Divider />

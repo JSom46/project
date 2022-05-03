@@ -65,7 +65,7 @@ export default function AddNotification(props) {
         formData.append('lat', lat); //Dane z mapy
         formData.append('lng', (((lng + 180) % 360 + 360) % 360) - 180); //Dane z mapy, znormalizowana dlugosc geog.
         try {
-            const response = await fetch('http://localhost:2400/anons/notifications', {
+            const response = await fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/anons/notifications', {
                 method: 'POST',
                 credentials: 'include',
                 body: formData

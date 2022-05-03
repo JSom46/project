@@ -28,7 +28,7 @@ export default function ChangePassword() {
       password: userData.pass
     }
     // console.log(requestData);
-    fetch('http://localhost:2400/auth/passwordChange', {
+    fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/auth/passwordChange', {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json'

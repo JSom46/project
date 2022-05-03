@@ -26,7 +26,7 @@ export default function Account(props) {
   React.useEffect(() => {
     const fetchData = async () => {
       setUserData([]);
-      let url = 'http://localhost:2400/auth/user';
+      let url = process.env.REACT_APP_SERVER_ROOT_URL + '/auth/user';
       try {
         await fetch(url, {
           method: 'GET',
@@ -55,7 +55,7 @@ export default function Account(props) {
   async function editLogin() {
     setLoading(true);
     try {
-      fetch('http://localhost:2400/auth/user', {
+      fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/auth/user', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json'
@@ -83,7 +83,7 @@ export default function Account(props) {
   async function handleRequestPasswordChange() {
     setLoading(true);
     try {
-      fetch('http://localhost:2400/auth/requestPasswordChange', {
+      fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/auth/requestPasswordChange', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

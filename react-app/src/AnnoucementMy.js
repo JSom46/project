@@ -53,7 +53,7 @@ function Row(props) {
   async function deleteAnnouncement(announcementData) {
     // console.log(JSON.stringify(id));
     try {
-      const response = await fetch('http://localhost:2400/anons/', {
+      const response = await fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/anons/', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -144,7 +144,7 @@ function Row(props) {
           <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
             <Collapse in={open} timeout="auto" unmountOnExit>
               <Stack direction="row" justifyContent="space-between" alignItems="stretch" sx={{ margin: 1 }}>
-                <img style={{ width: "100px", height: "100px", objectFit: "cover" }} src={'http://localhost:2400/anons/photo?name=' + row.image} alt={row.title} />
+                <img style={{ width: "100px", height: "100px", objectFit: "cover" }} src={process.env.REACT_APP_SERVER_ROOT_URL + '/anons/photo?name=' + row.image} alt={row.title} />
                 <Typography variant="h4">{row.title}</Typography>
                 <Button id={row.id} variant="contained" onClick={handleOpenEditDialog}>
                   Edytuj
@@ -254,7 +254,7 @@ export default function AnnoucementMy() {
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
   useEffect(() => {
     const fetchData = async (pageToFetch) => {
-      let url = 'http://localhost:2400/anons/my?page=' + (pageToFetch);
+      let url = process.env.REACT_APP_SERVER_ROOT_URL + '/anons/my?page=' + (pageToFetch);
       // console.log(url);
       try {
         const response = await fetch(url, {
