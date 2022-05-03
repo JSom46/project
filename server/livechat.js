@@ -2,6 +2,7 @@
 require('dotenv').config();
 
 const fs = require('fs');
+const fspromise = fs.promises;
 const path = require('path');
 const express = require('express');
 const app = express();
@@ -13,6 +14,9 @@ const httpServer = createServer(app);
 
 const con = require('./dbCon.js');
 const { resourceUsage } = require('process');
+
+const THUMBHEIGHT = parseInt(process.env.THUMBHEIGHT);
+console.debug(THUMBHEIGHT);
 
 var lastMessage, lastImage, lastChat;
 
@@ -161,14 +165,27 @@ io.on("connection", function (socket) {
             SELECT anons_id, chat_id, user_id
             FROM ChatUsers WHERE user_id = ?)
             SELECT cm.message_id, cm.chat_id, users.login, cm.message_date,
-                cm.message_text, ci.image_id
+                cm.message_text, ci.image_id, ci.thumbpath
             FROM ChatMessages cm JOIN users ON cm.user_id = users.id
                 JOIN Chats ch ON ch.chat_id = cm.chat_id
                 LEFT JOIN ChatImages ci ON ci.message_id = cm.message_id
             WHERE cm.chat_id = ?
             ORDER BY cm.message_date ASC`, socket.userId, chatId,
-                (err, result) => {
+                async (err, result) => {
                     if (!err) {
+                        for (let chat of result) {
+                            if (chat.thumbpath) {
+                                const thumbpath = chat.thumbpath;
+                                delete chat.thumbpath;
+
+                                try {
+                                    chat.thumbnail = await fspromise.readFile(thumbpath);
+                                }
+                                catch (e) {
+                                    console.debug(e);
+                                }
+                            }
+                        }
                         socket.emit('chat-messages', result.length, result);
                     } else {
                         console.debug(err);
@@ -358,37 +375,38 @@ io.on("connection", function (socket) {
         ++lastImage;
         ++lastMessage;
 
-        const imgFileName = chatroom + '-' + lastImage + '!' + imgName;
-        const imgFilePath = path.resolve(__dirname, 'chatpictures', imgFileName);
-
-        const thumbName = chatroom + '-' + lastImage + 'thumb!' + imgName;
-        const thumbPath = path.resolve(__dirname, 'chatthumbs', imgFileName)
-
-       var thumbBuff;
-       sharp(imgData)
-       .resize({height: process.env.THUMBHEIGHT})
-       .toBuffer()
-       .then(data =>{
-            io.to(chatroom).emit('chat-img', lastMessage, chatroom, socket.userName, curDate, lastImage, imgName, imgType, data);
-            try{
-                const writer = fs.createWriteStream(thumbPath);
-                writer.write(data);
-                writer.end();
-                writer.on('finish', () => {
-                    // zapis do pliku na dysku zokończony
-                    console.log('Thumbnail saved to: ', thumbPath);
-                });
+        sharp(imgData)
+            .resize({height: THUMBHEIGHT})
+            .toBuffer()
+            .then(data => {
+                io.to(chatroom).emit('chat-img', lastMessage, chatroom, socket.userName, curDate
+                      , lastImage, imgName, imgType, data);
+                try {
+                    const thumbName = chatroom + '-' + lastImage + '!thumb!' + imgName;
+                    const thumbPath = path.resolve(__dirname, process.env.CHATTHUMBS, thumbName)
+                   
+                    const writer = fs.createWriteStream(thumbPath);
+                    writer.write(data);
+                    writer.end();
+                    writer.on('finish', () => {
+                        // zapis do pliku na dysku zokończony
+                        console.log('Thumbnail saved to: ', thumbName);
+                    });
                 }
                 catch (error) {
-                    console.debug(error)
+                    console.debug(error);
                 }   
             })
-       .catch(err => {
-        io.to(chatroom).emit('chat-img', lastMessage, chatroom, socket.userName, curDate, lastImage, imgName, imgType, null);
-        console.debug(err);
-        })
+            .catch(err => {
+                io.to(chatroom)
+                    .emit('chat-img', lastMessage, chatroom, socket.userName, curDate
+                          , lastImage, imgName, imgType, null);
 
-        
+                console.debug(err);
+            });
+
+        const imgFileName = chatroom + '-' + lastImage + '!' + imgName;
+        const imgFilePath = path.resolve(__dirname, process.env.CHATPICTURES, imgFileName);
 
         try {
             const writer = fs.createWriteStream(imgFilePath);
@@ -400,7 +418,7 @@ io.on("connection", function (socket) {
             });
         }
         catch (error) {
-            console.debug(error)
+            console.debug(error);
         }
 
         con.run(`INSERT INTO ChatMessages (message_id, chat_id, user_id, message_date) VALUES

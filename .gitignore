@@ -2,7 +2,10 @@ server/node_modules/
 server/db/serverdb.db
 server/db/sessiondb.db
 server/chatpictures/
+server/chatthumbs/
 server/pictures/
+
+
 
 react-app/node_modules/
 

@@ -150,8 +150,7 @@ con.serialize(() => {
         user_id INT,
         filename TEXT,
         filepath TEXT,
-        thumbpath TEXT,
-        
+        thumbpath TEXT,       
         mimetype TEXT,
         CONSTRAINT Images_FK_message_id FOREIGN KEY (message_id) REFERENCES ChatMessages (message_id)
         CONSTRAINT Images_FK_user_id FOREIGN KEY (user_id) REFERENCES users (id)
@@ -167,13 +166,13 @@ con.serialize(() => {
 
 // usuwanie przedawnionych notyfikacji i dezaktywowanie przeterminowanych ogłoszen w okreslonym interwale
 setInterval(() => {
-    //usuniecie przedawnionych notyfikacji
+    /*//usuniecie przedawnionych notyfikacji
     con.run('DELETE FROM notifications WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.NOTIFICATION_TTL), (err) => {
         if(err){
             log.error('deleting expired notifications: ', err);
             throw err;
         }
-    });
+    }); */
 
     /*//dezaktywacja przeterminowanych ogloszen
     con.run('UPDATE anons SET is_active = 0 WHERE ((? / 1000) - create_date) > ?;', Date.now(), parseInt(process.env.ANON_TTL), (err) => {

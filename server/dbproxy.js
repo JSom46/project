@@ -55,4 +55,49 @@ class dbproxy
             }
         })
     }
+
+
+    runpromise(sql)
+    {
+        return new Promise(sql, err => {
+            this.dbcon.run(sql, ...params, (err) => {
+                if (!err) {
+                    resolve();
+                }
+                else {
+                    reject(err)
+                }
+            })
+        })
+    }
+
+    getpromise(sql, ...args)
+    {
+        return new Promise((resolve, reject) => {
+            this.dbcon.get(sql, ...args, (err, result) => {
+                if (!err) {
+                    resolve(result)
+                }
+                else {
+                    reject(err)
+                    console.debug(err)
+                }
+            })    
+        })
+    }
+
+    allpromise(sql, ...args)
+    {
+        return new Promise((resolve, reject) => {
+            this.dbcon.all(sql, ...args, (err, result) => {
+                if (!err) {
+                    resolve(result)
+                } else {
+                    reject(err)
+                    console.debug(err)
+                }
+            })
+        })
+    }
+
 }
