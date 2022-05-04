@@ -200,10 +200,9 @@ export default function Chat(props) {
         // console.log(chat_id);
         const regex = /<br\s*[\/]?>/gi;
         const msg = message.replace(regex,"\n")
-        console.log(msg);
-        // if (socket !== null) {
-        //     socket.emit("chat-msg", chatId, msg);
-        // }
+        if (socket !== null) {
+            socket.emit("chat-msg", chatId, msg);
+        }
     }
     const handleSendPicture = (event) => {
         let file = event.target.files[0];
