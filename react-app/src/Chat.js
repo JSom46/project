@@ -198,9 +198,10 @@ export default function Chat(props) {
     const handleSendMessage = (message) => {
         // console.log(anons_id);
         // console.log(chat_id);
-        const regex = /<br\s*[\/]?>/gi;
-        const msg = decodeHTMLEntities(message.replace(regex, "\n"));
-        // console.log(msg);
+        const regex1 = /<br\s*?><br\s*?>$/gi;
+        const regex2 = /<br\s*[\/]?>/gi;
+        const msg = decodeHTMLEntities(message.replace(regex1, "<br>").replace(regex2, "\n"));
+        console.log(msg);
         if (socket !== null) {
             socket.emit("chat-msg", chatId, msg);
         }
