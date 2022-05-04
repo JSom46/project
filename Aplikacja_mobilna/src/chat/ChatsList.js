@@ -24,6 +24,7 @@ import {
     Feather,
   } from "@expo/vector-icons";
   import { SocketContext } from "./SocketContext";
+  import { userDataContext } from "../screens/UserDataContext";
   //import { SocketContext } from "./ChatStack";
 
   const ChatItem = ({ title, login, newMsgs }) => (
@@ -63,7 +64,7 @@ const ChatList = ({ route, navigation }) => {
     React.useEffect(() => {
         //console.log(socket);
         if (socket === null) {
-            const newSocket = io("http://" + serwerIP + ":2300");
+            const newSocket = io("http://" + serwerIP + ":2400");
             setSocket(newSocket);
             console.log("Nawiązuje połączenie z serwerem...");
             //console.log(newSocket);
