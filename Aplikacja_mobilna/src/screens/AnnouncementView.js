@@ -236,19 +236,23 @@ const AnnouncementView = ({ route, navigation }) => {
             <></>
           ):(
             <>
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate("AddNotification", {
-                  anons_id: announcement.id,
-                  photos: "",
-                });
-              }}
-              style={announcementViewButton}
-            >
-              <Text style={{ fontSize: 20, fontWeight: "600" }}>
-                Widziałem to zwierzę
-              </Text>
-            </TouchableOpacity>
+            {userData.user_id === announcement.author_id ? (
+              <></>
+            ):(
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate("AddNotification", {
+                      anons_id: announcement.id,
+                      photos: "",
+                    });
+                  }}
+                  style={announcementViewButton}
+                >
+                  <Text style={{ fontSize: 20, fontWeight: "600" }}>
+                    Widziałem to zwierzę
+                  </Text>
+                </TouchableOpacity>
+            )}
 
             <TouchableOpacity
               onPress={() => {
