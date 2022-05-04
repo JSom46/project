@@ -118,7 +118,7 @@ export default function MenuAppBar(props) {
         <Box sx={{ flexGrow: 1, display: "flex" }}>
           <Button variant="text" sx={{ color: "white" }} href='/'>
             <Typography variant="h6" noWrap component="div" sx={{ mr: 2, display: "flex" }}>
-              PZ-XIV
+              ZwierzoZnajdźca
             </Typography>
           </Button>
           <Tooltip title={sessionStorage.getItem('login') === null ? "Dodawanie ogłoszeń jest tylko dla zalogowanych użytkowników" : ""}>
