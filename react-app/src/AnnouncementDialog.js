@@ -6,6 +6,10 @@ import { Typography } from '@mui/material';
 import { Divider } from '@mui/material';
 import { Snackbar, Alert } from '@mui/material';
 
+import MapIcon from '@mui/icons-material/Map';
+import ChatIcon from '@mui/icons-material/Chat';
+import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
+
 //import { Redirect, Link } from 'react-router-dom/cjs/react-router-dom.min';
 
 import AddNotification from './AddNotification';
@@ -41,10 +45,11 @@ function ControlButtons(props) {
     }
     return (
         <DialogActions>
+            <Button color='secondary' onClick={() => props.chatRedirect(props.announcementData.id)} endIcon={<ChatIcon/>} 
+            disabled={parseInt(sessionStorage.getItem('user_id'))  === parseInt(props.announcementData.author_id)}>Czat</Button>
+            <Button hidden={props.announcementData.category === 1} onClick={() => props.setOpenAddNotificationDialog(true)} endIcon={<AddLocationAltIcon />}>Widziałem to zwierzę</Button>
+            <Button onClick={() => (props.showOnMap(props.announcementData.lat, props.announcementData.lng))} endIcon={<MapIcon/>}>Pokaż na mapie</Button>
             <Button onClick={() => (props.setOpen(false))}>Wróć</Button>
-            <Button color='secondary' hidden={props.announcementData.category === 1} onClick={() => props.setOpenAddNotificationDialog(true)}>Widziałem to zwierzę</Button>
-            <Button color='secondary' onClick={() => props.chatRedirect(props.announcementData.id)} >Czat</Button>
-            <Button onClick={() => (props.showOnMap(props.announcementData.lat, props.announcementData.lng))}>Pokaż na mapie</Button>
         </DialogActions>
     )
 }

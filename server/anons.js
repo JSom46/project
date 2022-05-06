@@ -442,7 +442,7 @@ router.delete('/', (req, res) => {
             return res.sendStatus(404);
         }
         //uzytkownik nie jest autorem ogloszenia lub administratorem
-        if((row.author_id != req.session.user_id) || (req.session.is_admin == 1)){
+        if((row.author_id != req.session.user_id) && (req.session.is_admin != 1)){
             return res.sendStatus(403);
         }
         //usun ogloszenie z bazy

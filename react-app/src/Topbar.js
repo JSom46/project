@@ -3,7 +3,6 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
@@ -68,6 +67,23 @@ export default function MenuAppBar(props) {
         console.log("error", error);
       }
     }
+    // function fetchChatMessages() { //TODO
+    //   try {
+    //     fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/anons/messages', {
+    //       method: 'GET',
+    //       credentials: 'include'
+    //     }).then(response => {
+    //       if (response.status === 401) sessionStorage.clear();
+    //       response.json().then(data => {
+    //         // console.log(data);
+    //         sessionStorage.setItem('notificationsCount', data.count);
+    //         setNotificationsCount(data.count);
+    //       });
+    //     })
+    //   } catch (error) {
+    //     console.log("error", error);
+    //   }
+    // }
     if (sessionStorage.getItem('login') !== null) {
       fetchNotifications();
       const interval = setInterval(() => {

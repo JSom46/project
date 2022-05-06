@@ -239,6 +239,7 @@ const AnnouncementView = ({ route, navigation }) => {
             {userData.user_id === announcement.author_id ? (
               <></>
             ):(
+              <>
                 <TouchableOpacity
                   onPress={() => {
                     navigation.navigate("AddNotification", {
@@ -252,25 +253,25 @@ const AnnouncementView = ({ route, navigation }) => {
                     Widziałem to zwierzę
                   </Text>
                 </TouchableOpacity>
+                  
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate("Wiadomości", {
+                      screen: 'Lista rozmów',
+                      params: {createNewChat: announcement.id},
+                    });
+                  }}
+                  style={announcementViewButton}
+                >
+                  <Text style={{ fontSize: 20, fontWeight: "600" }}>
+                    Czat
+                  </Text>
+                </TouchableOpacity>
+              </>
             )}
-
-            <TouchableOpacity
-              onPress={() => {
-                navigation.navigate("Wiadomości", {
-                  screen: 'Lista rozmów',
-                  params: {createNewChat: announcement.id},
-                });
-              }}
-              style={announcementViewButton}
-            >
-              <Text style={{ fontSize: 20, fontWeight: "600" }}>
-                Czat
-              </Text>
-            </TouchableOpacity>
             </>
           )}
 
-          
         </ScrollView>
       )}
     </View>

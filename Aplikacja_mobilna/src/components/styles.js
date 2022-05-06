@@ -474,6 +474,26 @@ export const dialogContainer = {
   top: "20%",
 };
 
+export const modalBackground = {
+  backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  flex: 1,
+};
+
+export const photoModal = {
+  alignItems: "center",
+  shadowColor: "#000",
+  shadowOffset: {
+    width: 2,
+    height: 2
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 4,
+  marginHorizontal: "10%",
+  //alignSelf: "center"
+  top: "20%",
+  alignSelf:'baseline',
+};
+
 export const innerDialogContainer = {
   margin: 10,
   backgroundColor: "white",

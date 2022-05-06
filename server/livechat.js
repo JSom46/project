@@ -306,6 +306,59 @@ io.on("connection", function (socket) {
 
 
     ///////////////////////////////////////////////////////////
+    // usuwa wybrany czat
+    // parametry:
+    // - chatId : chat_id z tabeli [UserrChats]
+
+    socket.on("delete-chat", (chatId) => {
+        const chatroom = typeof chatId === 'number' ? chatId : parseInt(chatId);
+
+        // usuwanie zdjec zwiazanych z usuwanym czatem
+        con.each(`SELECT filepath, thumbpath FROM ChatImages WHERE message_id IN (SELECT message_id FROM ChatMessages WHERE chat_id = ?)`, chatroom, (err, row) => {
+            if(err){
+                console.debug(err);
+                return socket.emit('delete-chat-response', -1, 'error');
+            }
+            fs.unlink(row.filepath, (err) => {
+                if(err){
+                    console.debug('unlink: ', err);
+                } 
+            });
+            fs.unlink(row.thumbpath, (err) => {
+                if(err){
+                    console.debug('unlink: ', err);
+                } 
+            });
+        });
+
+        // usuwanie wpisow w bazie danych powiazanych z usuwanym czatem
+        con.run('DELETE FROM ChatImages WHERE message_id IN (SELECT message_id FROM ChatMessages WHERE chat_id = ?);', chatroom, (err) => {
+            if(err){
+                console.debug(err);
+                return socket.emit('delete-chat-response', -2, 'error');
+            }
+        });
+        con.run('DELETE FROM ChatMessages WHERE chat_id = ?;', chatroom, (err) => {
+            if(err){
+                console.debug(err);
+                return socket.emit('delete-chat-response', -3, 'error');
+            }
+        });
+        con.run('DELETE FROM ChatUsers WHERE chat_id = ?;', chatroom, (err) => {
+            if(err){
+                console.debug(err);
+                return socket.emit('delete-chat-response', -4, 'error');
+            }
+        });
+
+        // usuniecie członków czatu z pokoju
+        socket.emit('delete-chat-response', 1, 'disconnect');
+        io.of('/').in(chatroom).disconnectSockets();
+
+    });
+
+
+    ///////////////////////////////////////////////////////////
     // odbiera od klienta i rozsyła do pozostałych członków czatu
     // wiadomość tekstową oraz zapisuję ją w bazie danych
     // parametry:
