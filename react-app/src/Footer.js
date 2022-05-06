@@ -1,4 +1,4 @@
-import { Box, Container, Stack, Link, Typography } from '@mui/material';
+import { Box, Container, Stack, Link } from '@mui/material';
 import React from 'react';
 
 export default function Footer() {
@@ -7,8 +7,8 @@ export default function Footer() {
             <Box component="footer" sx={{color: "text.primary", bgcolor: "lightblue", padding:'20px', mt:'auto'}}>
                 <Container maxWidth="sm">
                     <Stack direction="row" spacing={4} justifyContent="center" alignItems="center">
-                        <Link href="faq" color="inherit">
-                            FAQ
+                        <Link href="info" color="inherit">
+                            Info
                         </Link>
                         <Link href="team" color="inherit">
                             Zespół

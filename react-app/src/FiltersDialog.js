@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Dialog, DialogTitle, Button, FormControl, FormGroup, InputLabel, Select, MenuItem, TextField, Box } from '@mui/material';
+import { Dialog, DialogTitle, Button, FormControl, InputLabel, Select, MenuItem, TextField } from '@mui/material';
 import { Stack } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import Item from '@mui/material/ListItem';
 
 import MapPicker from './MapPicker';
 
@@ -49,7 +48,7 @@ export default function FiltersDialog(props) {
     const [location, setLocation] = useState(filters.location);
     const [rad, setRad] = useState(filters.rad);
 
-    const [locateMe, setLocateMe] = useState(0);
+    const [locateMe] = useState(0);
 
     const [typesData, setTypesData] = useState([]);
     const [coatsData, setCoatsData] = useState([]);
@@ -230,7 +229,7 @@ export default function FiltersDialog(props) {
                     <Grid>
                         <FormControl variant="standard" style={{ width: '100%' }}>
                             <InputLabel id="category">Rodzaj zgłoszenia</InputLabel>
-                            <Select value={(category != -1) ? category : ''} labelId="category" id="category" label="Kategoria" onChange={handleCategoryChange}>
+                            <Select value={(category !== -1) ? category : ''} labelId="category" id="category" label="Kategoria" onChange={handleCategoryChange}>
                                 <MenuItem value={0}>Zaginięcie</MenuItem>
                                 <MenuItem value={1}>Znalezienie</MenuItem>
                             </Select>

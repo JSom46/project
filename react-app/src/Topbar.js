@@ -17,6 +17,7 @@ import Snackbar from '@mui/material/Snackbar';
 import { Alert } from '@mui/material';
 import AddAnnouncement from './AddAnnouncement';
 import ChatIcon from '@mui/icons-material/Chat';
+import AddIcon from '@mui/icons-material/Add';
 // import MUIDrawer from './Drawer'
 import Divider from '@mui/material/Divider';
 // import { FormGroup,FormControlLabel,Switch } from '@mui/material';
@@ -115,24 +116,43 @@ export default function MenuAppBar(props) {
   return (
     <AppBar position="static" sx={{ maxHeight: '60px', flexGrow: 1 }}>
       <Toolbar>
-        <Box sx={{ flexGrow: 1, display: "flex" }}>
-          <Button variant="text" sx={{ color: "white" }} href='/'>
+        <Box sx={{ flexGrow: 1, display: {xs: 'none', sm: 'none', md: 'flex'} }}>
+          <Button variant="text" sx={{ color: "white" }} href='/' startIcon={<img src='./logo_white.png' width='48px' height='48px' />}>
             <Typography variant="h6" noWrap component="div" sx={{ mr: 2, display: "flex" }}>
               ZwierzoZnajdźca
             </Typography>
           </Button>
           <Tooltip title={sessionStorage.getItem('login') === null ? "Dodawanie ogłoszeń jest tylko dla zalogowanych użytkowników" : ""}>
             <span>
-              <Button disabled={sessionStorage.getItem('login') === null} sx={{ my: 2, color: "white", display: "flex" }} onClick={handleAddAnnouncementButton}>
+              <Button disabled={sessionStorage.getItem('login') === null} sx={{ my: 2, color: "white", display: "flex" }} onClick={handleAddAnnouncementButton} endIcon={<AddIcon />}>
                 Dodaj ogłoszenie
               </Button>
             </span>
           </Tooltip>
           <Tooltip title={sessionStorage.getItem('login') === null ? "Czat jest tylko dla zalogowanych użytkowników" : ""} >
             <span>
-              <Button disabled={sessionStorage.getItem('login') === null} sx={{ my: 2, color: "white", display: "flex" }} onClick={() => window.location.href = "/chat"} endIcon={<ChatIcon />}>
+              <Button disabled={sessionStorage.getItem('login') === null} sx={{ my: 2, ml: 2, color: "white", display: "flex" }} onClick={() => window.location.href = "/chat"} endIcon={<ChatIcon />}>
                 Czat
               </Button>
+            </span>
+          </Tooltip>
+        </Box>
+        <Box sx={{ flexGrow: 1, display: { xs: 'flex', sm: 'flex', md: 'none' } }}>
+          <IconButton href='/'>
+            <img src='./logo_white.png' width='48px' height='48px' />
+          </IconButton>
+          <Tooltip title={sessionStorage.getItem('login') === null ? "Dodawanie ogłoszeń jest tylko dla zalogowanych użytkowników" : ""}>
+            <span>
+              <IconButton disabled={sessionStorage.getItem('login') === null} sx={{ my: 2, color: 'white', display: "flex" }} onClick={handleAddAnnouncementButton} >
+                <AddIcon />
+              </IconButton>
+            </span>
+          </Tooltip>
+          <Tooltip title={sessionStorage.getItem('login') === null ? "Czat jest tylko dla zalogowanych użytkowników" : ""} >
+            <span>
+              <IconButton disabled={sessionStorage.getItem('login') === null} sx={{ my: 2, ml: 2, color: 'white', display: "flex" }} onClick={() => window.location.href = "/chat"}>
+                <ChatIcon />
+              </IconButton>
             </span>
           </Tooltip>
         </Box>
@@ -148,23 +168,9 @@ export default function MenuAppBar(props) {
                 color="inherit"
                 endIcon={<AccountCircle />}
               >
-                {/* <Typography variant='subtitle2'>{sessionStorage.getItem('login')}&nbsp;</Typography> */}
                 {sessionStorage.getItem('login')}
               </Button>
             </Badge>
-            {/* <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleMenu}
-              color="inherit"
-            >
-              <Typography variant='subtitle2'>{sessionStorage.getItem('login')}&nbsp;</Typography>
-              <Badge badgeContent={notificationsCount} color="error">
-                <AccountCircle />
-              </Badge>
-            </IconButton> */}
             <Menu
               id="menu-appbar"
               anchorEl={accountAnchor}

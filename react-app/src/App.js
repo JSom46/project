@@ -15,10 +15,9 @@ import Announcements from './Announcements';
 import Footer from './Footer';
 import ChangePassword from './ChangePassword';
 import Chat from './Chat';
-import Faq from './Faq';
+import InfoPage from './InfoPage';
 import Team from './Team';
 
-//import MapTesting from './MapTesting'; //TEMP
 import { Box } from '@mui/material';
 
 
@@ -99,8 +98,8 @@ function App() {
             <Route path="/maptest">
               <MapTesting />
             </Route>*/}
-            <Route path="/faq">
-              <Faq />
+            <Route path="/info">
+              <InfoPage />
             </Route>
             <Route path="/team">
               <Team />

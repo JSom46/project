@@ -1,4 +1,3 @@
-//import 'leaflet/dist/leaflet.css';
 import './map.css';
 
 import React, { useEffect } from 'react';
@@ -14,7 +13,7 @@ function LocationMarker(props) {
         props.onLocationChange(loc);
     }
 
-    const mapEvents = useMapEvents({
+    useMapEvents({
         click(e) {
             console.log(e.latlng);
             handleLocationChange(e.latlng);
@@ -38,9 +37,6 @@ function LocationMarker(props) {
     );
 }
 
-//const mapBounds = [[90, -180], [-90, 180]];
-const mapBounds = null;
-
 export default function MapPicker(props) {
     const location = props.location;
 
@@ -49,7 +45,7 @@ export default function MapPicker(props) {
     }
 
     return(
-        <MapContainer className="map_picker" center={[52.25, 19.35]} zoom={5} maxBounds={mapBounds}>
+        <MapContainer className="map_picker" center={[52.25, 19.35]} zoom={5}>
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

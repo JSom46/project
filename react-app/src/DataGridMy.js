@@ -9,7 +9,6 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import Badge from '@mui/material/Badge';
 import { Stack, Box } from '@mui/material';
 import { Typography } from '@mui/material';
-import { Divider } from '@mui/material';
 import EditAnnouncement from './EditAnnouncement';
 import AnnouncementNotifications from './AnnouncementNotifications';
 import AnnouncementDialog from './AnnouncementDialog';
@@ -125,29 +124,10 @@ export default function DataGridMy() {
             console.log("error", error);
         }
     };
-    // const fetchNotificationsData = async (id) => {
-    //     let url = process.env.REACT_APP_SERVER_ROOT_URL + '/notifications?id=' + id;
-    //     try {
-    //         const response = await fetch(url, {
-    //             method: 'GET',
-    //             credentials: 'include'
-    //         });
-    //         const json = await response.json();
-    //         setAnnouncementData(json);
-    //     } catch (error) {
-    //         console.log("error", error);
-    //     }
-    // };
     const handleRowClick = (row) => {
         setAnnouncementData([]);
         setOpen(true);
         fetchAnnouncementData(row.id);
-    }
-    const handleImageClick = (image) => {
-        setOpenImageDialog({
-            open: true,
-            src: image.target.src
-        })
     }
     async function deleteAnnouncement(announcementData) {
         try {
@@ -309,8 +289,6 @@ export default function DataGridMy() {
                                             setNotificationsData([]);
                                             setOpenNotificationsDialog({ open: true, row: cellValues });
                                             fetchNotificationsData(cellValues.row.id);
-                                            // console.log(event);
-                                            // return console.log(cellValues);
                                         };
                                         return (
                                             <IconButton onClick={(event) => { handleClick(event, cellValues) }}>
@@ -336,71 +314,6 @@ export default function DataGridMy() {
                     )}
 
             </ThemeProvider>
-            {/*<Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth={true}>
-                <Box sx={{ width: '100%' }}>
-                    {announcementData.length === 0 ? (
-                        <Stack alignItems="center" m={3}>
-                            <CircularProgress />
-                        </Stack>
-                    ) : (
-                        <div>
-                            <DialogTitle>{announcementData.title}</DialogTitle>
-                            <DialogContent>
-                                <Typography variant="subtitle1">Opis</Typography>
-                                <DialogContentText>
-                                    {announcementData.description}
-                                </DialogContentText>
-                                <Divider />
-                                {(announcementData.images[0] !== '' && announcementData.images.length !== 0) &&
-                                    <span>
-                                        <Typography variant="subtitle1">Zdjęcia</Typography>
-                                        {announcementData.images && announcementData.images.map((element) => (
-                                            <img style={{ width: "100px", height: "100px", objectFit: "cover", marginRight: 2, marginBottom: 2 }} src={process.env.REACT_APP_SERVER_ROOT_URL + '/anons/photo?name=' + element}
-                                                alt={announcementData.title} key={element} onClick={handleImageClick} />
-                                        ))}
-                                        <Divider />
-                                    </span>
-                                }
-                                <Stack justifyContent="space-between" direction="row" alignContent="center" spacing={2}>
-                                    <span>
-                                        <Typography variant="subtitle1">Typ</Typography>
-                                        <DialogContentText>
-                                            {announcementData.type}
-                                        </DialogContentText>
-                                    </span>
-                                    <span>
-                                        <Typography variant="subtitle1">Rasa</Typography>
-                                        <DialogContentText>
-                                            {announcementData.breed}
-                                        </DialogContentText>
-                                    </span>
-                                    <span>
-                                        <Typography variant="subtitle1">Owłosienie</Typography>
-                                        <DialogContentText>
-                                            {announcementData.coat}
-                                        </DialogContentText>
-                                    </span>
-                                    <span>
-                                        <Typography variant="subtitle1">Umaszczenie</Typography>
-                                        <DialogContentText>
-                                            {announcementData.color}
-                                        </DialogContentText>
-                                    </span>
-                                </Stack>
-                                <Divider />
-                            </DialogContent>
-                            <DialogActions>
-                                <Button onClick={() => (setOpen(false))}>Wróć</Button>
-                                <Button color='warning' onClick={() => (setOpenEditDialog(true))}>Edytuj</Button>
-                                <Button color='error' onClick={() => (setOpenDeleteDialog(true))}>Usuń</Button>
-                                <Button onClick={() => (
-                                    window.location.href = "/dashboard" + "?lat=" + announcementData.lat + "&lng=" + announcementData.lng
-                                )}>Pokaż na mapie</Button>
-                            </DialogActions>
-                        </div>
-                    )}
-                </Box>
-            </Dialog>*/}
             <AnnouncementDialog
                 isMy={true}
                 open={open}

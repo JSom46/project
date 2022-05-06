@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, useLocation } from 'react-router-dom/cjs/react-router-dom.min';
-// import AnnoucementList from './AnnoucementList';
 import DataGridList from './DataGridList';
 
-// import Stack from '@mui/material/Stack';
-
 import Grid from '@mui/material/Grid';
-import Item from '@mui/material/ListItem';
 
 import MapOverview from './MapOverview';
 import AnnouncementDialog from './AnnouncementDialog';
 import FiltersDialog from './FiltersDialog';
-import { Stack, Box } from '@mui/material';
+import { Stack} from '@mui/material';
 
 
 
@@ -101,7 +97,6 @@ export default function Dashboard(props) {
     }
 
     const fetchData = async () => {
-      //console.log("FetchData");
       let url = process.env.REACT_APP_SERVER_ROOT_URL + '/anons/list';
 
       //apply filters
@@ -139,8 +134,7 @@ export default function Dashboard(props) {
         url += addParam("rad=" + filters.rad, params);
         params++;
       }
-      console.log(url);
-
+      //console.log(url);
 
       try {
         const response = await fetch(url, {
@@ -154,7 +148,6 @@ export default function Dashboard(props) {
       }
     }
     await fetchData();
-    //console.log(json);
     setListData(createData(json.list));
   }, [updateListData]);
 
@@ -167,7 +160,7 @@ export default function Dashboard(props) {
         credentials: 'include'
       });
       const json = await response.json();
-      console.log(url);
+      //console.log(url);
       setAnnouncementData(json);
     } catch (error) {
       console.log("error", error);
@@ -192,10 +185,6 @@ export default function Dashboard(props) {
     setUpdateMap(updateMap + 1);
   }
 
-  function openFiltersDialog() {
-    setFiltersDialogOpen(true);
-  }
-
   function updateFilters(_filters) {
     setFilters(_filters);
     refreshData();
@@ -204,7 +193,6 @@ export default function Dashboard(props) {
 
   function listDistance(val) {
     setShowDistance(val);
-    //TODO sortuj liste
   }
 
   return (
@@ -239,12 +227,6 @@ export default function Dashboard(props) {
             />
 
           </Stack>
-          {/* <Tooltip title={props.auth?.login ? "" : "Tylko zalogowani użytkownicy mogą dodawać ogłoszenia"}>
-            <span style={{width:'fit-content'}}>
-             <Button variant={checked ? "outlined" : "contained"} onClick={handleChange} disabled={props.auth?.login ? false : true} >Dodaj ogłoszenie</Button>
-            </span>
-          </Tooltip>
-          <Collapse in={checked}><AddAnnoucment /></Collapse> */}
         </Grid>
       </Grid>
       <AnnouncementDialog
@@ -254,8 +236,6 @@ export default function Dashboard(props) {
         showOnMap={showOnMap}
         chatRedirect={chatRedirect}
       />
-
-      {/*<button onClick={openFiltersDialog} >Filtry</button>*/}
     </BrowserRouter>
   );
 }

@@ -34,7 +34,7 @@ function ControlButtons(props) {
                 <Button color='warning' onClick={() => (props.setOpenEditDialog(true))}>Edytuj</Button>
                 <Button color='error' onClick={() => (props.setOpenDeleteDialog(true))}>Usuń</Button>
                 <Button onClick={() => (
-                    window.location.href = "/dashboard" + "?lat=" + props.announcementData.lat + "&lng=" + props.announcementData.lng
+                    window.location.href = "/dashboard?lat=" + props.announcementData.lat + "&lng=" + props.announcementData.lng
                 )}>Pokaż na mapie</Button>
             </DialogActions>
         )

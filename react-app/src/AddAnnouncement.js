@@ -108,18 +108,10 @@ export default function AddAnnoucment(props) {
   function removePicture(id) {
     if (id >= 0 && id < picturesCount && pictures !== null && pictures !== undefined) {
       let kformData = pictures;
-      //const picturesPreviewArray = picturesPreview;
 
       kformData.delete(id);
-      //picturesPreviewArray.splice(id, 1);
-      /*for (let i = 0; i < picturesPreviewArray.length; i++) {
-        if (picturesPreviewArray[i].id == id) {
-          picturesPreviewArray.splice(i, 1);
-        }
-      }*/
 
       setPictures(kformData);
-      //setPicturesPreview(picturesPreviewArray);
     }
     setUpdatePicturesPreview(updatePicturesPreview + 1);
   }
@@ -164,11 +156,6 @@ export default function AddAnnoucment(props) {
 
     for (let i = 0; i < len; i++) {
       if (checkPicture(event.target.files[i], kformData)) {
-
-        /*picturesPreviewArray.push({
-          id: i + picturesCount,
-          img: URL.createObjectURL(event.target.files[i])
-        });*/
         kformData.append(i + picturesCount, event.target.files[i]);
       }
     }

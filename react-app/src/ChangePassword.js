@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Stack, Typography, FormControl, FormGroup, TextField, Button, Snackbar, Alert } from '@mui/material';
-import { CircularProgress } from '@mui/material';
-
 
 
 export default function ChangePassword() {
@@ -126,7 +124,6 @@ export default function ChangePassword() {
             </FormGroup>
           </form>
         </FormControl>
-        {/* <CircularProgress hidden={!loading} /> */}
       </Stack>
       <Snackbar
         anchorOrigin={{ vertical: "top", horizontal: "center" }}

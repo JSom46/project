@@ -1,13 +1,8 @@
-//import { useState, useEffect } from 'react';
+
 import { DataGrid, GridFooterContainer, gridPageCountSelector, gridPageSelector, useGridApiContext, useGridSelector, plPL } from '@mui/x-data-grid';
 import { Pagination, IconButton } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
-/*import { Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, CircularProgress, Button } from '@mui/material';
-import { Stack } from '@mui/material';
-import { Typography } from '@mui/material';
-import { Divider } from '@mui/material';
-import AnnouncementDialog from './AnnouncementDialog';*/
 
 import moment from 'moment';
 import 'moment/locale/pl';
@@ -67,30 +62,9 @@ const columns = [
     valueFormatter: formatDate
   },
 ];
-function createData(id, title, category, type, createDate) {
-  return { id, title, category, type, createDate };
-}
-
-/*function formatData(data) {
-  moment.locale('pl');
-  let newData = data.map((el) => {
-    let newDate = moment(el.create_date).fromNow();
-    return {
-      id: el.id,
-      title: el.title,
-      category: el.category,
-      type: el.type,
-      distance: el.distance,
-      create_date: newDate
-    }
-  });
-  return newData;
-}*/
-
 function formatDate(el) {
   return moment(el.value).fromNow();
 }
-
 
 export default function DataGridList(props) {
   const handleRowClick = (row) => {

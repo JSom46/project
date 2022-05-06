@@ -1,12 +1,9 @@
-//import 'leaflet/dist/leaflet.css';
 import './map.css';
 
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 import L from 'leaflet';
-
-//import './marker-icon-found.png';
 
 /*
     Mapa wyswietlajaca wszystkie wczytane ogloszenia.
@@ -16,7 +13,6 @@ function MapController(props) {
 
     const map = useMap();
 
-    //console.log(new L.Icon.Default);
     const icon_found = new L.Icon({
         iconUrl: './marker-icon-found.png',
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -33,7 +29,6 @@ function MapController(props) {
         popupAnchor: [1, -34],
         shadowSize: [41, 41]
     });
-    //console.log(icon_found);
 
     function goToPos(pos, zoom) {
         map.flyTo(pos, zoom);
@@ -54,10 +49,9 @@ function MapController(props) {
             position={[anon.lat, anon.lng]}
             key={anon.id}
             eventHandlers={{ click: (e) => { props.handleMarkerClick(anon.id) } }}
-            icon={(anon.category == 'Znalezienie') ? icon_found : icon_missing}
+            icon={(anon.category === 'Znalezienie') ? icon_found : icon_missing}
         />
     );
-    //icon={(anon.category == 1) ? {url: './marker-icon-found.png'} : {}}
     return (
         <MarkerClusterGroup maxClusterRadius={50}>
             {markers}
@@ -80,7 +74,6 @@ export default function MapOverview(props) {
                     updateMap={props.updateMap}
                 />
             </MapContainer >
-            {/*<button onClick={refreshData}>Odswiez</button>*/}
         </div>
     )
 }

@@ -1,9 +1,7 @@
 import './map.css';
 
 import React from 'react';
-import { MapContainer, TileLayer, Marker, LayerGroup, Popup } from 'react-leaflet';
-
-import MapAnnouncementPopup from './MapAnnouncementPopup';
+import { MapContainer, TileLayer, Marker, LayerGroup } from 'react-leaflet';
 
 /*
     Mapa wyswietlajaca jedna lokacje
@@ -13,11 +11,7 @@ function LocationMarker(props) {
     let markers = null;
     if (props.loc !== undefined && props.loc !== null && props.loc.length === 2) {
         return (
-            <Marker position={props.loc}>
-                <Popup>
-                    <MapAnnouncementPopup />
-                </Popup>
-            </Marker>
+            <Marker position={props.loc} />
         );
     }
     return (

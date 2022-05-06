@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './login.css'
-// import { Button, Form, FormGroup, Label, Input } from 'reactstrap';
 
 import FormControl from '@mui/material/FormControl';
 import FormGroup from '@mui/material/FormGroup';
 import { InputLabel, TextField } from '@mui/material';
 import { Button } from '@mui/material';
-// import { Typography } from '@mui/material';
 import { Select, MenuItem } from '@mui/material';
-// import ImageList from '@mui/material/ImageList';
 import Box from '@mui/material/Box';
 import ImageListItem from '@mui/material/ImageListItem';
 import { Stack } from '@mui/material';
@@ -109,9 +106,9 @@ export default function EditAnnoucment(props) {
                     if (imname !== null && imname !== undefined && imname.length > 3) {
                         let imtype = "image/";
                         let nameguess = imname.slice(imname.length - 3);
-                        if (nameguess == "jpg") imtype += "jpeg";
+                        if (nameguess === "jpg") imtype += "jpeg";
                         else imtype += "png";
-                        const response = await (fetch(process.env.REACT_APP_SERVER_ROOT_URL + imname));
+                        const response = await (fetch(process.env.REACT_APP_SERVER_ROOT_URL + "/anons/photo?name=" + imname));
                         const blob = await (response.blob());
                         const file = new File([blob], imname, { type: imtype });
                         kformData.append(i, file);
@@ -142,18 +139,10 @@ export default function EditAnnoucment(props) {
     function removePicture(id) {
         if (id >= 0 && id < picturesCount && pictures !== null && pictures !== undefined) {
             let kformData = pictures;
-            //const picturesPreviewArray = picturesPreview;
 
             kformData.delete(id);
-            //picturesPreviewArray.splice(id, 1);
-            /*for (let i = 0; i < picturesPreviewArray.length; i++) {
-              if (picturesPreviewArray[i].id == id) {
-                picturesPreviewArray.splice(i, 1);
-              }
-            }*/
 
             setPictures(kformData);
-            //setPicturesPreview(picturesPreviewArray);
         }
         setUpdatePicturesPreview(updatePicturesPreview + 1);
     }
@@ -198,11 +187,6 @@ export default function EditAnnoucment(props) {
 
         for (let i = 0; i < len; i++) {
             if (checkPicture(event.target.files[i], kformData)) {
-
-                /*picturesPreviewArray.push({
-                  id: i + picturesCount,
-                  img: URL.createObjectURL(event.target.files[i])
-                });*/
                 kformData.append(i + picturesCount, event.target.files[i]);
             }
         }
