@@ -747,38 +747,8 @@ router.post('/activate', (req, res) => {
 });
 
 //pobieranie ilości nowych wiadomosci na czatach uzytkownika
-// req = {userid: integer}
-
-/*router.get('/messages', (req,res)=>{
-    con.all(
-        `WITH Chats (anons_id, chat_id, convers_id, asking_id) AS (
-            SELECT ow.anons_id, ow.chat_id, co.user_id, ow.user_id FROM ChatUsers ow
-                JOIN ChatUsers co ON ow.chat_id = co.chat_id AND ow.user_id <> co.user_id 
-                WHERE ow.user_id = ?)
-            SELECT c.anons_id, c.chat_id, users.login, anons.title, 
-                (SELECT count(*) FROM ChatMessages chm 
-                    WHERE chm.chat_id = c.chat_id
-                ) AllMsgs,
-                (SELECT count(*) FROM ChatMessages chm 
-                    WHERE chm.chat_id = c.chat_id
-                        AND chm.user_id <> c.convers_id AND chm.message_date > 
-                            (SELECT last_active_time FROM users u WHERE u.id = c.convers_id)
-                ) NewMsgs			
-            FROM Chats c
-            JOIN anons on c.anons_id = anons.id
-            JOIN users on c.convers_id = users.id`, socket.userId,
-            (err, result) => {
-                if (!err) {
-                    return res.status(200).json(result);
-                } else {
-                    console.debug(err);
-                    return res.status(500);
-                }                                
-        });
-});*/
-
 router.get('/messages', (req, res) => {
-    con.get(`SELECT COUNT(*) count FROM ChatMessages WHERE user_id != ? AND chat_id IN (SELECT chat_id FROM ChatUsers WHERE user_id = ? OR anons_id IN (SELECT id FROM anons WHERE author_id = ?)) AND message_date > (SELECT last_seen_time FROM ChatUsers WHERE user_id = ? OR anons_id IN (SELECT id FROM anons WHERE author_id = ?));`, req.session.user_id, req.session.user_id, req.session.user_id, req.session.user_id, req.session.user_id, (err, row) => {
+    con.get(`SELECT COUNT(*) count FROM ChatMessages WHERE user_id != ? AND chat_id IN (SELECT chat_id FROM ChatUsers WHERE user_id = ? OR anons_id IN (SELECT id FROM anons WHERE author_id = ?)) AND message_date > (SELECT last_active_time FROM users WHERE id = ?);`, req.session.user_id, req.session.user_id, req.session.user_id, req.session.user_id, (err, row) => {
         if(err){
             log.debug(err);
             return res.sendStatus(500);
