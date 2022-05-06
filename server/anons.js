@@ -749,7 +749,7 @@ router.post('/activate', (req, res) => {
 //pobieranie ilości nowych wiadomosci na czatach uzytkownika
 // req = {userid: integer}
 
-router.get('/messages', (req,res)=>{
+/*router.get('/messages', (req,res)=>{
     con.all(
         `WITH Chats (anons_id, chat_id, convers_id, asking_id) AS (
             SELECT ow.anons_id, ow.chat_id, co.user_id, ow.user_id FROM ChatUsers ow
@@ -775,7 +775,18 @@ router.get('/messages', (req,res)=>{
                     return res.status(500);
                 }                                
         });
-});
+});*/
+
+router.get('/messages', (req, res) => {
+    con.get(`SELECT COUNT(*) count FROM ChatMessages WHERE chat_id IN (SELECT chat_id FROM ChatUsers WHERE user_id = ? OR anons_id IN (SELECT id FROM anons WHERE author_id = ?)) AND message_date > (SELECT last_seen_time FROM ChatUsers WHERE user_id = ? OR anons_id IN (SELECT id FROM anons WHERE author_id = ?));`, req.session.user_id, req.session.user_id, req.session.user_id, req.session.user_id, (err, row) => {
+        if(err){
+            log.debug(err);
+            return res.sendStatus(500);
+        }
+        log.debug('count: ' + row.count);
+        return res.status(200).json({count: row.count});
+    });
+})
 
 module.exports = router;
 
