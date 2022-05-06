@@ -13,7 +13,7 @@ import { indigo } from '@mui/material/colors';
 import { Dialog, DialogTitle } from '@mui/material';
 import { Tooltip } from '@mui/material';
 import Snackbar from '@mui/material/Snackbar';
-import { Alert } from '@mui/material';
+import { Alert, IconButton } from '@mui/material';
 import AddAnnouncement from './AddAnnouncement';
 import ChatIcon from '@mui/icons-material/Chat';
 import AddIcon from '@mui/icons-material/Add';
@@ -133,7 +133,7 @@ export default function MenuAppBar(props) {
     <AppBar position="static" sx={{ maxHeight: '60px', flexGrow: 1 }}>
       <Toolbar>
         <Box sx={{ flexGrow: 1, display: {xs: 'none', sm: 'none', md: 'flex'} }}>
-          <Button variant="text" sx={{ color: "white" }} href='/' startIcon={<img src='./logo_white.png' width='48px' height='48px' />}>
+          <Button variant="text" sx={{ textTransform: 'none', color: "white" }} href='/' startIcon={<img src='./logo_white.png' width='48px' height='48px' />}>
             <Typography variant="h6" noWrap component="div" sx={{ mr: 2, display: "flex" }}>
               ZwierzoZnajdźca
             </Typography>
