@@ -3,7 +3,6 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
@@ -67,6 +66,23 @@ export default function MenuAppBar(props) {
         console.log("error", error);
       }
     }
+    // function fetchChatMessages() { //TODO
+    //   try {
+    //     fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/anons/messages', {
+    //       method: 'GET',
+    //       credentials: 'include'
+    //     }).then(response => {
+    //       if (response.status === 401) sessionStorage.clear();
+    //       response.json().then(data => {
+    //         // console.log(data);
+    //         sessionStorage.setItem('notificationsCount', data.count);
+    //         setNotificationsCount(data.count);
+    //       });
+    //     })
+    //   } catch (error) {
+    //     console.log("error", error);
+    //   }
+    // }
     if (sessionStorage.getItem('login') !== null) {
       fetchNotifications();
       const interval = setInterval(() => {
@@ -116,7 +132,7 @@ export default function MenuAppBar(props) {
     <AppBar position="static" sx={{ maxHeight: '60px', flexGrow: 1 }}>
       <Toolbar>
         <Box sx={{ flexGrow: 1, display: "flex" }}>
-          <Button variant="text" sx={{ color: "white" }} href='/'>
+          <Button variant="text" sx={{ color: "white" }} href='/' style={{textTransform: 'none'}}>
             <Typography variant="h6" noWrap component="div" sx={{ mr: 2, display: "flex" }}>
               ZwierzoZnajdźca
             </Typography>

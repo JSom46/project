@@ -8,10 +8,9 @@ import { Dialog, DialogTitle, DialogActions } from '@mui/material';
 import { LinearProgress } from '@mui/material';
 import { Snackbar, Alert } from '@mui/material';
 
-import ImageIcon from '@mui/icons-material/Image';
 import ClearIcon from '@mui/icons-material/Clear';
 
-import styles from "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
+import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import {
     MainContainer,
     ChatContainer,
@@ -42,7 +41,7 @@ export default function Chat(props) {
     const [header, setHeader] = useState(null);
     const [chatId, setChatId] = useState(-1);
     const [chatDeleteId, setChatDeleteId] = useState(-1);
-    const [createNewChat, setCreateNewChat] = useState(props?.id);
+    const [createNewChat, setCreateNewChat] = useState(parseInt(sessionStorage.getItem('anonsId')));
 
     const [userChats, setUserChats] = useState([]);
     const [chatMessages, setChatMessages] = useState([]);
@@ -93,11 +92,12 @@ export default function Chat(props) {
             }
             if (connected && authenticated) {
                 if (createNewChat !== undefined && createNewChat !== null) {
+                    sessionStorage.removeItem('anonsId');
                     socket.emit('new-chat', createNewChat);
                 }
                 socket.on("new-chat-response", (chat_id, message) => {
-                    console.log(chat_id);
-                    console.log(message);
+                    // console.log(chat_id);
+                    // console.log(message);
                     if (message === 'Chat already exists' || 'Chat created') {
                         setChatId(chat_id);
                         setCreateNewChat(null);
@@ -119,7 +119,7 @@ export default function Chat(props) {
                     setUserChats(userChats);
                 });
                 socket.on("chat-messages", (count, chatMsg) => {
-                    console.log(chatMsg);
+                    // console.log(chatMsg);
                     setChatMessages(chatMsg);
                 });
                 socket.on("chat-msg", (message_id, chat_id, username, datatime, message) => {
@@ -176,6 +176,18 @@ export default function Chat(props) {
                 });
                 socket.on("join-chat-response", (anons_id, chat_id, message) => {
                 });
+                socket.on("delete-chat-response", (status, message) => {
+                    if(status === 1){
+                        setSnackbarData({
+                            open: true,
+                            message: "Pomyślnie usunięto czat",
+                            severity: "success",
+                            loading: false
+                        });
+                        socket.emit('get-user-chats');
+
+                    }
+                });
                 socket.on("disconnect", () => {
                     // console.log("dc");
                     setAuthenticated(false);
@@ -188,9 +200,13 @@ export default function Chat(props) {
     const handleChatClick = (login, chat_id) => {
         // console.log(anons_id);
         // console.log(chat_id);
+        
         setHeader(login);
         setChatId(chat_id);
         if (socket !== null) {
+            if(chatId !== -1){
+                socket.emit("leave-chat", chatId);
+            }
             socket.emit("get-chat-messages", chat_id);
             socket.emit("join-chat", chat_id);
         }
@@ -199,7 +215,7 @@ export default function Chat(props) {
         // console.log(anons_id);
         // console.log(chat_id);
         const regex1 = /<br\s*?><br\s*?>$/gi;
-        const regex2 = /<br\s*[\/]?>/gi;
+        const regex2 = /<br\s*?>/gi;
         const msg = decodeHTMLEntities(message.replace(regex1, "<br>").replace(regex2, "\n"));
         console.log(msg);
         if (socket !== null) {
@@ -215,6 +231,12 @@ export default function Chat(props) {
                 socket.emit("chat-img", chatId, file.name, file.type, reader.result);
             }
         };
+    }
+    const handleChatDelete = () => {      
+        if (socket !== null) {
+            socket.emit("leave-chat", chatId);
+            socket.emit("delete-chat", chatDeleteId);
+        }
     }
     function decodeHTMLEntities(text) {
         var textArea = document.createElement('textarea');
@@ -259,7 +281,7 @@ export default function Chat(props) {
                         <ConversationHeader.Content userName={header} />
                     </ConversationHeader>
                     <MessageList>
-                        {chatMessages && chatMessages.map((item) => (
+                        {chatId !== -1 && chatMessages && chatMessages.map((item) => (
                             <Message key={item.message_id}
                                 model={{
                                     type: (item.image_id === null ? "html" : "custom"),
@@ -271,6 +293,7 @@ export default function Chat(props) {
                                 {item.image_id !== null ?
                                     <Message.CustomContent>
                                         <img
+                                            alt={item.image_id}
                                             src={URL.createObjectURL(new Blob([item.thumbnail], { type: item.mimetype }))}
                                             onClick={() => { setOpenImageDialog({ open: true, src: null }); socket.emit("get-image", item.image_id) }}
                                             style={{ borderRadius: "5%", cursor: "pointer" }}
@@ -321,7 +344,7 @@ export default function Chat(props) {
                 <DialogTitle>Czy na pewno chcesz usunąć ten czat?</DialogTitle>
                 <DialogActions>
                     <Button onClick={() => setOpenDeleteDialog(false)}>Anuluj</Button>
-                    <Button color='error' onClick={() => /*socket.emit("", chatDeleteId)*/ console.log(chatDeleteId)}>Usuń</Button>
+                    <Button color='error' onClick={() => {handleChatDelete(); setOpenDeleteDialog(false)}}>Usuń</Button>
                 </DialogActions>
             </Dialog>
         </div>
