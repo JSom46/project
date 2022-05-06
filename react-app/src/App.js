@@ -27,7 +27,7 @@ function App() {
   const [auth, setAuth] = useState("");
   const [anonsId, setAnonsId] = useState(-1);
   const chatRedirect = (id) => {
-    // console.log(id);
+    sessionStorage.setItem('anonsId',id);
     setAnonsId(id);
   }
   useEffect(() => {
@@ -41,6 +41,7 @@ function App() {
             response.json().then(data => {
               sessionStorage.removeItem('msg');
               sessionStorage.setItem('login', data.login);
+              sessionStorage.setItem('user_id', data.user_id);
               setAuth(data);
             });
           }
@@ -48,6 +49,7 @@ function App() {
             if (response.status === 403) {
               sessionStorage.setItem('msg', 'not logged in');
               sessionStorage.removeItem('login');
+              sessionStorage.removeItem('user_id');
             };
             throw new Error('Response not ok')
           }
@@ -61,6 +63,7 @@ function App() {
     else if (sessionStorage.getItem('login') !== null) {
       setAuth({
         "login": sessionStorage.getItem('login'),
+        "user_id": sessionStorage.getItem('user_id'),
       });
     }
     else {
