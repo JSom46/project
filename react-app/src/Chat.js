@@ -198,8 +198,12 @@ export default function Chat(props) {
     const handleSendMessage = (message) => {
         // console.log(anons_id);
         // console.log(chat_id);
+        const regex1 = /<br\s*?><br\s*?>$/gi;
+        const regex2 = /<br\s*[\/]?>/gi;
+        const msg = decodeHTMLEntities(message.replace(regex1, "<br>").replace(regex2, "\n"));
+        console.log(msg);
         if (socket !== null) {
-            socket.emit("chat-msg", chatId, message);
+            socket.emit("chat-msg", chatId, msg);
         }
     }
     const handleSendPicture = (event) => {
@@ -211,6 +215,11 @@ export default function Chat(props) {
                 socket.emit("chat-img", chatId, file.name, file.type, reader.result);
             }
         };
+    }
+    function decodeHTMLEntities(text) {
+        var textArea = document.createElement('textarea');
+        textArea.innerHTML = text;
+        return textArea.value;
     }
     return (
         <div style={{
@@ -254,7 +263,7 @@ export default function Chat(props) {
                             <Message key={item.message_id}
                                 model={{
                                     type: (item.image_id === null ? "html" : "custom"),
-                                    message: item.message_text,
+                                    message: decodeHTMLEntities(item.message_text),
                                     sentTime: item.message_date.toString(),
                                     sender: item.login,
                                     direction: (login === item.login ? "outgoing" : "incoming")
@@ -274,7 +283,10 @@ export default function Chat(props) {
                                         >
                                             ZDJĘCIE
                                         </Button> */}
-                                    </Message.CustomContent> : null}
+                                    </Message.CustomContent> :
+                                    <Message.CustomContent>
+                                        {item.message_text}
+                                    </Message.CustomContent>}
                                 {/* <Message.Header>{item.login}</Message.Header> */}
                                 <Message.Footer>{new Date(item.message_date).toLocaleString('pl-PL')}</Message.Footer>
                             </Message>

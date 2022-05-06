@@ -123,7 +123,7 @@ export default function Account(props) {
           </Typography>
         </CardContent>
         <CardActions sx={{ justifyContent: "right", flex: 1 }}>
-          <Button size="small" onClick={() => setOpenEditLogin((prev) => !(prev))} hidden={openEditLogin}>Zmień login</Button>
+          <Button size="small" onClick={() => setOpenEditLogin((prev) => !(prev))} hidden={openEditLogin}>Zmień nazwę użytkownika</Button>
           <Button size="small" hidden={openEditLogin} onClick={() => setOpenChangePasswordDialog(true)}>Zmień hasło</Button>
           <Button size="small" color="error" onClick={() => { setOpenEditLogin((prev) => !(prev)); setLoginField(userData.login) }} hidden={!openEditLogin}>Anuluj</Button>
           <Button size="small" color="success" hidden={!openEditLogin} onClick={() => editLogin()}>Zapisz</Button>
