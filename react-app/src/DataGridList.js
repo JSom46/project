@@ -9,6 +9,11 @@ import 'moment/locale/pl';
 
 moment.locale('pl');
 
+import moment from 'moment';
+import 'moment/locale/pl';
+
+moment.locale('pl');
+
 const theme = createTheme({
 },
   plPL,

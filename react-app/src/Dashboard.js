@@ -148,6 +148,7 @@ export default function Dashboard(props) {
       }
     }
     await fetchData();
+    //console.log(json);
     setListData(createData(json.list));
   }, [updateListData]);
 
