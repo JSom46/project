@@ -50,50 +50,48 @@ export default function MenuAppBar(props) {
       outline: indigo[700],
     }
   }));
-  React.useEffect(() => {
-    function fetchNotifications() {
-      try {
-        fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/anons/notifications/count', {
-          method: 'GET',
-          credentials: 'include'
-        }).then(response => {
-          if (response.status === 401) sessionStorage.clear();
-          response.json().then(data => {
-            // console.log(data);
-            sessionStorage.setItem('notificationsCount', data.count);
-            setNotificationsCount(data.count);
-          });
-        })
-      } catch (error) {
-        console.log("error", error);
-      }
+  const fetchNotifications = () => {
+    try {
+      fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/anons/notifications/count', {
+        method: 'GET',
+        credentials: 'include'
+      }).then(response => {
+        if (response.status === 401) sessionStorage.clear();
+        response.json().then(data => {
+          // console.log(data);
+          sessionStorage.setItem('notificationsCount', data.count);
+          setNotificationsCount(data.count);
+        });
+      })
+    } catch (error) {
+      console.log("error", error);
     }
-    function fetchChatMessages() {
-      try {
-        fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/anons/messages', {
-          method: 'GET',
-          credentials: 'include'
-        }).then(response => {
-          if (response.status === 401) sessionStorage.clear();
-          response.json().then(data => {
-            sessionStorage.setItem('messagesCount', data.count);
-            setMessagesCount(data.count);
-          });
-        })
-      } catch (error) {
-        console.log("error", error);
-      }
+  }
+  const fetchChatMessages = () => {
+    try {
+      fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/anons/messages', {
+        method: 'GET',
+        credentials: 'include'
+      }).then(response => {
+        if (response.status === 401) sessionStorage.clear();
+        response.json().then(data => {
+          sessionStorage.setItem('messagesCount', data.count);
+          setMessagesCount(data.count);
+        });
+      })
+    } catch (error) {
+      console.log("error", error);
     }
-    if (sessionStorage.getItem('login') !== null) {
+  }
+  if ((sessionStorage.getItem('messagesCount') === null || sessionStorage.getItem('notificationsCount') === null) && sessionStorage.getItem('login') !== null) {
+    fetchNotifications();
+    fetchChatMessages();
+    const interval = setInterval(() => {
       fetchNotifications();
       fetchChatMessages();
-      const interval = setInterval(() => {
-        fetchNotifications();
-        fetchChatMessages();
-      }, 3 * 60 * 1000);
-      return () => clearInterval(interval);
-    }
-  }, []);
+    }, 3 * 60 * 1000);
+    // return () => clearInterval(interval);
+  }
   function logout() {
     sessionStorage.clear();
     window.location.assign("/");

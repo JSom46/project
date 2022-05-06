@@ -180,12 +180,11 @@ export default function Chat(props) {
                     if(status === 1){
                         setSnackbarData({
                             open: true,
-                            message: "Pomyślnie usunięto czat",
-                            severity: "success",
+                            message: "Usunięto czat",
+                            severity: "info",
                             loading: false
                         });
                         socket.emit('get-user-chats');
-
                     }
                 });
                 socket.on("disconnect", () => {
