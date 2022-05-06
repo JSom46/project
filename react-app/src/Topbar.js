@@ -25,6 +25,7 @@ export default function MenuAppBar(props) {
   // const [auth, /*setAuth*/] = React.useState(false);
   const [accountAnchor, setAccountAnchor] = React.useState(null);
   const [notificationsCount, setNotificationsCount] = React.useState(0);
+  const [messagesCount, setMessagesCount] = React.useState(0);
   const [openAddAnnouncementDialog, setOpenAddAnnouncementDialog] = React.useState(false);
   const [snackbarData, setSnackbarData] = React.useState({
     open: false,
@@ -67,27 +68,28 @@ export default function MenuAppBar(props) {
         console.log("error", error);
       }
     }
-    // function fetchChatMessages() { //TODO
-    //   try {
-    //     fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/anons/messages', {
-    //       method: 'GET',
-    //       credentials: 'include'
-    //     }).then(response => {
-    //       if (response.status === 401) sessionStorage.clear();
-    //       response.json().then(data => {
-    //         // console.log(data);
-    //         sessionStorage.setItem('notificationsCount', data.count);
-    //         setNotificationsCount(data.count);
-    //       });
-    //     })
-    //   } catch (error) {
-    //     console.log("error", error);
-    //   }
-    // }
+    function fetchChatMessages() {
+      try {
+        fetch(process.env.REACT_APP_SERVER_ROOT_URL + '/anons/messages', {
+          method: 'GET',
+          credentials: 'include'
+        }).then(response => {
+          if (response.status === 401) sessionStorage.clear();
+          response.json().then(data => {
+            sessionStorage.setItem('messagesCount', data.count);
+            setMessagesCount(data.count);
+          });
+        })
+      } catch (error) {
+        console.log("error", error);
+      }
+    }
     if (sessionStorage.getItem('login') !== null) {
       fetchNotifications();
+      fetchChatMessages();
       const interval = setInterval(() => {
         fetchNotifications();
+        fetchChatMessages();
       }, 3 * 60 * 1000);
       return () => clearInterval(interval);
     }
@@ -132,7 +134,7 @@ export default function MenuAppBar(props) {
   return (
     <AppBar position="static" sx={{ maxHeight: '60px', flexGrow: 1 }}>
       <Toolbar>
-        <Box sx={{ flexGrow: 1, display: {xs: 'none', sm: 'none', md: 'flex'} }}>
+        <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'none', md: 'flex' } }}>
           <Button variant="text" sx={{ textTransform: 'none', color: "white" }} href='/' startIcon={<img src='./logo_white.png' width='48px' height='48px' />}>
             <Typography variant="h6" noWrap component="div" sx={{ mr: 2, display: "flex" }}>
               ZwierzoZnajdźca
@@ -147,8 +149,15 @@ export default function MenuAppBar(props) {
           </Tooltip>
           <Tooltip title={sessionStorage.getItem('login') === null ? "Czat jest tylko dla zalogowanych użytkowników" : ""} >
             <span>
-              <Button disabled={sessionStorage.getItem('login') === null} sx={{ my: 2, ml: 2, color: "white", display: "flex" }} onClick={() => window.location.href = "/chat"} endIcon={<ChatIcon />}>
+              <Button disabled={sessionStorage.getItem('login') === null} sx={{ my: 2, ml: 2, color: "white", display: "flex" }} onClick={() => window.location.href = "/chat"}
+                endIcon={
+                  <Badge badgeContent={messagesCount} color="secondary">
+                    <ChatIcon />
+                  </Badge>
+                }>
+
                 Czat
+
               </Button>
             </span>
           </Tooltip>
@@ -174,7 +183,7 @@ export default function MenuAppBar(props) {
         </Box>
         {(props.auth?.login && (
           <div>
-            <Badge badgeContent={notificationsCount} color="error">
+            <Badge badgeContent={notificationsCount || messagesCount} color={notificationsCount > messagesCount ? "error" : "secondary"} variant="dot">
               <Button
                 size="small"
                 aria-label="account of current user"
@@ -208,7 +217,11 @@ export default function MenuAppBar(props) {
                 </Badge>
               </MenuItem>
               <MenuItem onClick={function (event) { handleAccountClose(); window.location.href = "/account" }}>Moje konto</MenuItem>
-              <MenuItem onClick={function (event) { handleAccountClose(); window.location.href = "/chat" }}>Czat</MenuItem>
+              <MenuItem onClick={function (event) { handleAccountClose(); window.location.href = "/chat" }}>
+                <Badge badgeContent={messagesCount} color="secondary" variant="dot">
+                  Czat
+                </Badge>
+              </MenuItem>
               <Divider />
               <MenuItem onClick={function (event) { logout() }}>Wyloguj</MenuItem>
             </Menu>
