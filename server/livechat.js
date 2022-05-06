@@ -352,8 +352,8 @@ io.on("connection", function (socket) {
         });
 
         // usuniecie członków czatu z pokoju
-        socket.emit('delete-chat-response', 1, 'disconnect');
-        io.of('/').in(chatroom).disconnectSockets();
+        return socket.to(chatroom).emit('delete-chat-response', 1, 'disconnect');
+        //io.of('/').in(chatroom).disconnectSockets();
 
     });
 
