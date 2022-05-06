@@ -46,6 +46,7 @@ const ChatList = ({ route, navigation }) => {
     const [chatMessages, setChatMessages] = useState([]);
     const [isModalVisible, setModalVisible] = useState(false);
     const [modalData, setModalData] = useState();
+    const [refreshing, setRefreshing] = useState(false);
 
     const [anonsId, setAnonsId] = useState(-1);
     const [header, setHeader] = useState(null);
@@ -57,18 +58,18 @@ const ChatList = ({ route, navigation }) => {
 
     const {socket, setSocket} = React.useContext(SocketContext);
     
-
     React.useEffect(() => {
         //console.log(socket);
-        if (socket === null) {
-            const newSocket = io("http://" + serwer);
-            setSocket(newSocket);
+        if (socket === null || socket === undefined) {
+            //const newSocket = io("http://" + serwer);
+            //setSocket(newSocket);
             console.log("Nawiązuje połączenie z serwerem...");
             //console.log(newSocket);
             //console.log(socket);
         }
         else{
             console.log("ELSE");
+
             if (!connected) {
                 socket.on("connect", (event) => {
                     // console.log("con");
@@ -84,17 +85,17 @@ const ChatList = ({ route, navigation }) => {
                     socket.emit('get-user-chats');
                     // console.log("auth");
                     console.log("Połączono i uwierzytelniono");
-                    setLoading(false);
+                    //setLoading(false);
                 });
                 socket.emit('auth-request', login);
             }
             if (connected && authenticated) {
                 console.log("A CZY TU DZIALA", route?.params?.createNewChat);
-                console.log("W tym ifie");
+                //console.log("W tym ifie");
                 if (route?.params?.createNewChat !== undefined && route?.params?.createNewChat !== null) {
                     console.log("jakies tam paramtry sa");
                     socket.emit('new-chat', route?.params?.createNewChat);
-                    console.log("TWORZRE NOWY CZAT");
+                    console.log("TWORZRE NOWY CZAT", route?.params?.createNewChat);
                     //setCreateNewChat(null);
                     //route.params.createNewChat = null;
                     socket.once("new-chat-response", (chat_id, message) => {
@@ -114,11 +115,15 @@ const ChatList = ({ route, navigation }) => {
                 
                 socket.on("user-chats", (count, userChats) => {
                     //console.log(userChats);
+                    console.log("socket on user-chats");
                     setUserChats(userChats);
                     console.log("Ustawiono czaty uzytkownika");
+                    setRefreshing(false);
+                    setLoading(false);
                 });
-
+////////
                 socket.on("delete-chat-response", () => {
+                    console.log("W socket on delete-response");
                     socket.emit('get-user-chats');
                     console.log("Usunieto czat");
                 });
@@ -131,22 +136,27 @@ const ChatList = ({ route, navigation }) => {
             }
             return () => {
                 socket.off();
-                socket.removeAllListeners();
+                //socket.removeAllListeners();
             }
         }
     },[socket, connected, authenticated, route?.params?.createNewChat])
 
+//
     useFocusEffect(
         React.useCallback(() => {
-            console.log("FOCUS EFFECT");
+            //console.log("FOCUS EFFECT");
             //console.log("paranetry: ",route?.params);
             setCreateNewChat(route?.params?.createNewChat);
-            //console.log(socket);
+            //console.log("socket: ",socket);
+
+            //setTimeout(()=>console.log(socket), 5000);
+            
             if (socket != null) {
                 console.log("FOCUS EFFECT - odswiezono czaty");
                 socket.emit('get-user-chats');
+                console.log("po get user-chats w focuseffect");
+                setTimeout(()=>{socket.emit('get-user-chats')}, 1000);
             }
-            //
         }, [])
     );
 
@@ -188,10 +198,19 @@ const ChatList = ({ route, navigation }) => {
     const handleDelete = () => {
         if(socket != null){
             socket.emit('delete-chat', modalData?.chat_id);
+            //alert(modalData?.chat_id);
             toggleModal();
+            console.log("handleDelete");
         }
     }
 
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        if(socket != null){
+            socket.emit('get-user-chats');
+        }
+      }, []);
+////
     return(
         <View style={{flex: 1}}>
             {isLoading ? (
@@ -232,12 +251,12 @@ const ChatList = ({ route, navigation }) => {
                             data={userChats}
                             keyExtractor={(item) => item.chat_id}
                             renderItem={renderItem}
-                            // refreshControl={
-                            // <RefreshControl
-                            //     refreshing={refreshing}
-                            //     onRefresh={onRefresh}
-                            // />
-                            // }
+                            refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                            />
+                            }
                         />
                     </SafeAreaView>
                 ):(

@@ -14,7 +14,7 @@ const ChatStack = createNativeStackNavigator();
 const ChatStackScreen = ({ route, navigation }) => {
     //const [userData, setUserData] = useState(route.params.userData);
     const {userData, setUserData} = React.useContext(userDataContext);
-    const [socket, setSocket] = useState(null);
+    const [socket, setSocket] = useState(io("http://" + serwer));
     const [connected, setConnected] = useState(false);
     const [authenticated, setAuthenticated] = useState(false);
     const socketContextData = {socket: socket, setSocket: setSocket};

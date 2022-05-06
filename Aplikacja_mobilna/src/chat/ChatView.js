@@ -125,11 +125,13 @@ const ChatView = ({ route, navigation }) => {
 
           return () => {
             socket.emit("leave-chat", route.params.item.chat_id);
-            // socket.off("chat-messages", (count, chatMsg) => {});
-            // socket.off("join-chat-response", (anons_id, chat_id, message) => {});
-            // socket.off("leave-chat-response", (anons_id, chat_id, message) => {});
-            // socket.off("chat-msg", (message_id, chat_id, username, datatime, message) => {});
-            socket.removeAllListeners();
+            socket.removeAllListeners("chat-messages");
+            socket.removeAllListeners("join-chat-response");
+            socket.removeAllListeners("leave-chat-response");
+            socket.removeAllListeners("chat-msg");
+            socket.removeAllListeners("image");
+            socket.removeAllListeners("chat-img");
+            //socket.removeAllListeners();
           }
       }, [])
   );
