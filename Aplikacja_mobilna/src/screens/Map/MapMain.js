@@ -160,8 +160,8 @@ const MapMain = ({ navigation, route }) => {
   useFocusEffect(
     React.useCallback(() => {
       //console.log("WYWOLALO SJE");
-      console.log("useEffect1", route.params);
-      console.log("userData: ", userData);
+      //console.log("useEffect1", route.params);
+      //console.log("userData: ", userData);
       if(route.params && route.params.focusCoordinates != null){
         console.log("sa parametry: ", route.params.focusCoordinates);
         const tempRegion = {
@@ -180,7 +180,7 @@ const MapMain = ({ navigation, route }) => {
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log("useEffect2", route.params);
+      //console.log("useEffect2", route.params);
       if(route.params && route.params.refresh){
         console.log("wywolano odswiezenie mapy");
         fetchData();

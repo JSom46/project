@@ -12,8 +12,16 @@ import {
     TouchableOpacity,
     Image,
     RefreshControl,
+    Modal,
   } from "react-native";
-  import { stylesAnnouncements, chatListItem } from "../components/styles";
+  import { stylesAnnouncements,
+            chatListItem,
+            dialogContainer, 
+            innerDialogContainer, 
+            innerDialogButtonsContainer, 
+            dialogButton,
+            modalBackground, 
+} from "../components/styles";
   import { StatusBar } from "expo-status-bar";
   import {
     Octicons,
@@ -27,19 +35,6 @@ import {
   import { userDataContext } from "../screens/UserDataContext";
   //import { SocketContext } from "./ChatStack";
 
-  const ChatItem = ({ title, login, newMsgs }) => (
-    <View style={chatListItem}>
-      <View style={{ flex: 1 }}>
-        <Text style={{fontSize: 24}}>{title}</Text>
-        <Text>Z użytkownikiem: {login}</Text>
-      </View>
-      {newMsgs > 0 ? (
-        <Ionicons name="notifications" size={28} color="red" />
-      ):(
-        <Ionicons name="notifications" size={28} color="lightgray" />
-      )}
-    </View>
-  );
 
 const ChatList = ({ route, navigation }) => {
     //const [userData, setUserData] = useState(route.params.userData);
@@ -49,6 +44,8 @@ const ChatList = ({ route, navigation }) => {
     const [authenticated, setAuthenticated] = useState(false);
     const [userChats, setUserChats] = useState([]);
     const [chatMessages, setChatMessages] = useState([]);
+    const [isModalVisible, setModalVisible] = useState(false);
+    const [modalData, setModalData] = useState();
 
     const [anonsId, setAnonsId] = useState(-1);
     const [header, setHeader] = useState(null);
@@ -64,7 +61,7 @@ const ChatList = ({ route, navigation }) => {
     React.useEffect(() => {
         //console.log(socket);
         if (socket === null) {
-            const newSocket = io("http://" + serwerIP + ":2400");
+            const newSocket = io("http://" + serwer);
             setSocket(newSocket);
             console.log("Nawiązuje połączenie z serwerem...");
             //console.log(newSocket);
@@ -120,36 +117,12 @@ const ChatList = ({ route, navigation }) => {
                     setUserChats(userChats);
                     console.log("Ustawiono czaty uzytkownika");
                 });
-                
-                // socket.on("chat-img", (image_id, chat_id, username, datetime, lastImage, img_name, img_type) => {
-                //     // console.log(image_id);
-                //     // console.log(chat_id);
-                //     // console.log(username);
-                //     // console.log(datetime);
-                //     // console.log(lastImage);
-                //     // console.log(img_name);
-                //     // console.log(img_type);
-                //     var msg = {
-                //         message_id: image_id,
-                //         chat_id: chat_id,
-                //         image_id: lastImage,
-                //         username: username,
-                //         message_date: datetime,
-                //     }
-                //     if (chat_id === chatId) setChatMessages((prev) => [...prev, msg])
-                // });
-                // socket.on("image", (image_id, img_name, img_type, img_data) => {
-                //     // console.log(image_id);
-                //     // console.log(img_name);
-                //     // console.log(img_type);
-                //     // console.log(img_data);
-                //     const blob = new Blob([img_data], { type: img_type })
-                //     const url = URL.createObjectURL(blob);
-                //     setOpenImageDialog({
-                //         open: true,
-                //         src: url
-                //     })
-                // });
+
+                socket.on("delete-chat-response", () => {
+                    socket.emit('get-user-chats');
+                    console.log("Usunieto czat");
+                });
+        
                 socket.on("disconnect", () => {
                     // console.log("dc");
                     setAuthenticated(false);
@@ -166,14 +139,14 @@ const ChatList = ({ route, navigation }) => {
     useFocusEffect(
         React.useCallback(() => {
             console.log("FOCUS EFFECT");
-            console.log("paranetry: ",route?.params);
+            //console.log("paranetry: ",route?.params);
             setCreateNewChat(route?.params?.createNewChat);
             //console.log(socket);
             if (socket != null) {
                 console.log("FOCUS EFFECT - odswiezono czaty");
                 socket.emit('get-user-chats');
             }
-            
+            //
         }, [])
     );
 
@@ -182,12 +155,42 @@ const ChatList = ({ route, navigation }) => {
           onPress={() => navigation.navigate("Rozmowa", {item: item})}
         >
           <ChatItem
-            title={item.title}
-            login={item.login}
-            newMsgs={item.newMsgs}
+            item={item}
           />
         </TouchableOpacity>
     );
+
+    const ChatItem = ({ title, login, newMsgs, item }) => (
+        <View style={chatListItem}>
+          <View style={{ flex: 1 }}>
+            <Text style={{fontSize: 24}}>{item.title}</Text>
+            <Text>Z użytkownikiem: {item.login}</Text>
+          </View>
+          <TouchableOpacity onPress={()=>{
+            setModalData(item);
+              toggleModal();
+            }}>
+            <Ionicons name="close" size={28} color="darkgray" />
+          </TouchableOpacity>
+          
+          {/* {newMsgs > 0 ? (
+            <Ionicons name="notifications" size={28} color="red" />
+          ):(
+            <Ionicons name="notifications" size={28} color="lightgray" />
+          )} */}
+        </View>
+    );
+
+    const toggleModal = () => {
+        setModalVisible(!isModalVisible);
+    };
+
+    const handleDelete = () => {
+        if(socket != null){
+            socket.emit('delete-chat', modalData?.chat_id);
+            toggleModal();
+        }
+    }
 
     return(
         <View style={{flex: 1}}>
@@ -197,6 +200,34 @@ const ChatList = ({ route, navigation }) => {
                 <>
                 {userChats.length > 0 ? (
                     <SafeAreaView style={{ flex: 1 }}>
+                        <Modal visible={isModalVisible} transparent={true} onRequestClose={() => {setModalVisible(!isModalVisible)}}>
+                            <View style={modalBackground}>
+                                <View style={dialogContainer}>
+                                    <Text style={{ fontSize: 24, color: "black", fontWeight: "bold"}}>Potwierdź</Text>
+                                    <View style={innerDialogContainer}>
+                                    <Text style={{ fontSize: 18, color: "black", textAlign: "center" }}>Czy na pewno chcesz usunąć ten czat?</Text>
+                                    <Text style={{ fontSize: 18, color: "black", marginTop: 20}}>{modalData?.title}</Text>
+                                    </View>
+                                    <View style={innerDialogButtonsContainer}>
+                                    <TouchableOpacity style={dialogButton} onPress={toggleModal}>
+                                        <Text style={{ fontSize: 18, color: "black" }}>
+                                        Anuluj
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={[dialogButton, {backgroundColor: "red", borderWidth: 1, borderColor: "red"}]} onPress={handleDelete}>
+                                        <Ionicons
+                                        name="trash-outline"
+                                        size={24}
+                                        color={"white"}
+                                        />
+                                        <Text style={{ fontSize: 18, color: "white", marginLeft: 5 }}>
+                                        Tak
+                                        </Text>
+                                    </TouchableOpacity>
+                                    </View>
+                                </View>
+                            </View>
+                        </Modal>
                         <FlatList
                             data={userChats}
                             keyExtractor={(item) => item.chat_id}
