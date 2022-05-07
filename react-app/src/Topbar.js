@@ -84,7 +84,6 @@ export default function MenuAppBar(props) {
     }
   }
   React.useEffect(() => {
-
     if ((sessionStorage.getItem('messagesCount') === null || sessionStorage.getItem('notificationsCount') === null) && sessionStorage.getItem('login') !== null) {
       fetchNotifications();
       fetchChatMessages();
