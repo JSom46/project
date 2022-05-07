@@ -116,6 +116,7 @@ const ChatList = ({ route, navigation }) => {
                 socket.on("user-chats", (count, userChats) => {
                     //console.log(userChats);
                     console.log("socket on user-chats");
+                    console.log("lista ogloszen",userChats);
                     setUserChats(userChats);
                     console.log("Ustawiono czaty uzytkownika");
                     setRefreshing(false);
@@ -160,9 +161,21 @@ const ChatList = ({ route, navigation }) => {
         }, [])
     );
 
+    const updateNewMsgs = (chat_id) => {
+        let index = userChats.findIndex((item => item.chat_id == chat_id));
+        let chats = userChats;
+        if(chats[index].NewMsgs !== 0){
+            chats[index].NewMsgs = 0;
+            setUserChats(chats);
+        }
+    };
+
     const renderItem = ({ item }) => (
         <TouchableOpacity
-          onPress={() => navigation.navigate("Rozmowa", {item: item})}
+            onPress={() => {
+                updateNewMsgs(item.chat_id);
+                navigation.navigate("Rozmowa", {item: item});
+            }}
         >
           <ChatItem
             item={item}
@@ -172,6 +185,11 @@ const ChatList = ({ route, navigation }) => {
 
     const ChatItem = ({ title, login, newMsgs, item }) => (
         <View style={chatListItem}>
+            {item.NewMsgs > 0 ? (
+                <Ionicons name="notifications" size={28} color="red" style={{alignSelf: 'center'}}/>
+            ):(
+                <Ionicons name="notifications" size={28} color="lightgray" style={{alignSelf: 'center'}}/>
+            )}
           <View style={{ flex: 1 }}>
             <Text style={{fontSize: 24}}>{item.title}</Text>
             <Text>Z użytkownikiem: {item.login}</Text>
@@ -183,11 +201,7 @@ const ChatList = ({ route, navigation }) => {
             <Ionicons name="close" size={28} color="darkgray" />
           </TouchableOpacity>
           
-          {/* {newMsgs > 0 ? (
-            <Ionicons name="notifications" size={28} color="red" />
-          ):(
-            <Ionicons name="notifications" size={28} color="lightgray" />
-          )} */}
+          
         </View>
     );
 

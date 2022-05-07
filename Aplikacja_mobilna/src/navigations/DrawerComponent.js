@@ -37,8 +37,33 @@ const Drawer = createDrawerNavigator();
 
 const DrawerComponent = ({ navigation, route }) => {
   //const [userData, setUserData] = useState(route.params.userData);
+  const [newMessages, setNewMessages] = useState();
   const { userData, setUserData } = React.useContext(userDataContext);
 
+
+  React.useEffect(() => {
+    const getNewMessages = () => {
+      const url = "http://" + serwer + "/anons/messages";
+      axios
+        .get(url, { credentials: "same-origin" })
+        .then((response) => {
+          const result = response.data;
+          if (response.status == "200") {
+            console.log("nowe wiadomosci: ",result.count);
+            setNewMessages(result.count);
+            // response.json().then(data => {
+            //   console.log("nowe wiadomosci: ",data.count);
+            // });
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      };
+      getNewMessages();
+      console.log("Pobrano liczbe nowych wiadomosci na czatach");
+  },[])
+////////////
   const handleLogout = (credentials) => {
     console.log(credentials);
     const url = "http://" + serwer + "/auth/logout";
@@ -59,7 +84,7 @@ const DrawerComponent = ({ navigation, route }) => {
       .catch((error) => {
         console.log(error.JSON());
       });
-  };
+    };
 
   const handleLoggedIn = (credentials) => {
     const url = "http://" + serwer + "/auth/loggedin";
@@ -282,7 +307,8 @@ const DrawerComponent = ({ navigation, route }) => {
                 <Ionicons
                   name="chatbox-ellipses-outline"
                   size={size}
-                  color={focused ? "#7cc" : "#ccc"}
+                  // color={focused ? "#7cc" : "#ccc"}
+                  color={newMessages > 0 ? "red" : "#ccc"}
                 />
               ),
             }}
