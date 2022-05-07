@@ -7,6 +7,7 @@ import { Button, IconButton } from '@mui/material';
 import { Dialog, DialogTitle, DialogActions } from '@mui/material';
 import { LinearProgress } from '@mui/material';
 import { Snackbar, Alert } from '@mui/material';
+import { Badge } from '@mui/material';
 
 import ClearIcon from '@mui/icons-material/Clear';
 
@@ -177,7 +178,7 @@ export default function Chat(props) {
                 socket.on("join-chat-response", (anons_id, chat_id, message) => {
                 });
                 socket.on("delete-chat-response", (status, message) => {
-                    if(status === 1){
+                    if (status === 1) {
                         setSnackbarData({
                             open: true,
                             message: "Usunięto czat",
@@ -196,18 +197,26 @@ export default function Chat(props) {
             return () => socket.off();
         }
     }, [socket, connected, authenticated, chatId, login, createNewChat]);
+    const updateNewMsgs = (chat_id) => {
+        let index = userChats.findIndex((item => item.chat_id == chat_id));
+        let chats = userChats;
+        if(chats[index].NewMsgs !== 0){
+            chats[index].NewMsgs = 0;
+            setUserChats(chats);
+        }
+    };
     const handleChatClick = (login, chat_id) => {
         // console.log(anons_id);
         // console.log(chat_id);
-        
-        setHeader(login);
-        setChatId(chat_id);
         if (socket !== null) {
-            if(chatId !== -1){
+            if (chatId !== -1) {
                 socket.emit("leave-chat", chatId);
             }
+            setHeader(login);
+            setChatId(chat_id);
             socket.emit("get-chat-messages", chat_id);
             socket.emit("join-chat", chat_id);
+            updateNewMsgs(chat_id);
         }
     }
     const handleSendMessage = (message) => {
@@ -231,7 +240,7 @@ export default function Chat(props) {
             }
         };
     }
-    const handleChatDelete = () => {      
+    const handleChatDelete = () => {
         if (socket !== null) {
             socket.emit("leave-chat", chatId);
             socket.emit("delete-chat", chatDeleteId);
@@ -253,17 +262,15 @@ export default function Chat(props) {
                     <Divider />
                     <ConversationList>
                         {userChats && userChats.map((item) => (
-                            <Conversation key={item.chat_id} onClick={() => handleChatClick(item.login, item.chat_id)} active={/*item.anons_id === anonsId &&*/ item.chat_id === chatId}>
+                            <Conversation key={item.chat_id}
+                                onClick={() => handleChatClick(item.login, item.chat_id)}
+                                active={item.chat_id === chatId}
+                                unreadCnt={item.NewMsgs}
+                            >
+                                {/* <Badge badgeContent={3} color="secondary"></Badge> */}
                                 <Conversation.Content>
                                     <Typography variant="subtitle2">{item.login}</Typography>
-                                    {/* <Typography variant="caption">{item.title}</Typography> */}
                                     <Typography variant="caption">{item.title}</Typography>
-                                    {/* <Typography variant="caption">{"Wszystkich wiadomości: " + item.AllMsgs}</Typography> */}
-                                    {/* {item.NewMsgs !== 0 ?
-                                        <Typography variant="caption">{"Nowe wiadomości: " + item.NewMsgs}</Typography>
-                                        :
-                                        <Typography variant="caption">{"Wszystkich wiadomości: " + item.AllMsgs}</Typography>
-                                    } */}
                                 </Conversation.Content>
                                 <Conversation.Operations>
                                     <IconButton onClick={(e) => { e.stopPropagation(); setOpenDeleteDialog(true); setChatDeleteId(item.chat_id) }} >
@@ -343,7 +350,7 @@ export default function Chat(props) {
                 <DialogTitle>Czy na pewno chcesz usunąć ten czat?</DialogTitle>
                 <DialogActions>
                     <Button onClick={() => setOpenDeleteDialog(false)}>Anuluj</Button>
-                    <Button color='error' onClick={() => {handleChatDelete(); setOpenDeleteDialog(false)}}>Usuń</Button>
+                    <Button color='error' onClick={() => { handleChatDelete(); setOpenDeleteDialog(false) }}>Usuń</Button>
                 </DialogActions>
             </Dialog>
         </div>

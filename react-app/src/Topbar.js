@@ -83,15 +83,25 @@ export default function MenuAppBar(props) {
       console.log("error", error);
     }
   }
-  if ((sessionStorage.getItem('messagesCount') === null || sessionStorage.getItem('notificationsCount') === null) && sessionStorage.getItem('login') !== null) {
-    fetchNotifications();
-    fetchChatMessages();
+  React.useEffect(() => {
+
+    if ((sessionStorage.getItem('messagesCount') === null || sessionStorage.getItem('notificationsCount') === null) && sessionStorage.getItem('login') !== null) {
+      fetchNotifications();
+      fetchChatMessages();
+    }
+    else if (sessionStorage.getItem('messagesCount') !== null) {
+      setMessagesCount(parseInt(sessionStorage.getItem('messagesCount')));
+      setNotificationsCount(parseInt(sessionStorage.getItem('notificationsCount')));
+      sessionStorage.removeItem('messagesCount');
+      sessionStorage.removeItem('notificationsCount');
+    }
     const interval = setInterval(() => {
       fetchNotifications();
       fetchChatMessages();
     }, 3 * 60 * 1000);
-    // return () => clearInterval(interval);
-  }
+    return () => clearInterval(interval);
+  }, []);
+  
   function logout() {
     sessionStorage.clear();
     window.location.assign("/");
