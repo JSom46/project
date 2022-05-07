@@ -7,8 +7,6 @@ import { Button, IconButton } from '@mui/material';
 import { Dialog, DialogTitle, DialogActions } from '@mui/material';
 import { LinearProgress } from '@mui/material';
 import { Snackbar, Alert } from '@mui/material';
-import { Badge } from '@mui/material';
-
 import ClearIcon from '@mui/icons-material/Clear';
 
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
@@ -198,7 +196,7 @@ export default function Chat(props) {
         }
     }, [socket, connected, authenticated, chatId, login, createNewChat]);
     const updateNewMsgs = (chat_id) => {
-        let index = userChats.findIndex((item => item.chat_id == chat_id));
+        let index = userChats.findIndex((item => item.chat_id === chat_id));
         let chats = userChats;
         if(chats[index].NewMsgs !== 0){
             chats[index].NewMsgs = 0;
