@@ -21,7 +21,7 @@ const MyAnnouncementsStack = createNativeStackNavigator();
 
 const MyAnnouncementsStackScreen = ({ route, navigation }) => {
   //const [userData, setUserData] = useState(route.params.userData);
-  const {userData, setUserData} = React.useContext(userDataContext);
+  const { userData, setUserData } = React.useContext(userDataContext);
 
   return (
     //<NavigationContainer>
@@ -36,11 +36,11 @@ const MyAnnouncementsStackScreen = ({ route, navigation }) => {
         component={AnnouncementView}
         //initialParams={{ userData: userData }}
       />
-      <MyAnnouncementsStack.Screen
+      {/* <MyAnnouncementsStack.Screen
         name="Dodaj Ogloszenie"
         component={AddAnnouncement}
         initialParams={{ photos: "" }}
-      />
+      /> */}
     </MyAnnouncementsStack.Navigator>
     //</NavigationContainer>
   );

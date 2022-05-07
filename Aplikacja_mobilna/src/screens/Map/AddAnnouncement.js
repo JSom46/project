@@ -1,9 +1,11 @@
 import { View, SafeAreaView, Text, TouchableOpacity } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-
+import MapPicker from "./MapPicker";
+import { Alert } from "react-native";
 import React, { useState, useEffect } from "react";
 //icon
-
+//import * as RNFS from "react-native-fs";
+import * as FileSystem from "expo-file-system";
 import { Formik } from "formik";
 import {
   StyledContainer,
@@ -31,15 +33,15 @@ import {
   StyledButtonCategory,
   pickerStyle,
   categoryButton,
+  InnerContainerImage,
+  stylesAnnouncements,
 } from "../../components/styles";
 import { StatusBar } from "expo-status-bar";
-import * as ImagePicker from "expo-image-picker";
+
 import axios from "axios";
 import { Button } from "react-native-paper";
-
-//import { AssetsSelector } from "expo-images-picker";
-
-//import { ImageBrowser } from "expo-image-picker-multiple";
+import { Entypo } from "@expo/vector-icons";
+import * as Yup from "yup";
 
 const { brand, darkLight, black, primary, facebook } = Colors;
 
@@ -47,142 +49,78 @@ function createTypes(name, coats, colors, breeds) {
   return { name, coats, colors, breeds };
 }
 
-const AddAnnouncement = ({ navigation }) => {
-  const [title, setTitle] = useState();
-  const [description, setDescription] = useState();
+const AddAnnouncement = ({ navigation, route }) => {
   const [category, setCategory] = useState();
-  const [pictures, setPictures] = useState();
   const [type, setType] = useState("");
   const [coat, setCoat] = useState("");
   const [color, setColor] = useState("");
   const [breed, setBreed] = useState("");
-  const [picturesPreview, setPicturesPreview] = useState();
-  const [image, setImage] = useState(null);
-  const [lat, setLat] = useState();
+  const [image, setImage] = useState([]);
+  const [lat, setLat] = useState("");
   const [lng, setLng] = useState();
-  const [typesList = [], setTypesList] = useState();
   const [coatsList, setCoatsList] = useState([]);
   const [colorsList, setColorsList] = useState([]);
   const [breedsList, setBreedsList] = useState([]);
-  const [selectedType, setSelectedType] = useState(-1);
-  const [selectedColor, setSelectedColor] = useState();
-  const [selectedCoat, setSelectedCoat] = useState();
-  const [selectedBreed, setSelectedBreed] = useState();
+  const [types, setTypes] = useState();
+  const [message, setMessage] = useState();
+  const [messageType, setMessageType] = useState();
+  const [messageType1, setMessageType1] = useState();
+  const [message1, setMessage1] = useState();
 
-  let openImagePickerAsync = async () => {
-    let permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const [alertData, setAlertData] = useState({
+    open: false,
+    variant: "filled",
+    severity: "error",
+    text: "",
+  });
 
-    if (permissionResult.granted === false) {
-      alert("Permission to access camera roll is required!");
-      return;
-    }
-
-    let pickerResult = await ImagePicker.launchImageLibraryAsync();
-    console.log(pickerResult);
-    if (!pickerResult.cancelled) {
-      setImage(pickerResult.uri);
-      setPictures(pickerResult.uri);
-      console.log(pictures.uri);
-    }
-  };
-
-  const handlePictures = (event) => {
+  async function postAnnoucement(e) {
     const formData = new FormData();
-    const picturesPreviewArray = [];
-    for (let i = 0; i < event.target.files.length; i++) {
-      picturesPreviewArray.push(URL.createObjectURL(event.target.files[i]));
-      formData.append("pictures", event.target.files[i]);
-    }
-    setPictures(formData);
-    setPicturesPreview(picturesPreviewArray);
-    // console.log(picturesPreview);
-  };
-
-  const handleAddAnnounce = () => {
-    const formData = new FormData();
-    //  formData.append("title", credentials.title);
-    //  formData.append("category", credentials.category);
-    //  formData.append("description", credentials.description);
-    formData.append("title", title);
-    formData.append("category", category);
-    formData.append("description", description);
-    formData.append("type", type);
-    formData.append("lat", Math.random()); //Dane z mapy
-    formData.append("lng", Math.random()); //Dane z mapy
-    formData.append("pictures", image);
-    // console.log(formData);
-
-    var config = {
-      method: "post",
-      url: "http://" + serwer + "/anons/",
-      data: formData,
-      headers: formData.getHeadres,
-    };
-    axios(config)
-      .then((response) => {
-        // console.log("dostalem");
-        //  console.log(response.data);
-      })
-      .catch((err) => {
-        //  console.log(err.response);
-      });
-  };
-
-  // handleActiveButton = (id) => {
-  //   this.props.selectedtype.bind(this, id);
-  //   setState({ activeButton: id });
-  // };
-
-  async function postAnnoucement() {
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("category", category);
-    formData.append("description", description);
-    formData.append("type", type);
-    formData.append("coat", coat);
-    formData.append("color", color);
-    formData.append("breed", breed);
-    formData.append("picture", image);
-    formData.append("lat", Math.random()); //Dane z mapy
-    formData.append("lng", Math.random()); //Dane z mapy
-
-    console.log("FormData: ", formData);
-
+    formData.append("title", e.title);
+    formData.append("category", e.category);
+    formData.append("description", e.description);
+    formData.append("type", e.type);
+    formData.append("coat", e.coat);
+    formData.append("color", e.color);
+    formData.append("breed", e.breed);
+    image.map((item, key) => formData.append("pictures", item));
+    formData.append("lat", lat);
+    formData.append("lng", lng);
+    console.log(formData);
     try {
       const response = await fetch("http://" + serwer + "/anons/", {
         method: "POST",
         credentials: "include",
         body: formData,
+        headers: formData.getHeadres,
       });
-      const json = await response;
-      // console.log(JSON.stringify(json));
-      return json;
+      return response;
     } catch (error) {
       console.log("error", error);
     }
   }
-  const handleSubmit = async (e) => {
-    const response = await postAnnoucement();
-    //console.log(JSON.stringify(response));
-    if (response.status == 200) {
-      alert("Pomyślnie dodano ogłoszenie.");
-      navigation.goBack();
-    } else {
-      alert("Nie udało się dodać ogłoszenia.");
+
+  const handleSubmitt = async (e) => {
+    console.log(e);
+    if (checkFormLat(e)) {
+      if (checkFormType(e)) {
+        const response = await postAnnoucement(e);
+        console.log(response.status);
+        if (response.status == 200) {
+          alert("Pomyślnie dodano ogłoszenie.");
+          navigation.goBack();
+        } else {
+          alert("Nie udało się dodać ogłoszenia.");
+        }
+      }
     }
   };
 
   const handleTypeChange = (value) => {
     setType(value);
-    //console.log(value);
-    //console.log(typesList);
-    //console.log(typesList[0].name);
-    const choice = typesList.filter((item) => {
+    const choice = types.filter((item) => {
       return item.name == value;
     });
-    //console.log(choice);
-    //console.log(choice[0].coats);
     setCoat("");
     setColor("");
     setBreed("");
@@ -191,68 +129,85 @@ const AddAnnouncement = ({ navigation }) => {
     setBreedsList(choice[0].breeds);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchTypes = async () => {
-      const url = "http://" + serwer + "/anons/types";
-
-      axios
-        .get(url)
-        .then((response) => {
-          const result = response.data;
-          //console.log(response);
-          if (response.status == "200") {
-            //console.log(result);
-            //const json = response.json();
-            const tempTypes = [];
-
-            result.forEach((element) => {
-              tempTypes.push(
-                createTypes(
-                  element.name,
-                  element.coats,
-                  element.colors,
-                  element.breeds
-                )
-              );
-            });
-
-            //console.log(tempTypes);
-
-            setTypesList(tempTypes);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
+      let url = "http://" + serwer + "/anons/types";
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          credentials: "include",
         });
+        const json = await response.json();
+        const rows = [];
+        json.forEach((element) => {
+          rows.push(
+            createTypes(
+              element.name,
+              element.coats,
+              element.colors,
+              element.breeds
+            )
+          );
+        });
+
+        setTypes(rows);
+      } catch (error) {
+        console.log("error", error);
+      }
     };
 
     fetchTypes();
+    if (route.params.photos != "") {
+      setImage(route.params.photos);
+    }
+    setMessage("");
+    setMessage1("");
   }, []);
+
+  const handleCallback = (childData, childData2) => {
+    setLat(childData);
+    setLng(childData2);
+  };
+
+  const handleCallbackPhoto = (childData) => {
+    setImage(childData);
+  };
+
+  const checkFormType = (e) => {
+    console.log(e.type);
+    if (e.type == "") {
+      setMessageType1(false);
+      setMessage1("Nie wybrano typu zwierzaka");
+      console.log("Nie wybrano typu zwierzaka");
+      return false;
+    }
+    return true;
+  };
+
+  const checkFormLat = (e) => {
+    if (lat == "") {
+      setMessageType(false);
+      setMessage("Nie wybrano punktu na mapie");
+      return false;
+    }
+    return true;
+  };
+
+  const validationSchema = Yup.object().shape({
+    title: Yup.string()
+      .required("Tytuł jest wymagany")
+      .min(3, "Tytuł powinien miec conajmniej 3 znaki"),
+    category: Yup.string().required("Wybierz kategorię ogłoszenia"),
+    description: Yup.string().required("Opis jest wymagany"),
+  });
 
   return (
     <StyledContainer>
       <StatusBar style="dark" />
+
       <InnerContainerOne>
-        <SubTitle>Dodaj ogłoszenie</SubTitle>
-        <ButtonView>
-          <StyledButton isPhoto={true} onPress={openImagePickerAsync}>
-            <ButtonText isPhoto={true}>Wybierz{"\n"}zdjęcia</ButtonText>
-            {image && <ImageOne source={{ uri: image }} />}
-          </StyledButton>
-        </ButtonView>
-
-        {/* <ImageBrowser
-          max={4}
-          onChange={(num, onSubmit) => {}}
-          callback={(callback) => {}}
-        /> */}
-
-        {/* <ImageBrowser
-          max={4}
-          onChange={(num, onSubmit) => {}}
-          callback={(callback) => {}}
-        /> */}
         <Formik
+          validationSchema={validationSchema}
           initialValues={{
             title: "",
             category: "",
@@ -266,34 +221,35 @@ const AddAnnouncement = ({ navigation }) => {
             breed: "",
           }}
           onSubmit={(values) => {
-            values.lat = 50;
-            values.lng = 50;
-            setTitle(values.title);
-            setCategory(values.category);
-            setDescription(values.description);
-            setType(values.type);
-            setCoat(values.coat);
-            setBreed(values.breed);
-            setColor(values.color);
-            setLat(50);
-            setLng(50);
-            setPictures("");
-            handleSubmit();
+            handleSubmitt(values);
           }}
         >
-          {({ handleChange, handleBlur, handleSubmit, values }) => (
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            values,
+            errors,
+            touched,
+            isValid,
+          }) => (
             <StyledFormArea>
               <MyTextInput
-                label="Tytuł"
+                label="Tytuł*"
                 placeholder="Wpisz"
                 placeholderTextColor={darkLight}
                 onChangeText={handleChange("title")}
-                onBlur={handleBlur("titles")}
+                onBlur={handleBlur("title")}
                 value={values.title}
                 // keyboardType="email.address"
               />
+              {errors.title && touched.title && (
+                <Text style={{ fontSize: 10, color: "red" }}>
+                  {errors.title}
+                </Text>
+              )}
               <MyTextInput
-                label="Opis"
+                label="Opis*"
                 placeholder="Wpisz"
                 placeholderTextColor={darkLight}
                 onChangeText={handleChange("description")}
@@ -304,113 +260,115 @@ const AddAnnouncement = ({ navigation }) => {
                 isDescription={true}
                 // keyboardType="email.address"
               />
-
-              <StyledInputLabel>Typ</StyledInputLabel>
+              {errors.description && touched.description && (
+                <Text style={{ fontSize: 10, color: "red" }}>
+                  {errors.description}
+                </Text>
+              )}
+              <StyledInputLabel announce={true}>Typ*</StyledInputLabel>
               <Picker
                 style={pickerStyle}
+                selectedValue={type}
                 onValueChange={(itemValue) => {
-                  handleChange("type");
-                  values.type = itemValue;
-                  //alert(values.type);
                   handleTypeChange(itemValue);
-                  setSelectedType(itemValue);
+                  values.type = itemValue;
+                  setMessage1("");
                 }}
-                selectedValue={selectedType}
-                prompt="Typ"
               >
-                {typesList.map((item) => {
-                  return (
-                    <Picker.Item
-                      label={item.name.toString()}
-                      value={item.name.toString()}
-                      key={item.name.toString()}
-                    />
-                  );
-                })}
-              </Picker>
-
-              <StyledInputLabel>Owłosienie</StyledInputLabel>
-              <Picker
-                style={pickerStyle}
-                onValueChange={(itemValue) => {
-                  handleChange("coat");
-                  values.coat = itemValue;
-                  setSelectedCoat(itemValue);
-                }}
-                selectedValue={selectedCoat}
-                prompt="Owłosienie"
-                enabled={coatsList.length > 1 ? true : false}
-              >
-                {coatsList.length > 1 ? (
-                  coatsList.map((item) => {
-                    //console.log(item);
-                    return <Picker.Item label={item} value={item} key={item} />;
-                  })
-                ) : (
-                  <Picker.Item label={"Wybierz owłosienie"} value={0} key={0} />
-                )}
-              </Picker>
-
-              <StyledInputLabel>Umaszczenie</StyledInputLabel>
-              <Picker
-                style={pickerStyle}
-                onValueChange={(itemValue) => {
-                  handleChange("color");
-                  values.color = itemValue;
-                  setSelectedColor(itemValue);
-                }}
-                selectedValue={selectedColor}
-                prompt="Umaszczenie"
-                enabled={colorsList.length > 1 ? true : false}
-              >
-                {colorsList.length > 1 ? (
-                  colorsList.map((item) => {
-                    //console.log(item);
-                    return <Picker.Item label={item} value={item} key={item} />;
-                  })
-                ) : (
+                {type != "" ? null : (
                   <Picker.Item
-                    label={"Wybierz umaszczenie"}
-                    value={0}
-                    key={0}
-                  />
+                    label="Wybierz typ"
+                    value={null}
+                    color="#9EA0A4"
+                  ></Picker.Item>
                 )}
+                {types &&
+                  types.map((item) => (
+                    <Picker.Item
+                      key={item.name}
+                      label={item.name}
+                      value={item.name}
+                    />
+                  ))}
               </Picker>
+              <MsgBox type={messageType1}>{message1}</MsgBox>
 
-              <StyledInputLabel>Rasa</StyledInputLabel>
+              <StyledInputLabel announce={true}>Owłosienie</StyledInputLabel>
+
               <Picker
                 style={pickerStyle}
                 onValueChange={(itemValue) => {
-                  handleChange("breed");
-                  values.breed = itemValue;
-                  setSelectedBreed(itemValue);
+                  setCoat(itemValue);
+                  values.coat = itemValue;
                 }}
-                selectedValue={selectedBreed}
-                prompt="Rasa"
-                enabled={breedsList.length > 1 ? true : false}
+                selectedValue={coat}
+                enabled={coatsList.length > 0 ? true : false}
               >
-                {breedsList.length > 1 ? (
-                  breedsList.map((item) => {
-                    //console.log(item);
-                    return <Picker.Item label={item} value={item} key={item} />;
-                  })
-                ) : (
-                  <Picker.Item label={"Wybierz rasę"} value={0} key={0} />
+                {coat != "" ? null : (
+                  <Picker.Item
+                    label="Owłosienie"
+                    value={null}
+                    color="#9EA0A4"
+                  ></Picker.Item>
                 )}
+
+                {coatsList.map((item) => (
+                  <Picker.Item key={item} label={item} value={item} />
+                ))}
               </Picker>
 
-              <StyledInputLabel>{"Kategoria"}</StyledInputLabel>
+              <StyledInputLabel announce={true}>Umaszczenie</StyledInputLabel>
+              <Picker
+                style={pickerStyle}
+                selectedValue={color}
+                onValueChange={(itemValue) => {
+                  setColor(itemValue);
+                  values.color = itemValue;
+                }}
+                enabled={colorsList.length > 0 ? true : false}
+              >
+                {color != "" ? null : (
+                  <Picker.Item
+                    label="Umaszczenie"
+                    value={null}
+                    color="#9EA0A4"
+                  ></Picker.Item>
+                )}
+                {colorsList &&
+                  colorsList.map((item) => (
+                    <Picker.Item key={item} label={item} value={item} />
+                  ))}
+              </Picker>
+              <StyledInputLabel announce={true}>Rasa</StyledInputLabel>
+              <Picker
+                style={pickerStyle}
+                onValueChange={(itemValue) => {
+                  values.breed = itemValue;
+                  setBreed(itemValue);
+                }}
+                enabled={breedsList.length > 0 ? true : false}
+                selectedValue={breed}
+              >
+                {breed != "" ? null : (
+                  <Picker.Item
+                    label="Umaszczenie"
+                    value={null}
+                    color="#9EA0A4"
+                  ></Picker.Item>
+                )}
+                {breedsList &&
+                  breedsList.map((item) => (
+                    <Picker.Item key={item} label={item} value={item} />
+                  ))}
+              </Picker>
+              <StyledInputLabel announce={true}>
+                {"Kategoria*"}
+              </StyledInputLabel>
               <ButtonView>
-                {/* <StyledButtonCategory onPress={() => setCategory(0)}>
-                  <ButtonText isCategory={true}>Zaginione</ButtonText>
-                </StyledButtonCategory>
-                <StyledButtonCategory onPress={() => setCategory(1)}>
-                  <ButtonText isCategory={true}>Znalezione</ButtonText>
-                </StyledButtonCategory> */}
                 <TouchableOpacity
                   style={[
                     categoryButton,
-                    { backgroundColor: category == 0 ? "#E5E7EB" : "#ffffff" },
+                    { backgroundColor: category == 0 ? "#0898de" : "#ffffff" },
                   ]}
                   onPress={() => {
                     values.category = 0;
@@ -424,7 +382,7 @@ const AddAnnouncement = ({ navigation }) => {
                 <TouchableOpacity
                   style={[
                     categoryButton,
-                    { backgroundColor: category == 1 ? "#E5E7EB" : "#ffffff" },
+                    { backgroundColor: category == 1 ? "#0898DE" : "#ffffff" },
                   ]}
                   onPress={() => {
                     values.category = 1;
@@ -436,13 +394,65 @@ const AddAnnouncement = ({ navigation }) => {
                   </Text>
                 </TouchableOpacity>
               </ButtonView>
+              {errors.category && touched.category && (
+                <Text style={{ fontSize: 10, color: "red" }}>
+                  {errors.category}
+                </Text>
+              )}
+              <StyledInputLabel announce={true}>
+                {"Wskaż lokalizacje zgłoszenia*"}
+              </StyledInputLabel>
+              {
+                <MapPicker
+                  parentCallback={handleCallback}
+                  range={null}
+                  lat={null}
+                  lng={null}
+                />
+              }
 
-              <StyledButton onPress={handleSubmit} style={{ marginBottom: 50 }}>
+              <MsgBox type={messageType}>{message}</MsgBox>
+              <StyledInputLabel announce={true}>
+                {"Dodaj zdjęcia:"}
+              </StyledInputLabel>
+              <InnerContainerImage>
+                <StyledButton
+                  isEditAnnouncement={true}
+                  onPress={() => {
+                    navigation.navigate("ImageBrowser", {
+                      onGoBack: handleCallbackPhoto,
+                      count: 8,
+                    });
+                  }}
+                >
+                  <ButtonText isPhoto={true}>
+                    <Entypo name={"camera"} size={50} />
+                  </ButtonText>
+                </StyledButton>
+
+                {image == undefined
+                  ? null
+                  : image.map((item, key) => (
+                      <ImageOne key={key} source={{ uri: item.uri }} />
+                    ))}
+              </InnerContainerImage>
+              <StyledButton
+                announce={true}
+                onPress={handleSubmit}
+                style={{ marginBottom: 50 }}
+              >
                 <ButtonText>Dodaj</ButtonText>
               </StyledButton>
             </StyledFormArea>
           )}
         </Formik>
+        {/* <Alert
+          variant={alertData.variant}
+          severity={alertData.severity}
+          sx={{ mb: 2 }}
+        >
+          {alertData.text}
+        </Alert> */}
       </InnerContainerOne>
     </StyledContainer>
   );
@@ -451,7 +461,7 @@ const AddAnnouncement = ({ navigation }) => {
 const MyTextInput = ({ label, ...props }) => {
   return (
     <View>
-      <StyledInputLabel>{label}</StyledInputLabel>
+      <StyledInputLabel announce={true}>{label}</StyledInputLabel>
       <StyledTextInputAdd {...props} />
     </View>
   );

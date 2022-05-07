@@ -1,12 +1,20 @@
 import React, { useState } from "react";
-import {View, Text, Image, ScrollView, TouchableOpacity, Modal, Button } from "react-native";
 import {
-  stylesAnnouncements, 
-  ButtonView, 
-  announcementOptionsButton, 
-  dialogContainer, 
-  innerDialogContainer, 
-  innerDialogButtonsContainer, 
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Modal,
+  Button,
+} from "react-native";
+import {
+  stylesAnnouncements,
+  ButtonView,
+  announcementOptionsButton,
+  dialogContainer,
+  innerDialogContainer,
+  innerDialogButtonsContainer,
   dialogButton,
   announcementViewButton,
 } from "../components/styles";
@@ -30,7 +38,7 @@ const AnnouncementView = ({ route, navigation }) => {
   const [isModalVisible, setModalVisible] = useState(false);
 
   //const [userData, setUserData] = useState(route.params.userData);
-  const {userData, setUserData} = React.useContext(userDataContext);
+  const { userData, setUserData } = React.useContext(userDataContext);
 
   const [announcement, setAnnouncement] = useState();
   const [date, setDate] = useState();
@@ -72,7 +80,7 @@ const AnnouncementView = ({ route, navigation }) => {
 
   const handleDelete = () => {
     var data = JSON.stringify({
-      id: announcement.id
+      id: announcement.id,
     });
     var config = {
       method: "delete",
@@ -81,7 +89,7 @@ const AnnouncementView = ({ route, navigation }) => {
         "Content-Type": "application/json",
       },
       data: data,
-      credentials: 'same-origin',
+      credentials: "same-origin",
     };
     axios(config)
       .then((response) => {
@@ -114,50 +122,95 @@ const AnnouncementView = ({ route, navigation }) => {
         <SplashScreen />
       ) : (
         <ScrollView style={stylesAnnouncements.announcementContainer}>
-          {userData.user_id === announcement.author_id || userData.is_admin == 1 ? (
+          {userData.user_id === announcement.author_id ||
+          userData.is_admin == 1 ? (
             <ButtonView>
-            <TouchableOpacity style={announcementOptionsButton} onPress={() => alert("Jak bedzie w pełni dzialajace dodawanie to przerobi się je też na modyfikowanie")}>
-              <Text style={{ fontSize: 18, color: "black" }}>
-                Edytuj
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={announcementOptionsButton} onPress={toggleModal}>
-              <Text style={{ fontSize: 18, color: "black" }}>
-                Usuń
-              </Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={announcementOptionsButton}
+                onPress={() => {
+                  navigation.navigate("EditAnnouncement", {
+                    params: announcement,
+                    photos: announcement.images,
+                  });
+                }}
+              >
+                <Text style={{ fontSize: 18, color: "black" }}>Edytuj</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={announcementOptionsButton}
+                onPress={toggleModal}
+              >
+                <Text style={{ fontSize: 18, color: "black" }}>Usuń</Text>
+              </TouchableOpacity>
 
-            <Modal visible={isModalVisible} transparent={true} onRequestClose={() => {setModalVisible(!isModalVisible)}}>
-              <View style={dialogContainer}>
-                <Text style={{ fontSize: 24, color: "black", fontWeight: "bold"}}>Potwierdź</Text>
-                <View style={innerDialogContainer}>
-                  <Text style={{ fontSize: 18, color: "black", textAlign: "center" }}>Czy na pewno chcesz usunąć to ogłoszenie?</Text>
-                  <Text style={{ fontSize: 18, color: "black", marginTop: 20}}>{announcement.title}</Text>
-                  <Text style={{ fontSize: 14, color: "black"}}>{date.toLocaleDateString("pl-PL")}</Text>
-                </View>
-                <View style={innerDialogButtonsContainer}>
-                  <TouchableOpacity style={dialogButton} onPress={toggleModal}>
-                    <Text style={{ fontSize: 18, color: "black" }}>
-                      Anuluj
+              <Modal
+                visible={isModalVisible}
+                transparent={true}
+                onRequestClose={() => {
+                  setModalVisible(!isModalVisible);
+                }}
+              >
+                <View style={dialogContainer}>
+                  <Text
+                    style={{ fontSize: 24, color: "black", fontWeight: "bold" }}
+                  >
+                    Potwierdź
+                  </Text>
+                  <View style={innerDialogContainer}>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        color: "black",
+                        textAlign: "center",
+                      }}
+                    >
+                      Czy na pewno chcesz usunąć to ogłoszenie?
                     </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[dialogButton, {backgroundColor: "red", borderWidth: 1, borderColor: "red"}]} onPress={handleDelete}>
-                    <Ionicons
-                      name="trash-outline"
-                      size={24}
-                      color={"white"}
-                    />
-                    <Text style={{ fontSize: 18, color: "white", marginLeft: 5 }}>
-                      Tak
+                    <Text
+                      style={{ fontSize: 18, color: "black", marginTop: 20 }}
+                    >
+                      {announcement.title}
                     </Text>
-                    
-                  </TouchableOpacity>
+                    <Text style={{ fontSize: 14, color: "black" }}>
+                      {date.toLocaleDateString("pl-PL")}
+                    </Text>
+                  </View>
+                  <View style={innerDialogButtonsContainer}>
+                    <TouchableOpacity
+                      style={dialogButton}
+                      onPress={toggleModal}
+                    >
+                      <Text style={{ fontSize: 18, color: "black" }}>
+                        Anuluj
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[
+                        dialogButton,
+                        {
+                          backgroundColor: "red",
+                          borderWidth: 1,
+                          borderColor: "red",
+                        },
+                      ]}
+                      onPress={handleDelete}
+                    >
+                      <Ionicons
+                        name="trash-outline"
+                        size={24}
+                        color={"white"}
+                      />
+                      <Text
+                        style={{ fontSize: 18, color: "white", marginLeft: 5 }}
+                      >
+                        Tak
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-                
-              </View>
-          </Modal>
-          </ButtonView>
-          ):(
+              </Modal>
+            </ButtonView>
+          ) : (
             <></>
           )}
           <Text style={stylesAnnouncements.announcementTitle}>
@@ -219,12 +272,14 @@ const AnnouncementView = ({ route, navigation }) => {
           </View>
 
           <TouchableOpacity
-            onPress={() => navigation.navigate("Mapa", {
-              focusCoordinates: {
-                lat: announcement.lat,
-                lng: announcement.lng
-              }
-            })}
+            onPress={() =>
+              navigation.navigate("Mapa", {
+                focusCoordinates: {
+                  lat: announcement.lat,
+                  lng: announcement.lng,
+                },
+              })
+            }
             style={announcementViewButton}
           >
             <Text style={{ fontSize: 20, fontWeight: "600" }}>
@@ -234,44 +289,43 @@ const AnnouncementView = ({ route, navigation }) => {
 
           {userData.user_id === "guestId" ? (
             <></>
-          ):(
+          ) : (
             <>
-            {userData.user_id === announcement.author_id ? (
-              <></>
-            ):(
-              <>
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate("AddNotification", {
-                      anons_id: announcement.id,
-                      photos: "",
-                    });
-                  }}
-                  style={announcementViewButton}
-                >
-                  <Text style={{ fontSize: 20, fontWeight: "600" }}>
-                    Widziałem to zwierzę
-                  </Text>
-                </TouchableOpacity>
-                  
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate("Wiadomości", {
-                      screen: 'Lista rozmów',
-                      params: {createNewChat: announcement.id},
-                    });
-                  }}
-                  style={announcementViewButton}
-                >
-                  <Text style={{ fontSize: 20, fontWeight: "600" }}>
-                    Czat
-                  </Text>
-                </TouchableOpacity>
-              </>
-            )}
+              {userData.user_id === announcement.author_id ? (
+                <></>
+              ) : (
+                <>
+                  <TouchableOpacity
+                    onPress={() => {
+                      navigation.navigate("AddNotification", {
+                        anons_id: announcement.id,
+                        photos: "",
+                      });
+                    }}
+                    style={announcementViewButton}
+                  >
+                    <Text style={{ fontSize: 20, fontWeight: "600" }}>
+                      Widziałem to zwierzę
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      navigation.navigate("Wiadomości", {
+                        screen: "Lista rozmów",
+                        params: { createNewChat: announcement.id },
+                      });
+                    }}
+                    style={announcementViewButton}
+                  >
+                    <Text style={{ fontSize: 20, fontWeight: "600" }}>
+                      Czat
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              )}
             </>
           )}
-
         </ScrollView>
       )}
     </View>

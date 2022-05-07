@@ -642,3 +642,24 @@ paths:
           description: Nie znaleziono ogłoszenia o podanym id
         '500':
           description: Błąd po stronie serwera
+
+/messages:
+    get:
+      tags:
+       - /anons - ogłoszenia
+      summary: Zwraca ilość wiadomości na czacie otrzymanych od ostatniej wizyty (wymagane zalogowanie)
+      produces:
+      - application/json
+      responses:
+        '200':
+          description: Zwraca ilość wiadomości na czacie otrzymanych od ostatniej wizyty
+          schema:
+            type: object
+            properties:
+              count:
+                type: integer
+                description: ilość ilość wiadomości na czacie otrzymanych od ostatniej wizyty
+        '401':
+          description: Klient nie jest zalogowany
+        '500':
+          description: Błąd po stronie serwera

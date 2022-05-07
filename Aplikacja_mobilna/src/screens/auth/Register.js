@@ -23,6 +23,7 @@ import {
   ExtraView,
   TextLink,
   TextLinkContent,
+  Logo,
 } from "../../components/styles";
 import { StatusBar } from "expo-status-bar";
 
@@ -64,7 +65,8 @@ const Register = ({ navigation }) => {
     <StyledContainer>
       <StatusBar style="dark" />
       <InnerContainer>
-        <PageTitle>Nazwa</PageTitle>
+        <Logo source={require("./../../../assets/logomk2.png")} />
+        <PageTitle>ZwierzoZnajdźca</PageTitle>
         <SubTitle>Rejestracja</SubTitle>
 
         <Formik

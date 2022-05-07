@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -8,41 +8,68 @@ import {
 } from "react-native";
 import * as ImageManipulator from "expo-image-manipulator";
 import { ImageBrowser } from "expo-image-picker-multiple";
+import * as FileSystem from "expo-file-system";
+
+const getFileInfo = async (fileURI) => {
+  const fileInfo = await FileSystem.getInfoAsync(fileURI);
+  return fileInfo;
+};
+
+const isLessThanTheMB = (fileSize, smallerThanSizeMB) => {
+  const isOk = fileSize / 1024 / 1024 < smallerThanSizeMB;
+  return isOk;
+};
 
 const ImageBrowserScreen = ({ navigation, route }) => {
   const _getHeaderLoader = () => (
     <ActivityIndicator size="small" color={"#0580FF"} />
   );
+  const [count, setCount] = useState(route.params.count);
+  const handleClose = (modul) => {
+    setCheckPhoto(modul);
+  };
 
   const imagesCallback = (callback) => {
     callback
       .then(async (photos) => {
+        console.log(count);
+        let checkPhoto = true;
         const cPhotos = [];
         for (let photo of photos) {
           const pPhoto = await _processImageAsync(photo.uri);
-          cPhotos.push({
-            uri: pPhoto.uri,
-            name: photo.filename,
-            type: "image/jpg",
-          });
+          // console.log(pPhoto);
+          if (pPhoto != -1) {
+            cPhotos.push({
+              uri: pPhoto.uri,
+              name: photo.filename,
+              type: "image/jpg",
+            });
+          } else checkPhoto = false;
         }
-        if (route.params.value == 1) {
-          //console.log(cPhotos);
-          navigation.navigate("AddAnnouncement", { photos: cPhotos });
-        } else if (route.params.value == 2) {
-          navigation.navigate("AddNotification", { photos: cPhotos });
-        }
+        // route.params.
+        route.params.onGoBack(cPhotos);
+        navigation.goBack();
       })
       .catch((e) => console.log(e));
   };
 
   async function _processImageAsync(uri) {
-    const file = await ImageManipulator.manipulateAsync(
-      uri,
-      [{ resize: { width: 1000 } }],
-      { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
-    );
-    return file;
+    const fileInfo = await getFileInfo(uri);
+    if (!fileInfo?.size) {
+      console.log("Nie można wybrać tego pliku.\n Rozmiar nieznany.");
+    }
+    const isLt4MB = isLessThanTheMB(fileInfo.size, 4);
+    if (!isLt4MB) {
+      console.log("Rozmiar zdjęcia nie może być większy niż 4MB!");
+    } else {
+      const file = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 1000 } }],
+        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+      );
+      return file;
+    }
+    return -1;
   }
 
   const _renderDoneButton = (count, onSubmit) => {
@@ -70,10 +97,10 @@ const ImageBrowserScreen = ({ navigation, route }) => {
   return (
     <View style={[styles.flex, styles.container]}>
       <ImageBrowser
-        max={8}
         onChange={updateHandler}
         callback={imagesCallback}
         renderSelectedComponent={renderSelectedComponent}
+        max={count}
       />
     </View>
   );
