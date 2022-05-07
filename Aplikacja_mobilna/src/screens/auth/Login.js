@@ -25,6 +25,7 @@ import {
   TextLink,
   TextLinkContent,
   ButtonView,
+  Logo,
 } from "../../components/styles";
 import { StatusBar } from "expo-status-bar";
 
@@ -39,14 +40,14 @@ const Login = ({ navigation }) => {
   const [hidePassword, setHidedPassword] = useState(true);
   const [message, setMessage] = useState();
   const [messageType, setMessageType] = useState();
-  const {userData, setUserData} = React.useContext(userDataContext);
+  const { userData, setUserData } = React.useContext(userDataContext);
 
   // const {handleLogin} = React.useContext(AuthContext);
   // const {LoginGoogleFunc} = React.useContext(AuthContext);
   // const {LoginFacebookFunc} = React.useContext(AuthContext);
   // const {handleLogout} = React.useContext(AuthContext);
   //const {handleMessage} = React.useContext(AuthContext);
-  
+
   // //sprawdzanie po wlaczeniu aplikacji czy uzytkownik jest zalogowany
   // React.useEffect(() => {
   //   const handleLoggedIn = () => {
@@ -71,7 +72,6 @@ const Login = ({ navigation }) => {
   //   };
   //     handleLoggedIn();
   // }, []);
-
 
   async function LoginGoogle() {
     const data = await fetch("http://" + serwer + "/auth/google/url", {
@@ -112,7 +112,8 @@ const Login = ({ navigation }) => {
   const handleLogin = (credentials) => {
     handleMessage(null);
     var data = JSON.stringify({
-      email: "matmar@loremipsummail.com",
+      //   email: "matmar@loremipsummail.com",
+      email: "jarszy@loremipsummail.com",
       password: "noweHaslo12",
       // email: "admin@trash-mail.com",
       // password: "admin",
@@ -124,7 +125,7 @@ const Login = ({ navigation }) => {
         "Content-Type": "application/json",
       },
       data: data,
-      credentials: 'same-origin',
+      credentials: "same-origin",
     };
     console.log(config);
     console.log(data);
@@ -140,7 +141,7 @@ const Login = ({ navigation }) => {
             console.log("zalogowano");
             console.log(result);
             setUserData(result);
-            navigation.replace('Nawigator', {userData: result});
+            navigation.replace("Nawigator", { userData: result });
           } else {
             console.log("nie zalogowano");
           }
@@ -178,8 +179,9 @@ const Login = ({ navigation }) => {
     <StyledContainer>
       <StatusBar style="dark" />
       <InnerContainer>
-        <PageTitle>Logowanie</PageTitle>
-        <SubTitle>Account login</SubTitle>
+        <Logo source={require("./../../../assets/logomk2.png")} />
+        <PageTitle>ZwierzoZnajdźca</PageTitle>
+        <SubTitle>Logowanie</SubTitle>
 
         <Formik
           initialValues={{ email: "", password: "" }}
@@ -238,13 +240,13 @@ const Login = ({ navigation }) => {
                 </TextLink>
               </ExtraView>
 
-              <ExtraView>
+              {/* <ExtraView>
                 <ButtonView>
                   <StyledButton onPress={handleLogout}>
                     <ButtonText>Logout</ButtonText>
                   </StyledButton>
                 </ButtonView>
-              </ExtraView>
+              </ExtraView> */}
             </StyledFormArea>
           )}
         </Formik>

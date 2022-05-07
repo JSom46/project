@@ -34,8 +34,10 @@
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-native": "0.64.3",
+    "react-native-elements": "^3.4.2",
     "react-native-gesture-handler": "~2.1.0",
     "react-native-image-crop-picker": "^0.37.3",
+    "react-native-image-zoom-viewer": "^3.0.1",
     "react-native-map-clustering": "^3.4.2",
     "react-native-maps": "0.29.4",
     "react-native-material-menu": "^2.0.0",
@@ -52,7 +54,8 @@
     "react-navigation-stack": "^2.10.4",
     "socket.io-client": "^4.5.0",
     "styled-components": "^5.3.3",
-    "unimodules-permissions-interface": "^6.1.0"
+    "unimodules-permissions-interface": "^6.1.0",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"

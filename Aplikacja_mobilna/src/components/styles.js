@@ -23,7 +23,8 @@ export const Colors = {
   black: "#000000",
   facebook: "#3b5998",
   add: "#AFCF5F",
-  blue: "#B0E0E6",
+  //blue: "#B0E0E6",
+  blue: "#0898de",
 };
 
 const {
@@ -39,11 +40,16 @@ const {
   black,
   blue,
 } = Colors;
+
+export const Logo = styled.Image`
+  width: 150px;
+  height: 150px;
+`;
+
 export const StyledContainer = styled.ScrollView`
   flex: 1;
-  padding: 15px;
-  padding-bottom: 20px;
-  padding-right: 20px;
+  padding: 25px;
+  padding-top: ${StatusBarHeight + 10}px;
   background-color: ${primary};
 
   ${(props) =>
@@ -72,23 +78,29 @@ export const StyledContainer = styled.ScrollView`
 export const InnerContainer = styled.View`
   flex: 1;
   width: 100%;
-  align-items: stretch;
+  align-items: center;
 `;
 
 export const InnerContainerOne = styled.View`
   flex: 1;
   width: 100%;
-  align-items: stretch;
+  align-items: center;
 `;
 
 export const ImageOne = styled.Image`
   width: 100px;
   height: 100px;
   margin: 2px;
+  ${(props) =>
+    props.isNotification == true &&
+    `
+    width: 200px;
+    height: 200px;
+`}
 `;
 
 export const InnerContainerImage = styled.View`
-  width: 90%;
+  width: 100%;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -98,10 +110,10 @@ export const InnerContainerImage = styled.View`
 `;
 
 export const PageTitle = styled.Text`
-  font-size: 30px;
+  font-size: 35px;
   text-align: center;
   font-weight: bold;
-  color: ${brand};
+  color: ${blue};
   padding: 10px;
 `;
 export const SubTitle = styled.Text`
@@ -113,7 +125,7 @@ export const SubTitle = styled.Text`
 `;
 
 export const StyledFormArea = styled.View`
-  width: 90%;
+  width: 98%;
 `;
 
 export const StyledTextInput = styled.TextInput`
@@ -154,6 +166,12 @@ export const StyledInputLabel = styled.Text`
     font-weight: bold;
     font-size: 15px;
 `}
+  ${(props) =>
+    props.announce == true &&
+    `
+font-weight: bold;
+font-size: 14px;
+`}
 `;
 
 export const LeftIcon = styled.View`
@@ -184,10 +202,15 @@ export const AddingIcon = styled.TouchableOpacity`
   z-index: 1;
 `}
 `;
+export const StyledButtonPhoto = styled.TouchableOpacity`
+  height: 200px;
+  width: 200px;
+  display: flex;
+`;
 
 export const StyledButton = styled.TouchableOpacity`
   padding: 15px;
-  background-color: ${brand};
+  background-color: ${blue};
   justify-content: center;
   align-items: center;
   border-radius: 5px;
@@ -225,17 +248,30 @@ export const StyledButton = styled.TouchableOpacity`
   justify-content: space-evenly;
   `}
 
+
   ${(props) =>
-    props.isPhoto == true &&
+    props.isNotification == true &&
     `
-    padding-right: 35px;
+    padding-right: 10px;
+  height: 200px;
+  width: 200px;
+  display: flex;
+  background-color: ${secondary};
+  justify-content: center;
+  `}
+
+
+  ${(props) =>
+    props.isEditAnnouncement == true &&
+    `
+    padding-right: 10px;
   height: 100px;
   width: 100px;
   display: flex;
   background-color: ${secondary};
-  flex-direction: row;
-  justify-content: space-evenly;
+  justify-content: center;
   `}
+
   ${(props) =>
     props.filter == true &&
     `
@@ -243,6 +279,14 @@ export const StyledButton = styled.TouchableOpacity`
   height: 40px;
   width: 350px;
   background-color: ${brand};
+  `}
+  ${(props) =>
+    props.announce == true &&
+    `
+  padding: 0px;
+  height: 40px;
+  width: 350px;
+  background-color: ${blue};
   `}
 `;
 
@@ -268,7 +312,7 @@ export const StyledButtonCategory = styled.TouchableOpacity`
 
 export const ButtonText = styled.Text`
   color: ${primary};
-  font-size: 26px;
+  font-size: 24px;
 
   ${(props) =>
     props.welcome == true &&
@@ -333,6 +377,14 @@ export const ButtonView = styled.View`
   justify-content: space-between;
   flex-direction: row;
   align-items: center;
+
+  ${(props) =>
+    props.isNotification == true &&
+    `
+    justify-content: center;
+    flex-direction: row;
+    align-items: center;
+  `}
 `;
 
 export const ExtraText = styled.Text`
@@ -358,6 +410,36 @@ export const WelcomeContainer = styled(InnerContainer)`
   padding-top: 10px;
   justify-content: center;
 `;
+
+export const stylesNotificationList = StyleSheet.create({
+  listContainer: {
+    flex: 1,
+    //marginTop: StatusBar.currentHeight || 0,
+  },
+
+  NotificationListItem: {
+    backgroundColor: "white",
+    padding: 5,
+    paddingVertical: 8,
+    marginVertical: 1,
+    marginHorizontal: 8,
+    borderBottomWidth: 0.5,
+    borderRightWidth: 2,
+    borderLeftWidth: 2,
+    borderTopWidth: 2,
+    borderColor: "gray",
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  notificationtListItemPhoto: {
+    width: 100,
+    height: 100,
+    marginRight: 8,
+  },
+});
+
+//---------
 
 //---------
 
@@ -463,7 +545,7 @@ export const dialogContainer = {
   shadowColor: "#000",
   shadowOffset: {
     width: 0,
-    height: 2
+    height: 2,
   },
   shadowOpacity: 0.25,
   shadowRadius: 4,
@@ -475,7 +557,7 @@ export const dialogContainer = {
 };
 
 export const modalBackground = {
-  backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  backgroundColor: "rgba(0, 0, 0, 0.4)",
   flex: 1,
 };
 
@@ -484,14 +566,14 @@ export const photoModal = {
   shadowColor: "#000",
   shadowOffset: {
     width: 2,
-    height: 2
+    height: 2,
   },
   shadowOpacity: 0.25,
   shadowRadius: 4,
   marginHorizontal: "10%",
   //alignSelf: "center"
   top: "20%",
-  alignSelf:'baseline',
+  alignSelf: "baseline",
 };
 
 export const innerDialogContainer = {
@@ -502,14 +584,14 @@ export const innerDialogContainer = {
   alignItems: "center",
   borderTopWidth: 1,
   borderBottomWidth: 1,
-  borderColor: "gray"
+  borderColor: "gray",
 };
 
 export const innerDialogButtonsContainer = {
   margin: 10,
   backgroundColor: "white",
   padding: 5,
-  flexDirection:"row",
+  flexDirection: "row",
   alignItems: "center",
   justifyContent: "space-between",
 };
@@ -525,7 +607,7 @@ export const dialogButton = {
   padding: 1,
   marginHorizontal: 20,
   backgroundColor: "white",
-  flexDirection:"row",
+  flexDirection: "row",
   justifyContent: "center",
   alignItems: "center",
   borderRadius: 15,
@@ -557,7 +639,7 @@ export const chatListItemIncomingMessage = {
   borderTopRightRadius: 15,
   borderBottomRightRadius: 15,
   marginVertical: 1,
-  maxWidth: "75%"
+  maxWidth: "75%",
 };
 
 export const chatListItemIncomingContainer = {

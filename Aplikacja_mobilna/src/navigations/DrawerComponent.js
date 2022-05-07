@@ -9,7 +9,6 @@ import {
 
 // import {AuthContext} from './App'
 import Dashboard from "../screens/Dashboard";
-import NotificationsScreen from "../screens/NotificationsScreen";
 import { View, Text } from "react-native";
 import AnnouncementsScreen from "../screens/Announcements/AnnouncementsScreen";
 // import MyProfileScreen from './MyProfileScreen';
@@ -38,7 +37,7 @@ const Drawer = createDrawerNavigator();
 
 const DrawerComponent = ({ navigation, route }) => {
   //const [userData, setUserData] = useState(route.params.userData);
-  const {userData, setUserData} = React.useContext(userDataContext);
+  const { userData, setUserData } = React.useContext(userDataContext);
 
   const handleLogout = (credentials) => {
     console.log(credentials);
@@ -93,7 +92,7 @@ const DrawerComponent = ({ navigation, route }) => {
             {userData.user_id == "guestId" ? (
               <DrawerItem
                 label={({ focused, size }) => (
-                  <View style={{ flexDirection: "row", alignItems: "center"}}>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
                     <Text style={{ color: "gray" }}>Zaloguj się</Text>
                   </View>
                 )}
@@ -116,9 +115,9 @@ const DrawerComponent = ({ navigation, route }) => {
     >
       {userData.user_id == "guestId" ? (
         <>
-          <Drawer.Screen 
+          <Drawer.Screen
             name="Strona domowa"
-            component={Dashboard} 
+            component={Dashboard}
             //initialParams={{ userData: userData }}
             options={{
               drawerIcon: ({ focused, size }) => (
@@ -129,22 +128,22 @@ const DrawerComponent = ({ navigation, route }) => {
                 />
               ),
               headerRight: () => (
-                <View style={{flexDirection: "row", marginRight: 10}} >
+                <View style={{ flexDirection: "row", marginRight: 10 }}>
                   <Ionicons
                     name="refresh"
                     size={30}
                     onPress={() => {
-                      navigation.navigate("Mapa", {refresh: true});
+                      navigation.navigate("Mapa", { refresh: true });
                     }}
-                    style={{marginRight: 20}}
+                    style={{ marginRight: 20 }}
                   />
                   <AntDesign
-                  name="filter"
-                  size={30}
-                  onPress={() => {
-                    navigation.navigate("Filtry");
-                  }}
-                />
+                    name="filter"
+                    size={30}
+                    onPress={() => {
+                      navigation.navigate("Filtry");
+                    }}
+                  />
                 </View>
               ),
             }}
@@ -168,7 +167,7 @@ const DrawerComponent = ({ navigation, route }) => {
                   onPress={() => {
                     navigation.navigate("Filtry");
                   }}
-                  style={{marginRight: 10}}
+                  style={{ marginRight: 10 }}
                 />
               ),
             }}
@@ -202,22 +201,22 @@ const DrawerComponent = ({ navigation, route }) => {
                 />
               ),
               headerRight: () => (
-                <View style={{flexDirection: "row", marginRight: 10}} >
+                <View style={{ flexDirection: "row", marginRight: 10 }}>
                   <Ionicons
                     name="refresh"
                     size={30}
                     onPress={() => {
-                      navigation.navigate("Mapa", {refresh: true});
+                      navigation.navigate("Mapa", { refresh: true });
                     }}
-                    style={{marginRight: 20}}
+                    style={{ marginRight: 20 }}
                   />
                   <AntDesign
-                  name="filter"
-                  size={30}
-                  onPress={() => {
-                    navigation.navigate("Filtry");
-                  }}
-                />
+                    name="filter"
+                    size={30}
+                    onPress={() => {
+                      navigation.navigate("Filtry");
+                    }}
+                  />
                 </View>
               ),
             }}
@@ -241,7 +240,7 @@ const DrawerComponent = ({ navigation, route }) => {
                   onPress={() => {
                     navigation.navigate("Filtry");
                   }}
-                  style={{marginRight: 10}}
+                  style={{ marginRight: 10 }}
                 />
               ),
             }}
@@ -280,31 +279,19 @@ const DrawerComponent = ({ navigation, route }) => {
             //initialParams={{ userData: userData }}
             options={{
               drawerIcon: ({ focused, size }) => (
-                <Ionicons 
-                  name="chatbox-ellipses-outline" 
-                  size={size} 
-                  color={focused ? "#7cc" : "#ccc"}
-                />
-              ),
-            }}
-          />
-          <Drawer.Screen
-            name="Powiadomienia"
-            component={NotificationsScreen}
-            //initialParams={{ userData: userData }}
-            options={{
-              drawerIcon: ({ focused, size }) => (
                 <Ionicons
-                  name="notifications"
+                  name="chatbox-ellipses-outline"
                   size={size}
                   color={focused ? "#7cc" : "#ccc"}
                 />
               ),
             }}
           />
+
           <Drawer.Screen
             name="Dodaj Ogłoszenie"
             component={AddAnnouncement}
+            initialParams={{ photos: "" }}
             options={{
               drawerIcon: ({ focused, size }) => (
                 <Ionicons

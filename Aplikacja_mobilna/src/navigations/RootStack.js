@@ -21,7 +21,8 @@ import Filter from "../screens/Map/Filter";
 import ImageBrowser from "../screens/ImageBrowserScreen";
 import AddNotification from "../screens/Announcements/AddNotification";
 import { userDataContext } from "../screens/UserDataContext";
-
+import EditAnnouncement from "../screens/Announcements/EditAnnouncement";
+import NotificationList from "../screens/Notifications/NotificationsList";
 const Stack = createStackNavigator();
 
 //export const AuthContext = React.createContext();
@@ -30,7 +31,10 @@ const RootStack = () => {
   //const [userToken, setUserToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userData, setUserData] = useState(guestData);
-  const userDataContextValues = {userData: userData, setUserData: setUserData};
+  const userDataContextValues = {
+    userData: userData,
+    setUserData: setUserData,
+  };
   //const [initialRoute, setInitialRoute] = useState("Nawigator");
   //const guestData = {user_id: "guestId", email: "guest@email", login: "guest", is_admin: 0};
 
@@ -38,7 +42,7 @@ const RootStack = () => {
   React.useEffect(() => {
     const handleLoggedIn = () => {
       const url = "http://" + serwer + "/auth/loggedin";
-      //console.log("RootStack useEffect");
+      console.log("RootStack useEffect");
 
       axios
         .get(url)
@@ -66,74 +70,101 @@ const RootStack = () => {
 
   return (
     <userDataContext.Provider value={userDataContextValues}>
-    <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerStyled: {
-            backgroundColor: "transparent",
-          },
-          headerTintColor: Colors.tetriary,
-          headerTransparent: true,
-          HeaderTitle: "",
-          headerLeftContainerStyle: {
-            paddingLeft: 20,
-          },
-        }}
-        //initialRouteName={initialRoute}
-      >
-        {isLoading == true ? (
-          <Stack.Screen name="Loading" component={SplashScreen} />
-        ) : (
-          <>
-            <Stack.Screen
-              options={{ headerShown: false }}
-              name="Nawigator"
-              component={DrawerComponent}
-              //initialParams={{ userData: user }}
-            />
-            <Stack.Screen
-              options={{
-                headerTransparent: false,
-              }}
-              name="Login"
-              component={Login}
-            />
+      <NavigationContainer>
+        <Stack.Navigator
+          screenOptions={{
+            headerStyled: {
+              backgroundColor: "transparent",
+            },
+            headerTintColor: Colors.tetriary,
+            headerTransparent: true,
+            HeaderTitle: "",
+            headerLeftContainerStyle: {
+              paddingLeft: 20,
+            },
+          }}
+          //initialRouteName={initialRoute}
+        >
+          {isLoading == true ? (
+            <Stack.Screen name="Loading" component={SplashScreen} />
+          ) : (
+            <>
+              <Stack.Screen
+                options={{ headerShown: false }}
+                name="Nawigator"
+                component={DrawerComponent}
+                //initialParams={{ userData: user }}
+              />
+              <Stack.Screen
+                options={{
+                  headerTransparent: false,
+                  headerShown: false,
+                }}
+                name="Login"
+                component={Login}
+              />
 
-            <Stack.Screen name="Register" component={Register} />
-          </>
-        )}
-        <Stack.Screen
-          options={{
-            headerTransparent: false,
-          }}
-          name="Filtry"
-          component={Filter}
-        />
-        <Stack.Screen
-          name="ImageBrowser"
-          component={ImageBrowser}
-          options={{
-            title: "Selected 0 files",
-            headerTransparent: false,
-          }}
-        />
-        <Stack.Screen
-          name="AddAnnouncement"
-          component={AddAnnouncement}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="AddNotification"
-          component={AddNotification}
-          options={{
-            title: "Wyślij powiadomienie",
-            headerShown: true,
-          }}
-        />
+              <Stack.Screen
+                name="Register"
+                component={Register}
+                options={{
+                  headerTransparent: true,
+                  headerShown: false,
+                }}
+              />
+            </>
+          )}
+          <Stack.Screen
+            options={{
+              headerTransparent: false,
+            }}
+            name="Filtry"
+            component={Filter}
+          />
+          <Stack.Screen
+            name="ImageBrowser"
+            component={ImageBrowser}
+            options={{
+              title: "Selected 0 files",
+              headerTransparent: false,
+            }}
+            initialParams={{
+              count: "",
+            }}
+          />
+          <Stack.Screen
+            name="AddAnnouncement"
+            component={AddAnnouncement}
+            options={{
+              headerShown: false,
+            }}
+            initialParams={{ photos: "" }}
+          />
+          <Stack.Screen
+            name="AddNotification"
+            component={AddNotification}
+            options={{
+              title: "Wyślij powiadomienie",
+              headerShown: true,
+            }}
+          />
+          <Stack.Screen
+            name="Powiadomienia"
+            component={NotificationList}
+            options={{
+              headerShown: false,
+            }}
+          />
 
-        {/* <Stack.Screen name="MapMain" component={MapMain} />
+          <Stack.Screen
+            name="EditAnnouncement"
+            component={EditAnnouncement}
+            options={{
+              headerShown: false,
+              headerTransparent: false,
+            }}
+          />
+          {/* <Stack.Screen name="MapMain" component={MapMain} />
           <Stack.Screen
             options={{ headerTintColor: Colors.secondary, headerShown: false }}
             name="AnnouncementList"
@@ -149,8 +180,8 @@ const RootStack = () => {
             name="AddAnnouncement"
             component={AddAnnouncement}
           /> */}
-      </Stack.Navigator>
-    </NavigationContainer>
+        </Stack.Navigator>
+      </NavigationContainer>
     </userDataContext.Provider>
   );
 };

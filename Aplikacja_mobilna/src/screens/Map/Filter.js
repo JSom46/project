@@ -63,9 +63,11 @@ const Filter = ({ navigation, route }) => {
   const [lat, setLat] = useState(null);
   const [lng, setLng] = useState(null);
   const [slider, setSlider] = useState(30);
+  const [title, setTitle] = useState();
 
   const [filterData, setfilterData] = useContext(FilterContext);
   const [data, setData] = useState({
+    title: "",
     category: -1,
     type: "",
     coat: "",
@@ -106,6 +108,7 @@ const Filter = ({ navigation, route }) => {
   //   }
   // };
   const handleTypeChange = (value) => {
+    console.log(value);
     handleUpdate("type", value);
     //console.log(value);
     //console.log(typesList);
@@ -113,8 +116,8 @@ const Filter = ({ navigation, route }) => {
     const choice = types.filter((item) => {
       return item.name == value;
     });
-    //console.log(choice);
-    //console.log(choice[0].coats);
+    //  console.log(choice);
+    console.log(choice[0].coats);
     handleUpdate("coat", "");
     handleUpdate("color", "");
     handleUpdate("breed", "");
@@ -147,6 +150,7 @@ const Filter = ({ navigation, route }) => {
 
   const onSubmit = () => {
     console.log(data);
+    handleUpdate("title", title);
     setfilterData(data);
     navigation.goBack();
   };
@@ -188,6 +192,7 @@ const Filter = ({ navigation, route }) => {
   };
 
   const onClear = () => {
+    handleUpdate("title", "");
     handleUpdate("category", -1);
     handleUpdate("type", "");
     handleUpdate("coat", "");
@@ -221,6 +226,9 @@ const Filter = ({ navigation, route }) => {
   return (
     <StyledContainer>
       <InnerContainerOne>
+        {/* <StyledInputLabel filter={true}>{"Tytul"}</StyledInputLabel> */}
+
+        {/* <TextInput style={styles.input} onChangeText={setTitle} value={title} /> */}
         <StyledInputLabel filter={true}>{"Rodzaj zgłoszenia"}</StyledInputLabel>
         <ButtonView>
           <StyledButtonCategory
@@ -324,6 +332,7 @@ const Filter = ({ navigation, route }) => {
             mapFilter={true}
             range={data.rad >= 0 ? data.rad : null}
             lat={data.lat == "" ? null : data.lat}
+            lng={data.lng == "" ? null : data.lng}
           />
         }
         <Slider
@@ -355,5 +364,15 @@ const Filter = ({ navigation, route }) => {
     </StyledContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  input: {
+    height: 40,
+    margin: 12,
+    width: 200,
+    borderWidth: 1,
+    padding: 10,
+  },
+});
 
 export default Filter;

@@ -1,16 +1,19 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import MapView, { Marker, Circle } from "react-native-maps";
 import { View, StyleSheet, Dimensions, Text } from "react-native";
 import FilterContext from "../../components/Map/FilterContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { AddingIcon } from "../../components/styles";
+import UserLocationContext from "../../components/Context/UserLocationContext";
 
 const MapPicker = (props) => {
   //const location = props.location;
   const [lat, setLat] = useState();
   const [lng, setLng] = useState();
+  const [userLocation, setUserLocation] = useContext(UserLocationContext);
   const [filterData, setfilterData] = useContext(FilterContext);
   const [rad, setRad] = useState(0);
+  const mapRef = useRef();
 
   useEffect(() => {
     function handleLocationChange() {
@@ -24,19 +27,29 @@ const MapPicker = (props) => {
   }, [filterData.lat, filterData.lng]);
 
   useEffect(() => {
-    setLat(props.lat);
-    console.log(lat);
-  }, [props.lat]);
+    if (props.lat != null) {
+      setLat(props.lat);
+      setLng(props.lng);
+      console.log(lat);
+    }
+  }, [props.lat, props.lng]);
 
   useEffect(() => {
-    setRad(parseInt(props.range) * 1000);
+    if (props.range != null) {
+      setRad(parseInt(props.range) * 1000);
+    }
   }, [props.range]);
+
+  const animateToRegion = () => {
+    mapRef.current.animateToRegion(userLocation, 2000);
+  };
 
   return (
     <View
       style={props.mapFilter == true ? styles.container : styles.container2}
     >
       <MapView
+        ref={mapRef}
         style={props.mapFilter == true ? styles.map : styles.map2}
         onPress={(e) => {
           if (
@@ -79,7 +92,11 @@ const MapPicker = (props) => {
         )}
       </MapView>
       <AddingIcon mapPicker={true}>
-        <MaterialIcons name={"my-location"} size={20} />
+        <MaterialIcons
+          name={"my-location"}
+          size={30}
+          onPress={animateToRegion}
+        />
       </AddingIcon>
     </View>
   );
@@ -95,9 +112,9 @@ const styles = StyleSheet.create({
   },
   container2: {
     flex: 1,
-    borderWidth: 1,
-    borderRadius: 10,
-    width: 325,
+    borderWidth: 2,
+    borderRadius: 3,
+    width: 340,
     height: 255,
   },
   map: {
@@ -108,11 +125,11 @@ const styles = StyleSheet.create({
     borderRadius: 1,
   },
   map2: {
-    position: "absolute",
-    width: 320,
-    height: 250,
-    borderWidth: 2,
-    borderRadius: 1,
+    flex: 1,
+    // width: 320,
+    // height: 250,
+    borderWidth: 15,
+    borderRadius: 15,
   },
 });
 

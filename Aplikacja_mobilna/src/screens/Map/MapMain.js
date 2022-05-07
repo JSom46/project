@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import { StyleSheet, View, Text } from "react-native";
 import { Marker, Callout } from "react-native-maps";
-import { useFocusEffect, useLinkProps } from '@react-navigation/native';
+import { useFocusEffect, useLinkProps } from "@react-navigation/native";
 import MapView from "react-native-map-clustering";
 import * as Location from "expo-location";
 
@@ -13,6 +13,7 @@ import FilterContext from "../../components/Map/FilterContext";
 import { Svg, Image as ImageSvg } from "react-native-svg";
 import { stylesMap } from "../../components/styles";
 import { userDataContext } from "../UserDataContext";
+import UserLocationContext from "../../components/Context/UserLocationContext";
 
 const { brand, darkLight, black, primary } = Colors;
 
@@ -23,6 +24,7 @@ const MapMain = ({ navigation, route }) => {
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
+  const [userLocation, setUserLocation] = useContext(UserLocationContext);
   const [hasLocationPermissions, setLocationPermission] = useState(false);
 
   const testowazmienna = 232323;
@@ -30,7 +32,7 @@ const MapMain = ({ navigation, route }) => {
   const [markerRefs, setMarkerRefs] = useState([]);
   const [focusRegion, setFocusRegion] = useState(null);
   //const [userData, setUserData] = useState(route.params.userData);
-  const {userData, setUserData} = React.useContext(userDataContext);
+  const { userData, setUserData } = React.useContext(userDataContext);
 
   //dane z ogloszen
   const [tableData = [], setTableData] = useState();
@@ -48,8 +50,10 @@ const MapMain = ({ navigation, route }) => {
         let {
           coords: { latitude, longitude },
         } = await Location.getCurrentPositionAsync({});
-        handleUpdate("lat", latitude);
-        handleUpdate("lng", longitude);
+        handleUpdate("latitude", latitude);
+        handleUpdate("longitude", longitude);
+        console.log(userLocation.lat);
+        console.log(userLocation.lng);
         // Center the map on the location we just fetched.
         setRegion({
           latitude,
@@ -162,15 +166,15 @@ const MapMain = ({ navigation, route }) => {
       //console.log("WYWOLALO SJE");
       //console.log("useEffect1", route.params);
       //console.log("userData: ", userData);
-      if(route.params && route.params.focusCoordinates != null){
+      if (route.params && route.params.focusCoordinates != null) {
         console.log("sa parametry: ", route.params.focusCoordinates);
         const tempRegion = {
           latitude: route.params.focusCoordinates.lat,
           longitude: route.params.focusCoordinates.lng,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
-        }
-        
+        };
+
         mapRef.current.animateToRegion(tempRegion, 2000);
         //navigation.setParams({focusCoordinates: null});
         route.params.focusCoordinates = null;
@@ -181,13 +185,20 @@ const MapMain = ({ navigation, route }) => {
   useFocusEffect(
     React.useCallback(() => {
       //console.log("useEffect2", route.params);
-      if(route.params && route.params.refresh){
+      if (route.params && route.params.refresh) {
         console.log("wywolano odswiezenie mapy");
         fetchData();
         route.params.refresh = false;
       }
     }, [route.params])
   );
+
+  const handleUpdate = (name, values) => {
+    setUserLocation((prevState) => ({
+      ...prevState,
+      [name]: values,
+    }));
+  };
 
   return (
     <View style={styles.body}>
@@ -202,7 +213,9 @@ const MapMain = ({ navigation, route }) => {
             key={marker.id}
             coordinate={{ latitude: marker.lat, longitude: marker.lng }}
             pinColor={marker.category == "Znalezienie" ? "#0F0" : "#00F"}
-            ref={ref => {markerRefs[marker.id] = ref}}
+            ref={(ref) => {
+              markerRefs[marker.id] = ref;
+            }}
             onPress={() => {
               setTimeout(() => {
                 markerRefs[marker.id].hideCallout();
@@ -213,9 +226,9 @@ const MapMain = ({ navigation, route }) => {
             <Callout
               style={stylesMap.callout}
               onPress={() =>
-                navigation.navigate("Ogloszenie", { 
-                  announcement: marker, 
-                  //userData: userData 
+                navigation.navigate("Ogloszenie", {
+                  announcement: marker,
+                  //userData: userData
                 })
               }
             >

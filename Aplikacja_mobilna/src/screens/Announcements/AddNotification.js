@@ -1,63 +1,36 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
-import { StyleSheet, View, Label, Text } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Alert } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import {
   StyledContainer,
-  InnerContainer,
-  PageTitle,
-  SubTitle,
-  StyledFormArea,
-  RightIcon,
   StyledButton,
   StyledInputLabel,
-  StyledTextInput,
-  Colors,
-  LeftIcon,
   ButtonText,
-  MsgBox,
-  Line,
-  ExtraText,
   ExtraView,
-  TextLink,
-  TextLinkContent,
-  ButtonView,
   ImageOne,
   InnerContainerOne,
-  StyledTextInputAdd,
-  StyledButtonCategory,
-  InnerContainerImage,
+  MsgBox,
+  StyledButtonPhoto,
 } from "../../components/styles";
 import MapPicker from "../Map/MapPicker";
-import { set } from "react-native-reanimated";
+
+import { Entypo } from "@expo/vector-icons";
 
 const AddNotification = ({ navigation, route }) => {
-  const [image, setImage] = useState([]);
-
-  const { photos } = route.params;
+  const [image, setImage2] = useState([]);
+  const [anons_id] = useState(route.params.anons_id);
   const [lat, setLat] = useState();
   const [lng, setLng] = useState();
-  const [anonsId, setAnonsId] = useState();
-  const [pictures, setPictures] = useState(new FormData());
-
-  const handlePictures = () => {
-    const formData = new FormData();
-    const picturesPreviewArray = [];
-    for (let i = 0; i < image.length; i++) {
-      picturesPreviewArray.push(image[i].name);
-      formData.append("pictures", picturesPreviewArray[i]);
-    }
-    setPictures(formData);
-    console.log(pictures);
-  };
+  const [messageType, setMessageType] = useState();
+  const [message, setMessage] = useState();
 
   async function postNotification() {
     const formData = new FormData();
-    formData.append("anon_id", anonsId);
-    formData.append("picture", pictures);
+    formData.append("anon_id", anons_id);
+    image.map((item, key) => formData.append("picture", item));
     formData.append("lat", lat);
     formData.append("lng", lng);
-    console.log("ten");
-    console.log(formData);
+    //console.log(formData);
     try {
       const response = await fetch(
         "http://" + serwer + "/anons/notifications",
@@ -67,44 +40,60 @@ const AddNotification = ({ navigation, route }) => {
           body: formData,
         }
       );
-      console.log(response);
       return response;
     } catch (error) {
       console.log("error", error);
     }
   }
-  useEffect(() => {
-    for (let [key, value] of Object.entries(route.params)) {
-      {
-        `${key}` == "anons_id" && `${value}` != ""
-          ? setAnonsId(`${value}`)
-          : `${key}` == "anons_id" && `${value}` != ""
-          ? setImage(`${value}`)
-          : setImage(photos);
-      }
-    }
-    console.log(anonsId);
-    console.log(image);
-    // for (let i = 0; i < image.length; i++) {
-    //   console.log(image[i].name);
-    // }
-    [route.params];
-  });
 
-  const handleSubmit = async (e) => {
-    handlePictures();
+  const validationCheck = () => {
+    setMessage();
+    if (lat == undefined) {
+      setMessageType(false);
+      setMessage("Nie wybrano punktu na mapie");
+    } else if (!image.length) {
+      Alert.alert(
+        "Nie wybrano zdjęcia",
+        "Czy chcesz dodać zgłoszenie mimo to?",
+        [
+          {
+            text: "Tak",
+            onPress: () => {
+              handleSubmit();
+            },
+            style: "destructive",
+          },
+          {
+            text: "Nie",
+            onPress: () => {},
+          },
+        ],
+        { cancelable: false }
+      );
+    } else handleSubmit();
+  };
+
+  const handleSubmit = async () => {
     const response = await postNotification();
     if (response.status == 200) {
-      console.log("pomyslnie dodano zgloszenie");
+      //  console.log("pomyslnie dodano zgloszenie");
+      alert("Pomyślnie dodano ogłoszenie.");
+
       navigation.goBack();
     } else {
-      console.log("Nie udało się dodać ogłoszenia.");
+      alert("Nie udało się dodać ogłoszenia.");
+      //    console.log("Nie udało się dodać ogłoszenia.");
     }
   };
 
   const handleCallback = (childData, childData2) => {
     setLat(childData);
     setLng(childData2);
+  };
+
+  const handleCallbackPhoto = (childData) => {
+    setImage2(childData);
+    //  console.log(childData);
   };
 
   return (
@@ -115,34 +104,51 @@ const AddNotification = ({ navigation, route }) => {
         <ExtraView />
         <ExtraView />
         <ExtraView />
-        <ButtonView>
-          <StyledButton
-            filter={true}
-            onPress={() => {
-              navigation.navigate("ImageBrowser", { value: "2" });
-            }}
-          >
-            <ButtonText>Dodaj zdjecia</ButtonText>
-          </StyledButton>
-        </ButtonView>
-        <InnerContainerImage>
-          {/* {image.length == undefined
-            ? null
-            : image.map((item, key) => (
-                <ImageOne key={key} source={{ uri: item.uri }} />
-              ))} */}
-
-          {image.length != 0 &&
-            image.map((item, key) => (
-              <ImageOne key={key} source={{ uri: item.uri }} />
-            ))}
-        </InnerContainerImage>
         <StyledInputLabel filter={true}>
-          {"Gdzie widziałeś to zwierze?:"}
+          {"Gdzie widziałeś to zwierze?*:"}
         </StyledInputLabel>
         {<MapPicker parentCallback={handleCallback} range={null} />}
-        <StyledButton filter={true} onPress={handleSubmit}>
-          <ButtonText>Dodaj</ButtonText>
+        <MsgBox type={messageType}>{message}</MsgBox>
+
+        <StyledInputLabel filter={true}>{"Dodaj zdjęcie:"}</StyledInputLabel>
+        {image.length ? (
+          <StyledButtonPhoto
+            onPress={() => {
+              navigation.navigate("ImageBrowser", {
+                onGoBack: handleCallbackPhoto,
+                count: 1,
+              });
+            }}
+          >
+            {image.map((item, key) => (
+              <ImageOne
+                key={key}
+                isNotification={true}
+                source={{ uri: item.uri }}
+              />
+            ))}
+          </StyledButtonPhoto>
+        ) : (
+          <StyledButton
+            isNotification={true}
+            onPress={() => {
+              navigation.navigate("ImageBrowser", {
+                onGoBack: handleCallbackPhoto,
+                count: 1,
+              });
+            }}
+          >
+            <ButtonText isPhoto={true}>
+              <Entypo name={"camera"} size={50} />
+            </ButtonText>
+          </StyledButton>
+        )}
+        <StyledButton
+          announce={true}
+          style={{ marginBottom: 50 }}
+          onPress={validationCheck}
+        >
+          <ButtonText>Wyślij </ButtonText>
         </StyledButton>
         <ExtraView />
       </InnerContainerOne>

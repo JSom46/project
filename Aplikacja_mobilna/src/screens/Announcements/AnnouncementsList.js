@@ -70,7 +70,7 @@ const AnnouncementsList = ({ navigation, route }) => {
   const isFocused = useIsFocused();
   const [refreshing, setRefreshing] = useState(false);
   const [filterData, setfilterData] = useContext(FilterContext);
-  const {userData, setUserData} = React.useContext(userDataContext);
+  const { userData, setUserData } = React.useContext(userDataContext);
 
   function addParam(arg, params) {
     let str = "";
@@ -201,8 +201,9 @@ const AnnouncementsList = ({ navigation, route }) => {
     getAnnouncements(filterData)
       .then((rows) => setAnnouncements(rows))
       .finally(() => {
-        setRefreshing(false); 
-        setPageCount(pageCount + 1)});
+        setRefreshing(false);
+        setPageCount(pageCount + 1);
+      });
 
     //console.log("w odswiezaniu ",pageCount);
     //console.log("odswiezono");
@@ -221,10 +222,12 @@ const AnnouncementsList = ({ navigation, route }) => {
   //Ta funkcja renderuje ogloszenia - jest wywolywana dla kazdego elementu (item) na liscie
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      onPress={() => navigation.navigate("Ogloszenie", { 
-        announcement: item,
-        //userData: userData 
-      })} //onPress wyswietla konkretne ogloszenie - do Screena 'Ogloszenie' przekazywane jest cale ogloszenie w parametrze 'announcement'
+      onPress={() =>
+        navigation.navigate("Ogloszenie", {
+          announcement: item,
+          //userData: userData
+        })
+      } //onPress wyswietla konkretne ogloszenie - do Screena 'Ogloszenie' przekazywane jest cale ogloszenie w parametrze 'announcement'
     >
       <Announcement
         title={item.title}
@@ -236,7 +239,7 @@ const AnnouncementsList = ({ navigation, route }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <StatusBar style="dark"/>
+      <StatusBar style="dark" />
       {userData.user_id == "guestId" ? (
         <TouchableOpacity
           onPress={() => navigation.navigate("Login")}
@@ -248,7 +251,11 @@ const AnnouncementsList = ({ navigation, route }) => {
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
-          onPress={() => navigation.navigate("Dodaj Ogloszenie")}
+          onPress={() =>
+            navigation.navigate("Dodaj Ogłoszenie", {
+              photos: "",
+            })
+          }
           style={announcementAddButton}
         >
           <Text style={{ fontSize: 20, fontWeight: "600" }}>
@@ -276,10 +283,7 @@ const AnnouncementsList = ({ navigation, route }) => {
             }}
             onEndReachedThreshold={0.8}
             refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-              />
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
           />
         </SafeAreaView>
