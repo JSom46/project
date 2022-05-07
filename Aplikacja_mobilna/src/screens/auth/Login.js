@@ -112,8 +112,8 @@ const Login = ({ navigation }) => {
   const handleLogin = (credentials) => {
     handleMessage(null);
     var data = JSON.stringify({
-      //   email: "matmar@loremipsummail.com",
-      email: "jarszy@loremipsummail.com",
+      email: "matmar@loremipsummail.com",
+      // email: "jarszy@loremipsummail.com",
       password: "noweHaslo12",
       // email: "admin@trash-mail.com",
       // password: "admin",

@@ -132,7 +132,7 @@ const RootStack = () => {
               count: "",
             }}
           />
-          <Stack.Screen
+          {/* <Stack.Screen
             name="AddAnnouncement"
             component={AddAnnouncement}
             options={{
@@ -163,7 +163,7 @@ const RootStack = () => {
               headerShown: false,
               headerTransparent: false,
             }}
-          />
+          />  */}
           {/* <Stack.Screen name="MapMain" component={MapMain} />
           <Stack.Screen
             options={{ headerTintColor: Colors.secondary, headerShown: false }}
