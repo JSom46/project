@@ -18,7 +18,7 @@ import { userDataContext } from "../UserDataContext";
 import ImageBrowser from "../ImageBrowserScreen";
 import EditAnnouncement from "./EditAnnouncement";
 import NotificationList from "../Notifications/NotificationsList";
-
+import AddNotification from "./AddNotification";
 const AnnouncementsStack = createNativeStackNavigator();
 
 const AnnouncementsScreen = ({ route, navigation }) => {
@@ -45,14 +45,14 @@ const AnnouncementsScreen = ({ route, navigation }) => {
           headerShown: false,
         }}
       />
-      <AnnouncementsStack.Screen
+      {/* <AnnouncementsStack.Screen
         name="Dodaj Ogloszenie"
         component={AddAnnouncement}
         options={{
           headerShown: false,
         }}
         initialParams={{ photos: "" }}
-      />
+      /> */}
       {/* 
       <AnnouncementsStack.Screen
         name="ImageBrowser"
@@ -66,13 +66,18 @@ const AnnouncementsScreen = ({ route, navigation }) => {
         }}
       /> */}
 
-      <AnnouncementsStack.Screen
+      {/* <AnnouncementsStack.Screen
         name="EditAnnouncement"
         component={EditAnnouncement}
         options={{
           headerShown: false,
           headerTransparent: false,
         }}
+      /> */}
+      <AnnouncementsStack.Screen
+        name="AddNotification"
+        component={AddNotification}
+        options={{}}
       />
     </AnnouncementsStack.Navigator>
     //</NavigationContainer>

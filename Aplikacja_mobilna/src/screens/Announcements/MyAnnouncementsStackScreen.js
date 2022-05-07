@@ -16,6 +16,10 @@ import AnnouncementView from "../AnnouncementView";
 import AddAnnouncement from "../Map/AddAnnouncement";
 import MyAnnouncementsScreen from "../MyAnnouncementsScreen";
 import { userDataContext } from "../UserDataContext";
+import AddNotification from "./AddNotification";
+import ImageBrowser from "../ImageBrowserScreen";
+import NotificationList from "../Notifications/NotificationsList";
+import EditAnnouncement from "./EditAnnouncement";
 
 const MyAnnouncementsStack = createNativeStackNavigator();
 
@@ -36,11 +40,43 @@ const MyAnnouncementsStackScreen = ({ route, navigation }) => {
         component={AnnouncementView}
         //initialParams={{ userData: userData }}
       />
-      {/* <MyAnnouncementsStack.Screen
+      <MyAnnouncementsStack.Screen
+        name="AddNotification"
+        component={AddNotification}
+        options={{}}
+      />
+      <MyAnnouncementsStack.Screen
+        name="Powiadomienia"
+        component={NotificationList}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <MyAnnouncementsStack.Screen
         name="Dodaj Ogloszenie"
         component={AddAnnouncement}
         initialParams={{ photos: "" }}
-      /> */}
+      />
+      <MyAnnouncementsStack.Screen
+        name="ImageBrowser"
+        component={ImageBrowser}
+        options={{
+          title: "Selected 0 files",
+          headerTransparent: false,
+        }}
+        initialParams={{
+          count: "",
+        }}
+      />
+      <MyAnnouncementsStack.Screen
+        name="EditAnnouncement"
+        component={EditAnnouncement}
+        options={{
+          headerShown: false,
+          headerTransparent: false,
+        }}
+      />
     </MyAnnouncementsStack.Navigator>
     //</NavigationContainer>
   );
