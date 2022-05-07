@@ -124,9 +124,11 @@ io.on("connection", function (socket) {
         });
     });
 
+
+    
     ///////////////////////////////////////////////////////////    
     // zwraca listę czatów z informacją ile jest wszystkich i nowych wiadomości
-    socket.on('get-user-chats', () => {
+    /*socket.on('get-user-chats', () => {
         con.all(
         `WITH Chats (anons_id, chat_id, convers_id, asking_id) AS (
             SELECT ow.anons_id, ow.chat_id, co.user_id, ow.user_id FROM ChatUsers ow
@@ -151,6 +153,26 @@ io.on("connection", function (socket) {
                     console.debug(err);
                 }                                
         });
+    });*/
+
+
+    socket.on('get-user-chats', () => {
+        con.all(`WITH chats AS (
+                    SELECT ch.anons_id anons_id, ch.chat_id chat_id, u.login login, a.title title, u.id id, msg.message_date, msg.message_id 
+                    FROM ChatUsers ch LEFT JOIN users u ON ch.user_id = u.id 
+                        LEFT JOIN anons a ON ch.anons_id = a.id 
+                        LEFT JOIN ChatMessages msg ON msg.chat_id = ch.chat_id) 
+        
+                SELECT ch.anons_id, ch.chat_id, ch.login, ch.title, 
+                    (SELECT COUNT(message_id) FROM chats WHERE chat_id = ch.chat_id AND id != ? AND message_date > (SELECT last_active_time FROM users WHERE id = ?)) NewMsgs
+                FROM chats ch WHERE ch.chat_id IN (SELECT chat_id FROM chats WHERE id = ?) AND id != ? GROUP BY chat_id`, 
+            socket.userId, socket.userId, socket.userId, socket.userId, (err, res) => {
+                if(err){
+                    return console.debug(err);
+                }
+                console.debug(res);
+                socket.emit('user-chats', res.length, res);
+            });
     });
 
 

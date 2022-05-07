@@ -234,7 +234,7 @@ router.get('/google', async (req, res) => {
 
             if(req.session.type == 'web'){
                 req.session.type = undefined;
-                return res.redirect(301, process.env.WEB_APP_ROOT_URI);
+                return res.redirect(301, process.env.WEB_APP_ROOT_URI + '/dashboard');
             }
 
             return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: row.id, is_admin: row.is_admin});
@@ -285,7 +285,7 @@ router.get('/facebook', async (req, res) => {
 
                 if(req.session.type == 'web'){
                     req.session.type = undefined;
-                    return res.redirect(301, process.env.WEB_APP_ROOT_URI);
+                    return res.redirect(301, process.env.WEB_APP_ROOT_URI + '/dashboard');
                 }
 
                 return res.status(200).json({msg: 'ok', login: user.name, email: user.email, user_id: result.id, is_admin: 0});   
