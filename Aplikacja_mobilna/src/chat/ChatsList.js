@@ -130,13 +130,14 @@ const ChatList = ({ route, navigation }) => {
                 });
         
                 socket.on("disconnect", () => {
-                    // console.log("dc");
+                    console.log("dc");
                     setAuthenticated(false);
                     setConnected(false);
                 });
             }
             return () => {
                 socket.off();
+                //socket.disconnect();
                 //socket.removeAllListeners();
             }
         }

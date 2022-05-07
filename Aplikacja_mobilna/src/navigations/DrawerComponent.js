@@ -60,8 +60,10 @@ const DrawerComponent = ({ navigation, route }) => {
           console.log(error);
         });
       };
-      getNewMessages();
-      console.log("Pobrano liczbe nowych wiadomosci na czatach");
+      if(userData.user_id != "guestId"){
+        getNewMessages();
+        console.log("Pobrano liczbe nowych wiadomosci na czatach");
+      }
   },[])
 ////////////
   const handleLogout = (credentials) => {
