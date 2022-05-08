@@ -95,8 +95,10 @@ export default function MenuAppBar(props) {
       sessionStorage.removeItem('notificationsCount');
     }
     const interval = setInterval(() => {
-      fetchNotifications();
-      fetchChatMessages();
+      if(sessionStorage.getItem('login') !== null){
+        fetchNotifications();
+        fetchChatMessages();
+      }
     }, 3 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
