@@ -41,13 +41,20 @@ export default function Chat(props) {
     const [chatId, setChatId] = useState(-1);
     const [chatDeleteId, setChatDeleteId] = useState(-1);
     const [createNewChat, setCreateNewChat] = useState(parseInt(sessionStorage.getItem('anonsId')));
-
+    
     const [userChats, setUserChats] = useState([]);
     const [chatMessages, setChatMessages] = useState([]);
 
     const login = sessionStorage.getItem('login');
 
     React.useEffect(() => {
+        if(chatId !== -1 && userChats.length > 0){
+            userChats.find(element => {
+                if (element.chat_id === chatId && header === null){
+                    setHeader(element.login);
+                }
+            })
+        }
         if (socket === null) {
             const newSocket = io('http://localhost:2400');
             setSocket(newSocket);
@@ -114,7 +121,7 @@ export default function Chat(props) {
                     }
                 });
                 socket.on("user-chats", (count, userChats) => {
-                    console.log(userChats);
+                    // console.log(userChats);
                     setUserChats(userChats);
                 });
                 socket.on("chat-messages", (count, chatMsg) => {
@@ -170,12 +177,13 @@ export default function Chat(props) {
                     })
                 });
                 socket.on("chat-response", (status, message) => {
-                    console.log(status);
-                    console.log(message);
+                    // console.log(status);
+                    // console.log(message);
                 });
                 socket.on("join-chat-response", (anons_id, chat_id, message) => {
                 });
-                socket.on("delete-chat-response", (status, message) => {
+                socket.on('delete-chat-response', (status, message) => {
+                    console.log(message);
                     if (status === 1) {
                         setSnackbarData({
                             open: true,
@@ -198,7 +206,7 @@ export default function Chat(props) {
     const updateNewMsgs = (chat_id) => {
         let index = userChats.findIndex((item => item.chat_id === chat_id));
         let chats = userChats;
-        if(chats[index].NewMsgs !== 0){
+        if (chats[index].NewMsgs !== 0) {
             chats[index].NewMsgs = 0;
             setUserChats(chats);
         }
@@ -223,7 +231,7 @@ export default function Chat(props) {
         const regex1 = /<br\s*?><br\s*?>$/gi;
         const regex2 = /<br\s*?>/gi;
         const msg = decodeHTMLEntities(message.replace(regex1, "<br>").replace(regex2, "\n"));
-        console.log(msg);
+        // console.log(msg);
         if (socket !== null) {
             socket.emit("chat-msg", chatId, msg);
         }
@@ -242,6 +250,8 @@ export default function Chat(props) {
         if (socket !== null) {
             socket.emit("leave-chat", chatId);
             socket.emit("delete-chat", chatDeleteId);
+            let index = userChats.findIndex((item => item.chat_id === chatId));
+            userChats.splice(index,1);
         }
     }
     function decodeHTMLEntities(text) {
@@ -252,10 +262,10 @@ export default function Chat(props) {
     return (
         <div style={{
             height: "90vh",
-            position: "relative"
+            position: "sticky"
         }}>
-            <MainContainer responsive>
-                <Sidebar position="left" scrollable={false}>
+            <MainContainer>
+                <Sidebar position="left" scrollable={true}>
                     <Typography align='center' m={2} variant='h5'>Czat</Typography>
                     <Divider />
                     <ConversationList>
