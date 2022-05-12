@@ -53,7 +53,7 @@ export default function Chat(props) {
                 if (element.chat_id === chatId && header === null){
                     setHeader(element.login);
                 }
-                return 0;
+                return element.login;
             })
         }
         if (socket === null) {
@@ -122,7 +122,7 @@ export default function Chat(props) {
                     }
                 });
                 socket.on("user-chats", (count, userChats) => {
-                    // console.log(userChats);
+                    console.log(userChats);
                     setUserChats(userChats);
                 });
                 socket.on("chat-messages", (count, chatMsg) => {
@@ -247,11 +247,12 @@ export default function Chat(props) {
             }
         };
     }
-    const handleChatDelete = () => {
+    const handleChatDelete = (chat_id) => {
         if (socket !== null) {
-            socket.emit("leave-chat", chatId);
-            socket.emit("delete-chat", chatDeleteId);
-            let index = userChats.findIndex((item => item.chat_id === chatId));
+            // socket.emit("leave-chat", chatId);
+            // socket.emit("delete-chat", chatDeleteId);
+            let index = userChats.findIndex((item => item.chat_id === chat_id));
+            console.log(index);
             userChats.splice(index,1);
         }
     }
@@ -265,7 +266,7 @@ export default function Chat(props) {
             height: "90vh",
             position: "sticky"
         }}>
-            <MainContainer>
+            <MainContainer style={{height:"90%"}}>
                 <Sidebar position="left" scrollable={true}>
                     <Typography align='center' m={2} variant='h5'>Czat</Typography>
                     <Divider />
@@ -282,7 +283,7 @@ export default function Chat(props) {
                                     <Typography variant="caption">{item.title}</Typography>
                                 </Conversation.Content>
                                 <Conversation.Operations>
-                                    <IconButton onClick={(e) => { e.stopPropagation(); setOpenDeleteDialog(true); setChatDeleteId(item.chat_id) }} >
+                                    <IconButton onClick={(e) => { setChatDeleteId(item.chat_id); setOpenDeleteDialog(true);  e.stopPropagation(); }} >
                                         <ClearIcon />
                                     </IconButton>
                                 </Conversation.Operations>
@@ -313,14 +314,6 @@ export default function Chat(props) {
                                             onClick={() => { setOpenImageDialog({ open: true, src: null }); socket.emit("get-image", item.image_id) }}
                                             style={{ borderRadius: "5%", cursor: "pointer" }}
                                         />
-                                        {/* <Button
-                                            onClick={() => { setOpenImageDialog({ open: true, src: null }); socket.emit("get-image", item.image_id) }}
-                                            color="inherit"
-                                            size="small"
-                                            endIcon={<ImageIcon />}
-                                        >
-                                            ZDJĘCIE
-                                        </Button> */}
                                     </Message.CustomContent> :
                                     <Message.CustomContent>
                                         {item.message_text}
@@ -359,7 +352,7 @@ export default function Chat(props) {
                 <DialogTitle>Czy na pewno chcesz usunąć ten czat?</DialogTitle>
                 <DialogActions>
                     <Button onClick={() => setOpenDeleteDialog(false)}>Anuluj</Button>
-                    <Button color='error' onClick={() => { handleChatDelete(); setOpenDeleteDialog(false) }}>Usuń</Button>
+                    <Button color='error' onClick={() => { handleChatDelete(chatDeleteId); setOpenDeleteDialog(false) }}>Usuń</Button>
                 </DialogActions>
             </Dialog>
         </div>

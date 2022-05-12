@@ -2,8 +2,17 @@ import { Box, Container, Stack, Link } from '@mui/material';
 import React from 'react';
 
 export default function Footer() {
+    const [height, setHeight] = React.useState(window.innerHeight);
+    React.useEffect(() => {
+        function reportWindowSize() {
+            if(height !== window.innerHeight){
+                setHeight(window.innerHeight);
+            }
+        }
+        window.addEventListener('resize', reportWindowSize);
+    }, [height]);
     return (
-        <footer>
+        <footer hidden={height < 760}>
             <Box component="footer" sx={{
                 color: "text.primary",
                 backgroundColor: "lightblue",
@@ -13,8 +22,9 @@ export default function Footer() {
                 position: "fixed",
                 left: "0",
                 bottom: "0",
-                width: "100%"
-            }}>
+                width: "100%",
+            }}
+            >
                 <Container maxWidth="sm">
                     <Stack direction="row" spacing={4} justifyContent="center" alignItems="center">
                         <Link href="info" color="inherit">

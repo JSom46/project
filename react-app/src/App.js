@@ -111,8 +111,8 @@ function App() {
             <Route path="/account" children={<Account auth={auth} />} />
             <Route path="*" render={() => { return (<Redirect to="/dashboard" />) }} />
           </Switch>
+          <Footer />
         </BrowserRouter>
-        <Footer />
       </Box>
     </div>
 
