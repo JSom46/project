@@ -12,8 +12,6 @@ import { Snackbar, Alert } from '@mui/material';
 import { Grid } from '@mui/material';
 import { Dialog, LinearProgress, DialogContent, DialogActions, DialogTitle } from '@mui/material';
 
-import './login.css'
-
 
 function logout() {
   sessionStorage.clear();
@@ -160,6 +158,7 @@ export default function Login(props) {
                 <IconButton onClick={LoginFacebookFunc}> <Facebook /> </IconButton>
               </Stack>
             </form>
+            <Alert severity={snackbarData.severity !== "" ? snackbarData.severity : "error"} hidden={!snackbarData.open}>{snackbarData.message}</Alert>
           </FormControl>
           <Button variant="standard" size="small" onClick={() => setOpenChangePasswordDialog(true)}>Zapomniałem hasła</Button>
           <CircularProgress hidden={!loading} />
@@ -185,7 +184,7 @@ export default function Login(props) {
             <Button onClick={() => (setOpenChangePasswordDialog(false))}>Anuluj</Button>
           </DialogActions>
         </Dialog>
-        <Snackbar
+        {/* <Snackbar
           anchorOrigin={{ vertical: "top", horizontal: "center" }}
           open={snackbarData.open}
           onClose={() => setSnackbarData((prev) => ({ open: false, message: prev.message, severity: prev.severity }))}
@@ -194,7 +193,7 @@ export default function Login(props) {
           <Alert onClose={() => setSnackbarData((prev) => ({ open: false, message: prev.message, severity: prev.severity }))} severity={snackbarData.severity} sx={{ width: '100%' }}>
             {snackbarData.message}
           </Alert>
-        </Snackbar>
+        </Snackbar> */}
       </div>
     )
 }

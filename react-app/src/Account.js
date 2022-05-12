@@ -1,6 +1,6 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom/cjs/react-router-dom.min';
-import './login.css'
+
 import { Box } from '@mui/system';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
