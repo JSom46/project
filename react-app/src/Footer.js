@@ -4,7 +4,17 @@ import React from 'react';
 export default function Footer() {
     return (
         <footer>
-            <Box component="footer" sx={{color: "text.primary", bgcolor: "lightblue", padding:'20px', mt:'auto'}}>
+            <Box component="footer" sx={{
+                color: "text.primary",
+                backgroundColor: "lightblue",
+                borderTop: "1px solid #E7E7E7",
+                textAlign: "center",
+                padding: "20px",
+                position: "fixed",
+                left: "0",
+                bottom: "0",
+                width: "100%"
+            }}>
                 <Container maxWidth="sm">
                     <Stack direction="row" spacing={4} justifyContent="center" alignItems="center">
                         <Link href="info" color="inherit">

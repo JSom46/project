@@ -8,7 +8,6 @@ import Register from './Register';
 import Login from './Login';
 import Activate from './Activate';
 import MenuAppBar from './Topbar';
-import Profile from './Profile';
 import Account from './Account';
 import Dashboard from './Dashboard';
 import Announcements from './Announcements';
@@ -26,7 +25,7 @@ function App() {
   const [auth, setAuth] = useState("");
   const [anonsId, setAnonsId] = useState(-1);
   const chatRedirect = (id) => {
-    sessionStorage.setItem('anonsId',id);
+    sessionStorage.setItem('anonsId', id);
     setAnonsId(id);
   }
   useEffect(() => {
@@ -76,11 +75,12 @@ function App() {
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', }}>
         <BrowserRouter>
           <MenuAppBar auth={auth} />
+          <br />
           <Switch>
             <Route exact path="/" render={() => { return (<Redirect to="/dashboard" />) }} />
             <Route path="/dashboard">
-              <Dashboard auth={auth} chatRedirect={chatRedirect}/>
-              {(anonsId !== -1) && <Redirect to={{pathname: "/chat", state:{id:anonsId}}} />}
+              <Dashboard auth={auth} chatRedirect={chatRedirect} />
+              {(anonsId !== -1) && <Redirect to={{ pathname: "/chat", state: { id: anonsId } }} />}
             </Route>
             <Route path="/announcements">
               <Announcements auth={auth} />
@@ -94,7 +94,7 @@ function App() {
             <Route path="/changePassword">
               <ChangePassword />
             </Route>
-            <Route path="/chat" render={(props) => <Chat id={props.location.state?.id}/>}/>
+            <Route path="/chat" render={(props) => <Chat id={props.location.state?.id} />} />
             {/* <Route path="/chatTesting">
               <Chat />
             </Route>
@@ -108,13 +108,12 @@ function App() {
               <Team />
             </Route>
             <Route path="/activate" children={<Activate />} />
-            <Route path="/profile" children={<Profile auth={auth} />} />
             <Route path="/account" children={<Account auth={auth} />} />
             <Route path="*" render={() => { return (<Redirect to="/dashboard" />) }} />
           </Switch>
         </BrowserRouter>
+        <Footer />
       </Box>
-      <Footer />
     </div>
 
   );

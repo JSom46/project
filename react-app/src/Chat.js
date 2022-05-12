@@ -53,6 +53,7 @@ export default function Chat(props) {
                 if (element.chat_id === chatId && header === null){
                     setHeader(element.login);
                 }
+                return 0;
             })
         }
         if (socket === null) {
@@ -202,7 +203,7 @@ export default function Chat(props) {
             }
             return () => socket.off();
         }
-    }, [socket, connected, authenticated, chatId, login, createNewChat]);
+    }, [socket, connected, authenticated, chatId, login, createNewChat, userChats, header]);
     const updateNewMsgs = (chat_id) => {
         let index = userChats.findIndex((item => item.chat_id === chat_id));
         let chats = userChats;
