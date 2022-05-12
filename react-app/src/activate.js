@@ -1,7 +1,8 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './login.css'
 
 import { CircularProgress } from '@mui/material';
+import { Stack } from '@mui/material';
 
 
 async function activateAccount(userData) {
@@ -12,46 +13,51 @@ async function activateAccount(userData) {
     },
     credentials: 'same-origin',
     body: JSON.stringify(userData)
-  }).then(data => data.json())
+  });
   return data;
- }
+}
 export default function Activate() {
-  const [activated,setActivated] = useState(0);
+  const [activated, setActivated] = useState(0);
 
   useEffect(() => {
-    let paramString = window.location.search;
-    let searchParams = new URLSearchParams(paramString);
     const handleActivate = async e => {
-      // e.preventDefault();
+      let paramString = window.location.search;
+      let searchParams = new URLSearchParams(paramString);
       var code = searchParams.get("code");
       const response = await activateAccount({
         code
       });
-      console.log(response.msg);
-      if(response.msg === 'account activated') setActivated(2);
-      else if(response.msg === 'invalid code') setActivated(1);
+      // console.log(response);
+      if (response.status === 200) setActivated(2);
+      else setActivated(1);
     }
     handleActivate();
-}, []);
-if(activated === 2){
-  setTimeout(()=>{window.location.href = '/login'},5000)
-  return(
-    <div>
-      <h3 style={{color:"green"}}>Pomyślnie aktywowano konto</h3>
-      <p>Nastąpi przekierowanie na stronę logowania...</p>
+  }, []);
+  if (activated === 2) {
+    setTimeout(() => { window.location.href = '/login' }, 5000)
+    return (
+      <div>
+        <Stack justifyContent="center" alignItems="center">
+          <h3 style={{ color: "green" }}>Pomyślnie aktywowano konto</h3>
+          <p>Nastąpi przekierowanie na stronę logowania...</p>
+        </Stack>
       </div>
     )
   }
-  else if(activated === 1){
-  return(
-    <div>
-     <h3 style={{color:"red"}}>To konto zostało już aktywowane lub kod aktywacyjny jest błędny.</h3>
-     </div>
-   )
+  else if (activated === 1) {
+    return (
+      <div>
+        <Stack justifyContent="center" alignItems="center">
+          <h3 style={{ color: "red" }}>To konto zostało już aktywowane lub kod aktywacyjny jest błędny.</h3>
+        </Stack>
+      </div>
+    )
   }
-  else return(
+  else return (
     <div>
-     <CircularProgress />
+      <Stack justifyContent="center" alignItems="center">
+        <CircularProgress />
+      </Stack>
     </div>
-   )
+  )
 }
