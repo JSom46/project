@@ -694,6 +694,22 @@ export const announcementViewButton = {
   marginBottom: 10,
 };
 
+export const drawerLogo = {
+  width: 150,
+  height: 150,
+  alignSelf: 'center',
+};
+
+export const drawerAppName = {
+  fontSize: 24,
+  fontWeight: 'bold',
+  textAlign: 'center',
+  borderBottomWidth: 2,
+  borderBottomColor: 'lightgray',
+  paddingBottom: 10,
+  marginBottom: 5,
+};
+
 export const stylesAnnouncements = StyleSheet.create({
   listContainer: {
     flex: 1,

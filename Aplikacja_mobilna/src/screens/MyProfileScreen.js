@@ -155,7 +155,7 @@ const MyProfileScreen = ({navigation, route}) => {
                         />
 
                         <TouchableOpacity style={[stylesMyProfileButton, {marginTop: 5, marginBottom: 5}]} onPress={handleSubmit}>
-                            <Text style={{fontSize: 20, fontWeight: "600"}}>Zmień login</Text>
+                            <Text style={{fontSize: 20, fontWeight: "600"}}>Zmień nazwę użytkownika</Text>
                         </TouchableOpacity>
                 </View>
             )}

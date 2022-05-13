@@ -9,7 +9,7 @@ import {
 
 // import {AuthContext} from './App'
 import Dashboard from "../screens/Dashboard";
-import { View, Text } from "react-native";
+import { View, Text, Image } from "react-native";
 import AnnouncementsScreen from "../screens/Announcements/AnnouncementsScreen";
 // import MyProfileScreen from './MyProfileScreen';
 import MyProfileScreen from "../screens/MyProfileScreen";
@@ -32,6 +32,7 @@ import axios from "axios";
 import ChatStackScreen from "../chat/ChatStack";
 import AboutAppScreen from "../screens/AboutAppScreen";
 import { userDataContext } from "../screens/UserDataContext";
+import { drawerLogo, drawerAppName } from "../components/styles";
 
 const Drawer = createDrawerNavigator();
 
@@ -114,7 +115,11 @@ const DrawerComponent = ({ navigation, route }) => {
       drawerContent={(props) => {
         return (
           <DrawerContentScrollView {...props}>
-            <DrawerItemList {...props} />
+            <View>
+              <Image style={drawerLogo} source={require('../../assets/logo_transparent.png')}/>
+              <Text style={drawerAppName}>ZwierzoZnajdźca</Text>
+              <DrawerItemList {...props} />
+            </View>
 
             {userData.user_id == "guestId" ? (
               <DrawerItem
@@ -309,8 +314,8 @@ const DrawerComponent = ({ navigation, route }) => {
                 <Ionicons
                   name="chatbox-ellipses-outline"
                   size={size}
-                  // color={focused ? "#7cc" : "#ccc"}
-                  color={newMessages > 0 ? "red" : "#ccc"}
+                  color={focused ? "#7cc" : "#ccc"}
+                  //color={newMessages > 0 ? "red" : "#ccc"}
                 />
               ),
             }}

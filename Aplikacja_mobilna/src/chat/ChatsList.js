@@ -90,7 +90,6 @@ const ChatList = ({ route, navigation }) => {
                 socket.emit('auth-request', login);
             }
             if (connected && authenticated) {
-                console.log("A CZY TU DZIALA", route?.params?.createNewChat);
                 //console.log("W tym ifie");
                 if (route?.params?.createNewChat !== undefined && route?.params?.createNewChat !== null) {
                     console.log("jakies tam paramtry sa");
@@ -186,11 +185,11 @@ const ChatList = ({ route, navigation }) => {
 
     const ChatItem = ({ title, login, newMsgs, item }) => (
         <View style={chatListItem}>
-            {item.NewMsgs > 0 ? (
+            {/* {item.NewMsgs > 0 ? (
                 <Ionicons name="notifications" size={28} color="red" style={{alignSelf: 'center'}}/>
             ):(
                 <Ionicons name="notifications" size={28} color="lightgray" style={{alignSelf: 'center'}}/>
-            )}
+            )} */}
           <View style={{ flex: 1 }}>
             <Text style={{fontSize: 24}}>{item.title}</Text>
             <Text>Z użytkownikiem: {item.login}</Text>
