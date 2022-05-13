@@ -134,12 +134,14 @@ const AnnouncementView = ({ route, navigation }) => {
                   });
                 }}
               >
+                <AntDesign name="edit" size={24} color="black" style={{marginRight: 10}}/>
                 <Text style={{ fontSize: 18, color: "black" }}>Edytuj</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={announcementOptionsButton}
                 onPress={toggleModal}
               >
+                <Ionicons name="trash-outline" size={24} color="black" style={{marginRight: 10}}/>
                 <Text style={{ fontSize: 18, color: "black" }}>Usuń</Text>
               </TouchableOpacity>
 

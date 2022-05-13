@@ -524,6 +524,7 @@ export const categoryButton = {
 
 export const announcementOptionsButton = {
   padding: 1,
+  flexDirection: 'row',
   backgroundColor: "#ffffff",
   justifyContent: "center",
   alignItems: "center",
