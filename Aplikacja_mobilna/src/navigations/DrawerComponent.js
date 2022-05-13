@@ -123,22 +123,27 @@ const DrawerComponent = ({ navigation, route }) => {
 
             {userData.user_id == "guestId" ? (
               <DrawerItem
-                label={({ focused, size }) => (
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Text style={{ color: "gray" }}>Zaloguj się</Text>
-                  </View>
-                )}
+                label="Zaloguj się"
                 onPress={() => navigation.navigate("Login")}
+                icon={({ focused, size }) => (
+                  <Ionicons
+                    name="enter-outline"
+                    size={size}
+                    color={focused ? "#7cc" : "#ccc"}
+                  />
+                )}
               />
             ) : (
               <DrawerItem
-                label={({ focused, size }) => (
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Text style={{ color: "gray" }}>Wyloguj</Text>
-                  </View>
-                )}
-                //onPress={logOut}
+                label="Wyloguj"
                 onPress={() => handleLoggedIn()}
+                icon={({ focused, size }) => (
+                  <Ionicons
+                    name="exit-outline"
+                    size={size}
+                    color={focused ? "#7cc" : "#ccc"}
+                  />
+                )}
               />
             )}
           </DrawerContentScrollView>
