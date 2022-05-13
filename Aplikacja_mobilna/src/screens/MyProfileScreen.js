@@ -1,5 +1,5 @@
 import React, {useRef, useState} from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView} from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, Image} from 'react-native';
 import { Formik } from 'formik';
 import axios from 'axios';
 import { stylesHome, stylesMyProfileContainer, stylesMyProfileButton, stylesMyProfileTextInput } from '../components/styles';
@@ -130,6 +130,8 @@ const MyProfileScreen = ({navigation, route}) => {
                 </Text>
             </View>
 
+            <Image style={{width: 200, height: 200, alignSelf: 'center',}} source={require('../../assets/logo_transparent.png')}/>
+
         {/* Formularz do zmiany loginu*/}
         <Formik
             initialValues={{ login: userData.login}}
@@ -190,7 +192,7 @@ const MyProfileScreen = ({navigation, route}) => {
                             <Text style={{fontSize: 20, fontWeight: "600"}}>Wyślij maila z kodem do zmiany hasła</Text>
                         </TouchableOpacity>
 
-                        <Text style={{fontSize: 16}}>Nowe hasło</Text>
+                        {/* <Text style={{fontSize: 16}}>Nowe hasło</Text>
                         <TextInput
                             onChangeText={handleChange('newPassword')}
                             onBlur={handleBlur('newPassword')}
@@ -213,7 +215,7 @@ const MyProfileScreen = ({navigation, route}) => {
                             <Text style={{fontSize: 20, fontWeight: "600"}}>Zmień hasło</Text>
                         </TouchableOpacity>
 
-                        <Text style={{color: 'red', textAlign: 'center', marginTop: 5}}>{message}</Text>
+                        <Text style={{color: 'red', textAlign: 'center', marginTop: 5}}>{message}</Text> */}
 
                 </View>
             )}
