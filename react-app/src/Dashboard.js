@@ -197,7 +197,7 @@ export default function Dashboard(props) {
 
   return (
     <BrowserRouter>
-      <Grid container spacing={2} columns={16} sx={{px: '20px'}}>
+      <Grid container spacing={2} columns={16} sx={{px: '12px', py: '12px'}}>
         <Grid item lg={10} md={16} xs={16}>
           <MapOverview
             data={listData}

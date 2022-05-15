@@ -14,26 +14,27 @@ export default function Footer() {
     return (
         <footer hidden={height < 760}>
             <Box component="footer" sx={{
-                color: "text.primary",
-                backgroundColor: "lightblue",
-                borderTop: "1px solid #E7E7E7",
+                color: "text.secondary",
+                backgroundColor: "white",
+                borderTop: "1px solid #C0C0C0",
                 textAlign: "center",
-                padding: "20px",
+                padding: "12px",
                 position: "fixed",
                 left: "0",
                 bottom: "0",
                 width: "100%",
+                fontSize: 16
             }}
             >
                 <Container maxWidth="sm">
                     <Stack direction="row" spacing={4} justifyContent="center" alignItems="center">
-                        <Link href="info" color="inherit">
+                        <Link href="info" color="inherit" underline="none">
                             Info
                         </Link>
-                        <Link href="team" color="inherit">
+                        <Link href="team" color="inherit" underline="none">
                             Zespół
                         </Link>
-                        <Link href="https://strona-zespolxiv.herokuapp.com/index.html" target="_blank" color="inherit">
+                        <Link href="https://aleks-2.mat.umk.pl/pz2021/zesp14/" target="_blank" color="inherit" underline="none">
                             Dokumentacja
                         </Link>
                     </Stack>

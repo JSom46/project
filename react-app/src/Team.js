@@ -7,15 +7,14 @@ export default function Team() {
                     <Typography variant='h5' gutterBottom >
                         Zespół:
                     </Typography>
-                    <Typography>
-                    Jan Sompoliński - serwer<br />
-                    Łukasz Halada - serwer<br />
-                    Arkadiusz Kletkiewicz - aplikacja przeglądarkowa<br />
-                    Bartosz Gryniaków - aplikacja przeglądarkowa<br />
-                    Mateusz Wójciak - aplikacja mobilna<br />
-                    Mikołaj Poznański - aplikacja mobilna<br />
-                    <br />
-                    Opiekun: Michał Dudkiewicz
+                    <Typography sx={{px: 4}}>
+                    <li>Michał Dudkiewicz - opiekun zespołu<br /></li>
+                    <li>Jan Sompoliński - kierownik zespołu, programista serwera<br /></li>
+                    <li>Łukasz Halada - programista serwera<br /></li>
+                    <li>Arkadiusz Kletkiewicz - sekretarz, programista aplikacji przeglądarkowej<br /></li>
+                    <li>Bartosz Gryniaków - programista aplikacji przeglądarkowej<br /></li>
+                    <li>Mateusz Wójciak - programista aplikacji mobilnej<br /></li>
+                    <li>Mikołaj Poznański - programista aplikacji mobilnej<br /></li>
                     </Typography>
         </Container>
     );

@@ -9,11 +9,13 @@ export default function InfoPage() {
             </Box>
             
             <Typography variant='h2' align='center' ><b>ZwierzoZnajdźca</b><br/><br/></Typography>
-            <Typography>
-                Aplikacja mająca na celu ułatwienie znajdowania zagubionych zwierząt. 
+            <Typography align='justify' >
+                ZwierzoZnajdźca powstał, by ułatwić właścicielom zaginionych zwierząt ich znalezienie.
+                <br /><br />
                 Użytkownicy mogą dodawać ogłoszenia o zaginięciu zwierząt, wraz z informacjami o zwierzęciu, zdjęciami i informacją o miejscu w którym ostatnio mieli kontakt z pupilem.
-                Inni użytkownicy mogą odpowiadać na takie ogłoszenia, zamieszczając zdjęcia i lokację w któryj widzieli zwierzę.
-                Istnieje tez opcja dodania ogłoszeń o znalezieniu zwierzęcia, które wygląda na zaginione.
+                Inni użytkownicy mogą odpowiadać na takie ogłoszenia, zamieszczając zdjęcia i lokację w której widzieli zwierzę.
+                <br /><br />
+                Istnieje też mozliwość dodania ogłoszeń o znalezieniu zwierzęcia, które wygląda na zaginione - może ktoś go właśnie szuka?
             </Typography>
         </Container>
     );
