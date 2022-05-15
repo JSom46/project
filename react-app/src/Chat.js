@@ -2,12 +2,14 @@ import React, { useState /*useEffect*/ } from 'react';
 import io from 'socket.io-client';
 
 import { Typography } from '@mui/material';
+import { Tooltip } from '@mui/material';
 import { Divider } from '@mui/material';
 import { Button, IconButton } from '@mui/material';
 import { Dialog, DialogTitle, DialogActions } from '@mui/material';
 import { LinearProgress } from '@mui/material';
 import { Snackbar, Alert } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import {
@@ -41,16 +43,20 @@ export default function Chat(props) {
     const [chatId, setChatId] = useState(-1);
     const [chatDeleteId, setChatDeleteId] = useState(-1);
     const [createNewChat, setCreateNewChat] = useState(parseInt(sessionStorage.getItem('anonsId')));
-    
+
     const [userChats, setUserChats] = useState([]);
     const [chatMessages, setChatMessages] = useState([]);
+
+    const [loadAllMessages, setLoadAllMessages] = useState(false);
+    const [messagesLoading, setMessagesLoading] = useState(false);
+    const msgListRef = React.useRef();
 
     const login = sessionStorage.getItem('login');
 
     React.useEffect(() => {
-        if(chatId !== -1 && userChats.length > 0){
+        if (chatId !== -1 && userChats.length > 0) {
             userChats.find(element => {
-                if (element.chat_id === chatId && header === null){
+                if (element.chat_id === chatId && header === null) {
                     setHeader(element.login);
                 }
                 return element.login;
@@ -122,12 +128,14 @@ export default function Chat(props) {
                     }
                 });
                 socket.on("user-chats", (count, userChats) => {
-                    console.log(userChats);
+                    // console.log(userChats);
                     setUserChats(userChats);
                 });
                 socket.on("chat-messages", (count, chatMsg) => {
-                    // console.log(chatMsg);
+                    if (count > 30) setLoadAllMessages(true);
+                    else setLoadAllMessages(false);
                     setChatMessages(chatMsg);
+                    setMessagesLoading(false);
                 });
                 socket.on("chat-msg", (message_id, chat_id, username, datatime, message) => {
                     // console.log(message_id);
@@ -195,6 +203,20 @@ export default function Chat(props) {
                         socket.emit('get-user-chats');
                     }
                 });
+                socket.on('new-msg-notification', (message_id, chat_id, login, datetime, message) => {
+                    let index = userChats.findIndex((item => item.chat_id === chat_id));
+                    let chats = userChats;
+                    chats[index].NewMsgs = chats[index].NewMsgs + 1;
+                    setUserChats([]);
+                    setUserChats(chats);
+                });
+                socket.on('new-img-notification', (message_id, chat_id, login, datetime, message) => {
+                    let index = userChats.findIndex((item => item.chat_id === chat_id));
+                    let chats = userChats;
+                    chats[index].NewMsgs = chats[index].NewMsgs + 1;
+                    setUserChats([]);
+                    setUserChats(chats);
+                });
                 socket.on("disconnect", () => {
                     // console.log("dc");
                     setAuthenticated(false);
@@ -216,6 +238,7 @@ export default function Chat(props) {
         // console.log(anons_id);
         // console.log(chat_id);
         if (socket !== null) {
+            setMessagesLoading(true);
             if (chatId !== -1) {
                 socket.emit("leave-chat", chatId);
             }
@@ -253,7 +276,7 @@ export default function Chat(props) {
             // socket.emit("delete-chat", chatDeleteId);
             let index = userChats.findIndex((item => item.chat_id === chat_id));
             console.log(index);
-            userChats.splice(index,1);
+            userChats.splice(index, 1);
         }
     }
     function decodeHTMLEntities(text) {
@@ -266,7 +289,7 @@ export default function Chat(props) {
             height: "90vh",
             position: "sticky"
         }}>
-            <MainContainer style={{height:"90%"}}>
+            <MainContainer style={{ height: "90%" }}>
                 <Sidebar position="left" scrollable={true}>
                     <Typography align='center' m={2} variant='h5'>Czat</Typography>
                     <Divider />
@@ -283,7 +306,7 @@ export default function Chat(props) {
                                     <Typography variant="caption">{item.title}</Typography>
                                 </Conversation.Content>
                                 <Conversation.Operations>
-                                    <IconButton onClick={(e) => { setChatDeleteId(item.chat_id); setOpenDeleteDialog(true);  e.stopPropagation(); }} >
+                                    <IconButton onClick={(e) => { setChatDeleteId(item.chat_id); setOpenDeleteDialog(true); e.stopPropagation(); }} >
                                         <ClearIcon />
                                     </IconButton>
                                 </Conversation.Operations>
@@ -295,33 +318,56 @@ export default function Chat(props) {
                     <ConversationHeader hidden={chatId === -1}>
                         {/* <ConversationHeader.Back /> */}
                         <ConversationHeader.Content userName={header} />
+                        <ConversationHeader.Actions>
+                            <Tooltip title="Zjedź na dół">
+                                <IconButton onClick={() => msgListRef.current.scrollToBottom("smooth")}>
+                                    <ArrowDownwardIcon />
+                                </IconButton>
+                            </Tooltip>
+                        </ConversationHeader.Actions>
                     </ConversationHeader>
-                    <MessageList>
-                        {chatId !== -1 && chatMessages && chatMessages.map((item) => (
-                            <Message key={item.message_id}
-                                model={{
-                                    type: (item.image_id === null ? "html" : "custom"),
-                                    message: decodeHTMLEntities(item.message_text),
-                                    sentTime: item.message_date.toString(),
-                                    sender: item.login,
-                                    direction: (login === item.login ? "outgoing" : "incoming")
-                                }}>
-                                {item.image_id !== null ?
-                                    <Message.CustomContent>
-                                        <img
-                                            alt={item.image_id}
-                                            src={URL.createObjectURL(new Blob([item.thumbnail], { type: item.mimetype }))}
-                                            onClick={() => { setOpenImageDialog({ open: true, src: null }); socket.emit("get-image", item.image_id) }}
-                                            style={{ borderRadius: "5%", cursor: "pointer" }}
-                                        />
-                                    </Message.CustomContent> :
-                                    <Message.CustomContent>
-                                        {item.message_text}
-                                    </Message.CustomContent>}
-                                {/* <Message.Header>{item.login}</Message.Header> */}
-                                <Message.Footer>{new Date(item.message_date).toLocaleString('pl-PL')}</Message.Footer>
-                            </Message>
-                        ))}
+                    <MessageList loading={messagesLoading} ref={msgListRef}>
+                        <MessageList.Content>
+                            {loadAllMessages &&
+                                <div style={{ margin: "auto", display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                    <Button onClick={() => setLoadAllMessages(false)}>
+                                        Załaduj wszystkie wiadomości
+                                    </Button>
+                                </div>
+                            }
+                            {chatId !== -1 && chatMessages &&
+                                chatMessages.slice((loadAllMessages ? (chatMessages.length - 30) : (0)), chatMessages.length).map((item) => (
+                                    <Message key={item.message_id}
+                                        model={{
+                                            type: (item.image_id === null ? "html" : "custom"),
+                                            message: decodeHTMLEntities(item.message_text),
+                                            sentTime: item.message_date.toString(),
+                                            sender: item.login,
+                                            direction: (login === item.login ? "outgoing" : "incoming")
+                                        }}>
+                                        {item.image_id !== null ?
+                                            <Message.CustomContent>
+                                                <Tooltip title={new Date(item.message_date).toLocaleString('pl-PL')} arrow>
+                                                    <img
+                                                        alt={item.image_id}
+                                                        src={URL.createObjectURL(new Blob([item.thumbnail], { type: item.mimetype }))}
+                                                        onClick={() => { setOpenImageDialog({ open: true, src: null }); socket.emit("get-image", item.image_id) }}
+                                                        style={{ borderRadius: "5%", cursor: "pointer" }}
+                                                    />
+                                                </Tooltip>
+                                            </Message.CustomContent> :
+                                            <Message.CustomContent>
+                                                <Tooltip title={new Date(item.message_date).toLocaleString('pl-PL')} arrow>
+                                                    <div style={{ width: "100%", height: "100%" }}>
+                                                        {item.message_text}
+                                                    </div>
+                                                </Tooltip>
+                                            </Message.CustomContent>}
+                                        {/* <Message.Header>{item.login}</Message.Header> */}
+                                        {/* <Message.Footer>{new Date(item.message_date).toLocaleString('pl-PL')}</Message.Footer> */}
+                                    </Message>
+                                ))}
+                        </MessageList.Content>
                     </MessageList>
                     <MessageInput disabled={chatId === -1} placeholder="Wpisz wiadomość tutaj..." onAttachClick={() => fileInput.current.click()} onSend={(message) => handleSendMessage(message)} />
                 </ChatContainer>
