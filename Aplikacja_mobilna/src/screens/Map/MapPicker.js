@@ -40,8 +40,6 @@ const MapPicker = (props) => {
           latitudeDelta: 3.0,
           longitudeDelta: 3.0,
         });
-        console.log("user != null");
-        console.log(userLocation.latitude);
       }
       if (lat != null) {
         setInitialRegion({
@@ -59,9 +57,7 @@ const MapPicker = (props) => {
           latitudeDelta: 5.0,
           longitudeDelta: 5.0,
         });
-        console.log("other != null");
       }
-      console.log("other != null");
     },
     [userLocation],
     [props.lat]

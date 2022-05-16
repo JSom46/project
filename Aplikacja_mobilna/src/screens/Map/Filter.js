@@ -130,6 +130,9 @@ const Filter = ({ navigation, route }) => {
     if (data.lng != "") {
       handleUpdateFilterData("lng", data.lng);
     }
+    if (data.category != -1) {
+      handleUpdateFilterData("category", data.category);
+    }
     if (slider != 30) {
       handleUpdateFilterData("rad", slider);
     }
