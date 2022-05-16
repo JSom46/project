@@ -69,8 +69,10 @@ const Filter = ({ navigation, route }) => {
   useEffect(
     () => {
       const changeFilter = () => {
-        handleUpdate("lat", lat);
-        handleUpdate("lng", lng);
+        if (lat != null) {
+          handleUpdate("lat", lat);
+          handleUpdate("lng", lng);
+        }
       };
       changeFilter();
       console.log;
@@ -374,7 +376,7 @@ const Filter = ({ navigation, route }) => {
               style={{ width: 300, height: 40 }}
               minimumValue={0}
               maximumValue={200}
-              value={slider}
+              value={data.rad}
               step={1}
               maximumTrackTintColor="#000000"
               onValueChange={(value) => {

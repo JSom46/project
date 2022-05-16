@@ -82,6 +82,7 @@ const MapMain = ({ navigation, route }) => {
   }
 
   const fetchData = async () => {
+    console.log(filterData);
     setTableData();
     let url = "http://" + serwer + "/anons/list";
     let params = 0;
