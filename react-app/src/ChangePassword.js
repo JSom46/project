@@ -119,7 +119,7 @@ export default function ChangePassword() {
             <FormGroup>
               <TextField type='password' id="password" label="Nowe hasło" variant="standard" error={password.isValid} helperText={password.errors} required onChange={e => setPassword({ value: e.target.value })} />
               <TextField type='password' id="repeatPassword" label="Powtórz nowe hasło" variant="standard" error={passwordRepeat.isValid} helperText={passwordRepeat.errors} required onChange={e => setPasswordRepeat({ value: e.target.value })} />
-              <br />
+              <div><br /></div>
               <Button variant="contained" type="submit">Zmień hasło</Button>
             </FormGroup>
           </form>

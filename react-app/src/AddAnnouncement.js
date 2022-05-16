@@ -334,9 +334,9 @@ export default function AddAnnoucment(props) {
             </Select>
           </FormControl>
         </Stack>
-        <br />
+        <div><br /></div>
         <MapPicker autoLocate={true} location={location} onLocationChange={handleLocationChange} />
-        <br />
+        <div><br /></div>
         <Tooltip title="Maksymalnie 8 zdjęć. Maksymalnie 4MB na zdjęcie">
           <Button aria-describedby="imageUploadButton" variant="contained" component="label">Dodaj zdjęcia
             <input id="imageUploadButton" type="file" accept="image/*" onChange={handlePictures} hidden multiple />

@@ -75,7 +75,7 @@ function App() {
       <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', }}>
         <BrowserRouter>
           <MenuAppBar auth={auth} />
-          <br />
+          <div><br /></div>
           <Switch>
             <Route exact path="/" render={() => { return (<Redirect to="/dashboard" />) }} />
             <Route path="/dashboard">

@@ -86,9 +86,9 @@ export default function AddNotification(props) {
         <Box component="form" autoComplete="off" sx={{ padding: 2, width: '100%' }}>
             <FormGroup>
                 <Typography variant='subtitle1'>Gdzie widziałeś to zwierzę?</Typography>
-                <br />
+                <div><br /></div>
                 <MapPicker location={location} onLocationChange={handleLocationChange} />
-                <br />
+                <div><br /></div>
                 <Tooltip title="Maksymalnie 4MB">
                     <Button aria-describedby="imageUploadButton" variant="contained" component="label">Dodaj zdjęcia
                         <input id="imageUploadButton" type="file" accept="image/*" onChange={handlePictures} hidden />

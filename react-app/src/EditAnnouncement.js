@@ -379,9 +379,9 @@ export default function EditAnnoucment(props) {
                             </Select>
                         </FormControl>
                     </Stack>
-                    <br />
+                    <div><br /></div>
                     <MapPicker location={location} onLocationChange={handleLocationChange} />
-                    <br />
+                    <div><br /></div>
                     <Button variant="contained" component="label">Dodaj zdjęcia
                         <input type="file" accept='.jpg, .png' onChange={handlePictures} hidden multiple />
                     </Button>

@@ -134,7 +134,7 @@ export default function Login(props) {
             <h1>Zalogowany</h1>
             <h2>Login:{" " + props.auth.login}</h2>
             <div>
-              <Button color="primary" onClick={logout}>Wyloguj</Button><br />
+              <Button color="primary" onClick={logout}>Wyloguj</Button><div><br /></div>
             </div>
           </Grid>
         </Grid>
@@ -150,7 +150,7 @@ export default function Login(props) {
               <FormGroup>
                 <TextField type='email' id="email" label="Email" variant="standard" required onChange={e => setEmail(e.target.value)} />
                 <TextField type='password' id="password" label="Hasło" variant="standard" required onChange={e => setPassword(e.target.value)} />
-                <br />
+                <div><br /></div>
                 <Button variant="contained" type="submit">Zaloguj</Button>
               </FormGroup>
               <Stack direction="row" spacing={8} justifyContent="center" alignItems="center">

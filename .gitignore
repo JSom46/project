@@ -8,6 +8,7 @@ server/pictures/
 
 
 react-app/node_modules/
+react-app/build/
 
 mobileApp/android/build
 mobileApp/ios
