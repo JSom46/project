@@ -125,7 +125,7 @@ const RootStack = () => {
             name="ImageBrowser"
             component={ImageBrowser}
             options={{
-              title: "Selected 0 files",
+              title: "Wybrano 0 ",
               headerTransparent: false,
             }}
             initialParams={{

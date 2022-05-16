@@ -58,17 +58,18 @@ const MyAnnouncementsStackScreen = ({ route, navigation }) => {
         component={AddAnnouncement}
         initialParams={{ photos: "" }}
       />
-      <MyAnnouncementsStack.Screen
+      {/* <MyAnnouncementsStack.Screen
         name="ImageBrowser"
         component={ImageBrowser}
         options={{
-          title: "Selected 0 files",
+          headerShown: true,
+          title: "Wybrano 0 ",
           headerTransparent: false,
         }}
         initialParams={{
           count: "",
         }}
-      />
+      /> */}
       <MyAnnouncementsStack.Screen
         name="EditAnnouncement"
         component={EditAnnouncement}

@@ -18,17 +18,9 @@ import UserLocationContext from "../../components/Context/UserLocationContext";
 const { brand, darkLight, black, primary } = Colors;
 
 const MapMain = ({ navigation, route }) => {
-  const [mapRegion, setRegion] = useState({
-    latitude: 52.5,
-    longitude: 19.2,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  });
   const [userLocation, setUserLocation] = useContext(UserLocationContext);
   const [hasLocationPermissions, setLocationPermission] = useState(false);
-
   const testowazmienna = 232323;
-
   const [markerRefs, setMarkerRefs] = useState([]);
   const [focusRegion, setFocusRegion] = useState(null);
   //const [userData, setUserData] = useState(route.params.userData);
@@ -39,6 +31,13 @@ const MapMain = ({ navigation, route }) => {
   const [status, setStatus] = useState();
   const [filterData, setfilterData] = useContext(FilterContext);
 
+  const [mapRegion, setRegion] = useState({
+    latitude: 50,
+    longitude: 20,
+    latitudeDelta: 10.0922,
+    longitudeDelta: 10.0421,
+  });
+
   useEffect(() => {
     const getLocationAsync = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -46,6 +45,7 @@ const MapMain = ({ navigation, route }) => {
       if ("granted" !== status) {
         setLocation("Permission to access location was denied");
       } else {
+        console.log("grand");
         setLocationPermission(true);
         let {
           coords: { latitude, longitude },
@@ -56,8 +56,8 @@ const MapMain = ({ navigation, route }) => {
         console.log(userLocation.lng);
         // Center the map on the location we just fetched.
         setRegion({
-          latitude,
-          longitude,
+          latitude: latitude,
+          longitude: longitude,
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         });

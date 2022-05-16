@@ -113,12 +113,12 @@ const Login = ({ navigation }) => {
     handleMessage(null);
     let userData = {
       email: credentials.email,
-      password: credentials.password
-    }
+      password: credentials.password,
+    };
     console.log("xd");
     console.log(userData);
     var data = JSON.stringify({
-      credentials
+      credentials,
       // email: "jarszy@loremipsummail.com",
       // email: "jarszy@loremipsummail.com",
       // password: "noweHaslo12",
@@ -131,6 +131,7 @@ const Login = ({ navigation }) => {
       headers: {
         "Content-Type": "application/json",
       },
+      //data: data,
       data: credentials,
       credentials: "same-origin",
     };
