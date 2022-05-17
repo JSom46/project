@@ -5,6 +5,7 @@ import Grid from '@mui/material/Grid';
 
 import MapPicker from './MapPicker';
 
+
 /*
     TODO better way to clear single filter, without clearing all of them
 */
@@ -234,7 +235,7 @@ export default function FiltersDialog(props) {
                                 <MenuItem value={1}>Znalezienie</MenuItem>
                             </Select>
                         </FormControl>
-                        
+
                     </Grid>
                     <Grid item>
                         <Stack direction="row" spacing={1}>
@@ -275,7 +276,7 @@ export default function FiltersDialog(props) {
                                 ))}
                             </Select> */}
                             <Autocomplete
-                                disablePortal
+
                                 disabled={coatsData.length === 0}
                                 options={coatsData}
                                 renderInput={(params) => <TextField {...params} label="Owłosienie" onBlur={handleCoatChange} />}
@@ -289,7 +290,7 @@ export default function FiltersDialog(props) {
                                 ))}
                             </Select> */}
                             <Autocomplete
-                                disablePortal
+
                                 disabled={colorsData.length === 0}
                                 options={colorsData}
                                 renderInput={(params) => <TextField {...params} label="Umaszczenie" onBlur={handleColorChange} />}
@@ -303,7 +304,7 @@ export default function FiltersDialog(props) {
                                 ))}
                             </Select> */}
                             <Autocomplete
-                                disablePortal
+
                                 disabled={breedsData.length === 0}
                                 options={breedsData}
                                 renderInput={(params) => <TextField {...params} label="Rasa" onBlur={handleBreedChange} />}
