@@ -116,7 +116,7 @@ export default function Register() {
               <TextField type='email' id="email" label="Email" variant="standard" required onChange={e => setEmail(e.target.value)} />
               <TextField type='password' id="password" label="Hasło" variant="standard" error={!password.isValid} helperText={password.errors} required onChange={e => setPassword({ "value": e.target.value, "isValid": true })} />
               <TextField type='password' id="passwordRepeat" label="Powtórz hasło" variant="standard" error={!passwordRepeat.isValid} helperText={passwordRepeat.errors} required onChange={e => setPasswordRepeat({ "value": e.target.value, "isValid": true })} />
-            <br />
+            <div><br /></div>
             <Button variant="contained" type="submit" onClick={handleSubmit}>Zarejestruj</Button>
             </FormGroup>
           </form>

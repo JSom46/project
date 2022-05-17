@@ -5,10 +5,15 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
+  LogBox,
 } from "react-native";
 import * as ImageManipulator from "expo-image-manipulator";
 import { ImageBrowser } from "expo-image-picker-multiple";
 import * as FileSystem from "expo-file-system";
+
+LogBox.ignoreLogs([
+  "Non-serializable values were found in the navigation state",
+]);
 
 const getFileInfo = async (fileURI) => {
   const fileInfo = await FileSystem.getInfoAsync(fileURI);
@@ -21,13 +26,7 @@ const isLessThanTheMB = (fileSize, smallerThanSizeMB) => {
 };
 
 const ImageBrowserScreen = ({ navigation, route }) => {
-  const _getHeaderLoader = () => (
-    <ActivityIndicator size="small" color={"#0580FF"} />
-  );
   const [count, setCount] = useState(route.params.count);
-  const handleClose = (modul) => {
-    setCheckPhoto(modul);
-  };
 
   const imagesCallback = (callback) => {
     callback
@@ -76,14 +75,14 @@ const ImageBrowserScreen = ({ navigation, route }) => {
     if (!count) return null;
     return (
       <TouchableOpacity title={"Done"} onPress={onSubmit}>
-        <Text onPress={onSubmit}>Done</Text>
+        <Text onPress={onSubmit}>Zakończ</Text>
       </TouchableOpacity>
     );
   };
 
   const updateHandler = (count, onSubmit) => {
     navigation.setOptions({
-      title: `Selected ${count} files`,
+      title: `Wybrano ${count}`,
       headerRight: () => _renderDoneButton(count, onSubmit),
     });
   };

@@ -298,16 +298,16 @@ export const StyledButtonCategory = styled.TouchableOpacity`
   border-radius: 5px;
   margin-vertical: 5px;
   height: 60px;
-  width: 140px;
+  width: 170px;
   border-radius: 10px;
   border-width: 1px;
   border-color: ${black};
   ${(props) =>
     props.isPress == true &&
     `
-    font-size: 18px;
-    background-color: ${blue};
-    `}
+  font-size: 18px;
+  background-color: ${blue};
+  `}
 `;
 
 export const ButtonText = styled.Text`
@@ -524,7 +524,7 @@ export const categoryButton = {
 
 export const announcementOptionsButton = {
   padding: 1,
-  flexDirection: 'row',
+  flexDirection: "row",
   backgroundColor: "#ffffff",
   justifyContent: "center",
   alignItems: "center",
@@ -698,15 +698,15 @@ export const announcementViewButton = {
 export const drawerLogo = {
   width: 150,
   height: 150,
-  alignSelf: 'center',
+  alignSelf: "center",
 };
 
 export const drawerAppName = {
   fontSize: 24,
-  fontWeight: 'bold',
-  textAlign: 'center',
+  fontWeight: "bold",
+  textAlign: "center",
   borderBottomWidth: 2,
-  borderBottomColor: 'lightgray',
+  borderBottomColor: "lightgray",
   paddingBottom: 10,
   marginBottom: 5,
 };

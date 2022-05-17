@@ -446,26 +446,40 @@ router.delete('/', (req, res) => {
             return res.sendStatus(403);
         }
         //usun ogloszenie z bazy
-        con.run(`DELETE FROM 
-                    anons 
-                WHERE 
-                    id = ?`, req.body.id, (err) => {
-            if(err){
-                log.debug(err);
-                return res.sendStatus(500);
-            }
-            return res.sendStatus(200);
-        }); 
-        //jesli ogłoszenie mialo jakies zdjecia - usun je
-        if(row.images.length > 0){
-            row.images.split('#').forEach((e) => {
-                fs.unlink('./pictures/' + e, (err) => {
-                    if(err){
-                        log.debug('unlink: ', err);
-                    } 
-                });
+        con.serialize(() => {
+            con.run('DELETE FROM ChatImages WHERE message_id IN (SELECT message_id FROM ChatMessages WHERE chat_id IN (SELECT chat_id FROM ChatUsers WHERE anons_id = ?));', req.body.id, (err) => {
+                if(err){
+                    log.debug('1' + err);
+                }
+            })
+               .run('DELETE FROM ChatMessages WHERE chat_id IN (SELECT chat_id FROM ChatUsers WHERE anons_id = ?);', req.body.id, (err) => {
+                if(err){
+                    log.debug('2' + err);
+                }
+            })
+               .run('DELETE FROM ChatUsers WHERE anons_id = ?;', req.body.id, (err) => {
+                if(err){
+                    log.debug('3' + err);
+                }
+            })
+               .run('DELETE FROM anons WHERE id = ?;', req.body.id, (err) => {
+                if(err){
+                    log.debug('4' + err);
+                    return res.sendStatus(500);
+                }
+                //jesli ogłoszenie mialo jakies zdjecia - usun je 
+                if(row.images.length > 0){
+                    row.images.split('#').forEach((e) => {
+                        fs.unlink('./pictures/' + e, (err) => {
+                            if(err){
+                                log.debug('unlink: ', err);
+                            } 
+                        });
+                    });
+                } 
+                return res.sendStatus(200);
             });
-        }  
+        });
     });
 });
 

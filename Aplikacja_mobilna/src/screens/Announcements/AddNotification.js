@@ -11,6 +11,7 @@ import {
   InnerContainerOne,
   MsgBox,
   StyledButtonPhoto,
+  SubTitle,
 } from "../../components/styles";
 import MapPicker from "../Map/MapPicker";
 
@@ -100,9 +101,7 @@ const AddNotification = ({ navigation, route }) => {
     <StyledContainer>
       <StatusBar style="dark" />
       <InnerContainerOne>
-        <ExtraView />
-        <ExtraView />
-        <ExtraView />
+        <SubTitle>Dodaj powiadomienie</SubTitle>
         <ExtraView />
         <StyledInputLabel filter={true}>
           {"Gdzie widziałeś to zwierze?*:"}
@@ -150,7 +149,6 @@ const AddNotification = ({ navigation, route }) => {
         >
           <ButtonText>Wyślij </ButtonText>
         </StyledButton>
-        <ExtraView />
       </InnerContainerOne>
     </StyledContainer>
   );

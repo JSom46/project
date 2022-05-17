@@ -111,10 +111,17 @@ const Login = ({ navigation }) => {
   };
   const handleLogin = (credentials) => {
     handleMessage(null);
+    let userData = {
+      email: credentials.email,
+      password: credentials.password,
+    };
+    console.log("xd");
+    console.log(userData);
     var data = JSON.stringify({
-      email: "matmar@loremipsummail.com",
+      credentials,
       // email: "jarszy@loremipsummail.com",
-      password: "noweHaslo12",
+      // email: "jarszy@loremipsummail.com",
+      // password: "noweHaslo12",
       // email: "admin@trash-mail.com",
       // password: "admin",
     });
@@ -124,7 +131,8 @@ const Login = ({ navigation }) => {
       headers: {
         "Content-Type": "application/json",
       },
-      data: data,
+      //data: data,
+      data: credentials,
       credentials: "same-origin",
     };
     console.log(config);
@@ -187,7 +195,7 @@ const Login = ({ navigation }) => {
           initialValues={{ email: "", password: "" }}
           onSubmit={(values) => {
             // console.log(JSON.stringify(values));
-            handleLogin(JSON.stringify(values));
+            handleLogin(values);
           }}
         >
           {({ handleChange, handleBlur, handleSubmit, values }) => (

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 
 import FormControl from '@mui/material/FormControl';
 import FormGroup from '@mui/material/FormGroup';
-import { InputLabel, TextField } from '@mui/material';
+import { InputLabel, TextField, Autocomplete } from '@mui/material';
 import { Button } from '@mui/material';
 import { Select, MenuItem } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -119,7 +119,7 @@ export default function EditAnnoucment(props) {
                 setUpdatePicturesPreview(updatePicturesPreview + 1);
             }
             getPictures();
-        }  
+        }
     }, [0]);
 
     //update pictures preview
@@ -288,7 +288,7 @@ export default function EditAnnoucment(props) {
         e.preventDefault();
         if (checkForm()) {
             await editAnnoucement();
-        }        
+        }
     }
 
     useEffect(() => {
@@ -344,9 +344,10 @@ export default function EditAnnoucment(props) {
                             ))}
                         </Select>
                     </FormControl>
+                    <div><br /></div>
                     <Stack justifyContent="space-evenly" direction="row" alignItems="center" spacing={2}>
                         <FormControl variant="standard" style={{ width: '100%' }}>
-                            <InputLabel id="coat">Owłosienie</InputLabel>
+                            {/* <InputLabel id="coat">Owłosienie</InputLabel>
                             <Select value={coat} labelId="coat" id="coat" onChange={handleCoatChange} disabled={typesData.coats.length === 0}>
                                 {typesData.coats.length === 0 ?
                                     <MenuItem key={coat} value={coat}>{coat}</MenuItem>
@@ -354,10 +355,16 @@ export default function EditAnnoucment(props) {
                                     typesData.coats.map((item) => (
                                         <MenuItem key={item} value={item}>{item}</MenuItem>
                                     ))}
-                            </Select>
+                            </Select> */}
+                            <Autocomplete
+                                disablePortal
+                                disabled={typesData.coats.length === 0}
+                                options={typesData.coats}
+                                renderInput={(params) => <TextField {...params} label="Owłosienie" onBlur={handleCoatChange} />}
+                            />
                         </FormControl>
                         <FormControl variant="standard" style={{ width: '100%' }}>
-                            <InputLabel id="colors">Umaszczenie</InputLabel>
+                            {/* <InputLabel id="colors">Umaszczenie</InputLabel>
                             <Select value={color} labelId="colors" id="colors" onChange={handleColorChange} disabled={typesData.colors.length === 0}>
                                 {typesData.colors.length === 0 ?
                                     <MenuItem key={color} value={color}>{color}</MenuItem>
@@ -365,10 +372,16 @@ export default function EditAnnoucment(props) {
                                     typesData.colors.map((item) => (
                                         <MenuItem key={item} value={item}>{item}</MenuItem>
                                     ))}
-                            </Select>
+                            </Select> */}
+                            <Autocomplete
+                                disablePortal
+                                disabled={typesData.colors.length === 0}
+                                options={typesData.colors}
+                                renderInput={(params) => <TextField {...params} label="Umaszczenie" onBlur={handleColorChange} />}
+                            />
                         </FormControl>
                         <FormControl variant="standard" style={{ width: '100%' }}>
-                            <InputLabel id="breeds">Rasa</InputLabel>
+                            {/* <InputLabel id="breeds">Rasa</InputLabel>
                             <Select value={breed} labelId="breeds" id="breeds" onChange={handleBreedChange} disabled={typesData.breeds.length === 0}>
                                 {typesData.breeds.length === 0 ?
                                     <MenuItem key={breed} value={breed}>{breed}</MenuItem>
@@ -376,12 +389,18 @@ export default function EditAnnoucment(props) {
                                     typesData.breeds.map((item) => (
                                         <MenuItem key={item} value={item}>{item}</MenuItem>
                                     ))}
-                            </Select>
+                            </Select> */}
+                            <Autocomplete
+                                disablePortal
+                                disabled={typesData.breeds.length === 0}
+                                options={typesData.breeds}
+                                renderInput={(params) => <TextField {...params} label="Rasa" onBlur={handleBreedChange} />}
+                            />
                         </FormControl>
                     </Stack>
-                    <br />
+                    <div><br /></div>
                     <MapPicker location={location} onLocationChange={handleLocationChange} />
-                    <br />
+                    <div><br /></div>
                     <Button variant="contained" component="label">Dodaj zdjęcia
                         <input type="file" accept='.jpg, .png' onChange={handlePictures} hidden multiple />
                     </Button>

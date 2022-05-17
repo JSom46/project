@@ -8,13 +8,13 @@ export default function Team() {
                         Zespół:
                     </Typography>
                     <Typography sx={{px: 4}}>
-                    <li>Michał Dudkiewicz - opiekun zespołu<br /></li>
-                    <li>Jan Sompoliński - kierownik zespołu, programista serwera<br /></li>
-                    <li>Łukasz Halada - programista serwera<br /></li>
-                    <li>Arkadiusz Kletkiewicz - sekretarz, programista aplikacji przeglądarkowej<br /></li>
-                    <li>Bartosz Gryniaków - programista aplikacji przeglądarkowej<br /></li>
-                    <li>Mateusz Wójciak - programista aplikacji mobilnej<br /></li>
-                    <li>Mikołaj Poznański - programista aplikacji mobilnej<br /></li>
+                    <li>Michał Dudkiewicz - opiekun zespołu<div><br /></div></li>
+                    <li>Jan Sompoliński - kierownik zespołu, programista serwera<div><br /></div></li>
+                    <li>Łukasz Halada - programista serwera<div><br /></div></li>
+                    <li>Arkadiusz Kletkiewicz - sekretarz, programista aplikacji przeglądarkowej<div><br /></div></li>
+                    <li>Bartosz Gryniaków - programista aplikacji przeglądarkowej<div><br /></div></li>
+                    <li>Mateusz Wójciak - programista aplikacji mobilnej<div><br /></div></li>
+                    <li>Mikołaj Poznański - programista aplikacji mobilnej<div><br /></div></li>
                     </Typography>
         </Container>
     );

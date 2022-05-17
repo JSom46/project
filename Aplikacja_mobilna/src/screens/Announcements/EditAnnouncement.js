@@ -75,12 +75,6 @@ const EditAnnouncement = ({ navigation, route }) => {
   const [breedsList, setBreedsList] = useState([]);
   const [types, setTypes] = useState();
   const [isLoading, setLoading] = useState(true);
-  const [typesData, setTypesData] = useState({
-    types: "",
-    coats: "",
-    colors: "",
-    breeds: "",
-  });
 
   const [message, setMessage] = useState();
   const [messageType, setMessageType] = useState();
@@ -123,8 +117,6 @@ const EditAnnouncement = ({ navigation, route }) => {
 
   const handleSubmit = async (e) => {
     const response = await editAnnoucement();
-    console.log(response);
-    console.log(response.status);
     if (response.status == 200) {
       alert("Pomyślnie edytowano ogłoszenie.");
       navigation.goBack();
@@ -133,65 +125,29 @@ const EditAnnouncement = ({ navigation, route }) => {
     }
   };
 
-  const handleTypeChange = (value) => {
+  const handleTypeChange = (array, value) => {
+    const choice = array.filter((item) => {
+      return item.name == value;
+    });
+
+    setCoatsList(choice[0].coats);
+    setColorsList(choice[0].colors);
+    setBreedsList(choice[0].breeds);
+  };
+  const handleType = (value) => {
     setType(value);
     setCoat("");
     setBreed("");
     setColor("");
-    const choice = typesData.types.filter((type) => {
-      return type.name === event.target.value;
+    // console.log(types);
+    const choice = types.filter((item) => {
+      return item.name == value;
     });
-    setTypesData((prev) => ({
-      types: prev.types,
-      coats: choice[0].coats,
-      colors: choice[0].colors,
-      breeds: choice[0].breeds,
-    }));
+
+    setCoatsList(choice[0].coats);
+    setColorsList(choice[0].colors);
+    setBreedsList(choice[0].breeds);
   };
-
-  useEffect(() => {
-    const fetchTypes = async () => {
-      let url = "http://" + serwer + "/anons/types";
-      try {
-        const response = await fetch(url, {
-          method: "GET",
-          credentials: "include",
-        });
-        const json = await response.json();
-        const rows = [];
-
-        json.forEach((element) => {
-          rows.push(
-            createTypes(
-              element.name,
-              element.coats,
-              element.colors,
-              element.breeds
-            )
-          );
-        });
-        const choice = rows.filter((c) => {
-          return c.name === type;
-        });
-        setTypesData({
-          types: rows,
-          coats: choice[0].coats,
-          colors: choice[0].colors,
-          breeds: choice[0].breeds,
-        });
-        setTypes(rows);
-      } catch (error) {
-        console.log("error", error);
-      }
-    };
-    setLoading(true);
-    fetchTypes();
-    if (route.params.photos != "") {
-      setImage(route.params.photos);
-    }
-
-    setLoading(false);
-  }, []);
 
   const handleCallback = (childData, childData2) => {
     setLat(childData);
@@ -202,6 +158,48 @@ const EditAnnouncement = ({ navigation, route }) => {
     setImage(childData);
     setImage1([]);
   };
+
+  const fetchTypes = async () => {
+    let url = "http://" + serwer + "/anons/types";
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include",
+      });
+      const json = await response.json();
+      const rows = [];
+
+      json.forEach((element) => {
+        rows.push(
+          createTypes(
+            element.name,
+            element.coats,
+            element.colors,
+            element.breeds
+          )
+        );
+      });
+      setTypes(rows);
+      return rows;
+    } catch (error) {
+      console.log("error", error);
+      return true;
+    }
+  };
+
+  useEffect(() => {
+    fetchTypes()
+      .then((rows) => {
+        setTypes(rows);
+        handleTypeChange(rows, type);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+    if (route.params.photos != "") {
+      setImage(route.params.photos);
+    }
+  }, []);
 
   const validationSchema = Yup.object().shape({
     title: Yup.string()
@@ -294,7 +292,7 @@ const EditAnnouncement = ({ navigation, route }) => {
                     style={pickerStyle}
                     selectedValue={type}
                     onValueChange={(itemValue) => {
-                      handleTypeChange(itemValue);
+                      handleType(itemValue);
                       values.type = itemValue;
                     }}
                   >
@@ -322,28 +320,23 @@ const EditAnnouncement = ({ navigation, route }) => {
                   <Picker
                     style={pickerStyle}
                     onValueChange={(itemValue) => {
-                      //setCoat(itemValue);
+                      setCoat(itemValue);
                       values.coat = itemValue;
                     }}
                     selectedValue={coat}
                     enabled={coatsList.length > 0 ? true : false}
                   >
-                    {coatsList.length === 0 ? (
-                      <Picker.Item key={coat} value={coat}>
-                        {coat}
-                      </Picker.Item>
-                    ) : (
-                      //     coat != "" ? null : (
-                      //   <Picker.Item
-                      //     label="Owłosienie"
-                      //     value={null}
-                      //     color="#9EA0A4"
-                      //   ></Picker.Item>
-                      //     )
+                    {coat != "" ? null : (
+                      <Picker.Item
+                        label="Owłosienie"
+                        value={null}
+                        color="#9EA0A4"
+                      ></Picker.Item>
+                    )}
+                    {coatsList &&
                       coatsList.map((item) => (
                         <Picker.Item key={item} label={item} value={item} />
-                      ))
-                    )}
+                      ))}
                   </Picker>
 
                   <StyledInputLabel announce={true}>
@@ -351,11 +344,11 @@ const EditAnnouncement = ({ navigation, route }) => {
                   </StyledInputLabel>
                   <Picker
                     style={pickerStyle}
-                    selectedValue={color}
                     onValueChange={(itemValue) => {
                       setColor(itemValue);
                       values.color = itemValue;
                     }}
+                    selectedValue={color}
                     enabled={colorsList.length > 0 ? true : false}
                   >
                     {color != "" ? null : (
@@ -382,7 +375,7 @@ const EditAnnouncement = ({ navigation, route }) => {
                   >
                     {breed != "" ? null : (
                       <Picker.Item
-                        label="Umaszczenie"
+                        label="Rasa"
                         value={null}
                         color="#9EA0A4"
                       ></Picker.Item>

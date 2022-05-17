@@ -8,31 +8,60 @@ import UserLocationContext from "../../components/Context/UserLocationContext";
 
 const MapPicker = (props) => {
   //const location = props.location;
-  const [lat, setLat] = useState();
-  const [lng, setLng] = useState();
+  const [lat, setLat] = useState(props.lat);
+  const [lng, setLng] = useState(props.lng);
   const [userLocation, setUserLocation] = useContext(UserLocationContext);
   const [filterData, setfilterData] = useContext(FilterContext);
   const [rad, setRad] = useState(0);
   const mapRef = useRef();
+  const [initialRegion, setInitialRegion] = useState();
 
-  useEffect(() => {
-    function handleLocationChange() {
-      if (filterData.lat != "") {
-        setLat(filterData.lat);
-        setLng(filterData.lng);
-      }
-    }
-
-    handleLocationChange();
-  }, [filterData.lat, filterData.lng]);
-
-  useEffect(() => {
-    if (props.lat != null) {
-      setLat(props.lat);
-      setLng(props.lng);
+  useEffect(
+    () => {
+      props.parentCallback(lat, lng);
       console.log(lat);
-    }
-  }, [props.lat, props.lng]);
+      console.log(lng);
+    },
+    [lat, lng],
+    [props]
+  );
+
+  useEffect(() => {
+    setLat(props.lat);
+    setLng(props.lng);
+  }, [props.lat]);
+
+  useEffect(
+    () => {
+      if (userLocation.latitude != null) {
+        setInitialRegion({
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          latitudeDelta: 3.0,
+          longitudeDelta: 3.0,
+        });
+      }
+      if (lat != null) {
+        setInitialRegion({
+          latitude: lat,
+          longitude: lng,
+          latitudeDelta: 2.0,
+          longitudeDelta: 2.0,
+        });
+        console.log("lat != null");
+        console.log(lat);
+      } else {
+        setInitialRegion({
+          latitude: 52,
+          longitude: 19,
+          latitudeDelta: 5.0,
+          longitudeDelta: 5.0,
+        });
+      }
+    },
+    [userLocation],
+    [props.lat]
+  );
 
   useEffect(() => {
     if (props.range != null) {
@@ -60,24 +89,15 @@ const MapPicker = (props) => {
             setLng(e.nativeEvent.coordinate.longitude);
           }
         }}
+        initialRegion={initialRegion}
       >
-        {lat == null
-          ? null
-          : lng == null
-          ? null
-          : lat == undefined
-          ? null
-          : props.parentCallback(lat, lng)}
         {lat == null ? null : lng == null ? null : lng == undefined ? null : (
           <MapView.Marker
             coordinate={{ latitude: lat, longitude: lng }}
             pinColor={"#000000"}
           />
         )}
-        {lat == null ? null : lat == undefined ? null : lng ==
-          null ? null : lng == undefined ? null : rad == null ? null : isNaN(
-            rad
-          ) == true ? null : (
+        {lat == null ? null : rad == null ? null : isNaN(rad) == true ? null : (
           <Circle
             center={{
               latitude: lat,

@@ -2,6 +2,7 @@
 import { DataGrid, GridFooterContainer, gridPageCountSelector, gridPageSelector, useGridApiContext, useGridSelector, plPL } from '@mui/x-data-grid';
 import { Pagination, IconButton } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import ImageIcon from '@mui/icons-material/Image';
 import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 
 import moment from 'moment';
@@ -29,6 +30,14 @@ const columns = [
   //   headerName: 'ID',
   //   width: 10,
   // },
+  {
+    field: 'image',
+    headerName: <ImageIcon />,
+    flex: 0.2,
+    editable: false,
+    sortable: false,
+    renderCell: (params) => (params.value !== process.env.REACT_APP_SERVER_ROOT_URL + "/anons/photo?name=" ? <img src={params.value} style={{ width: "50px", height: "50px", objectFit: "cover"}}/> : ""), // renderCell will render the component
+  },
   {
     field: 'title',
     headerName: 'Tytuł',

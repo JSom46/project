@@ -20,7 +20,7 @@ function createData(list) {
       title: element.title,
       category: (element.category === 0 ? "Zaginięcie" : "Znalezienie"),
       type: element.type,
-      image: element.image,
+      image: process.env.REACT_APP_SERVER_ROOT_URL + "/anons/photo?name=" + element.image,
       create_date: element.create_date,
       lat: element.lat,
       lng: element.lng,
