@@ -21,14 +21,16 @@ function MapController(props) {
         popupAnchor: [1, -34],
         shadowSize: [41, 41]
     });
-    const icon_missing = new L.Icon({
+    const icon_missing = new L.Icon.Default();
+    /*const icon_missing = new L.Icon({
         iconUrl: './marker-icon-missing.png',
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
         iconSize: [25, 41],
         iconAnchor: [12, 41],
         popupAnchor: [1, -34],
         shadowSize: [41, 41]
-    });
+    });*/
+    
 
     function goToPos(pos, zoom) {
         map.flyTo(pos, zoom);

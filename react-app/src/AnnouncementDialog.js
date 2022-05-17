@@ -110,7 +110,10 @@ export default function AnnouncementDialog(props) {
                                 </Grid>
                                 <Grid item md={6} sm={8} xs={14} sx={{ pb: '10px' }}>
                                     <Typography variant="subtitle1">Lokacja</Typography>
-                                    <MapSimple loc={[props.announcementData.lat, props.announcementData.lng]} />
+                                    <MapSimple 
+                                        loc={[props.announcementData.lat, props.announcementData.lng]} 
+                                        useIconFound={props.announcementData.category == 1}
+                                    />
                                 </Grid>
                             </Grid>
 
