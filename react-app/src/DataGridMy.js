@@ -59,10 +59,12 @@ export default function DataGridMy() {
     });
     const [inDeletionProcess, setInDeletionProcess] = useState(false);
     const [data, setData] = useState([]);
+    const [dataLoading, setDataLoading] = useState(false);
     const [reload, setReload] = useState(false);
     useEffect(() => {
         const fetchData = async () => {
             setData([]);
+            setDataLoading(true);
             let url = process.env.REACT_APP_SERVER_ROOT_URL + '/anons/my';
             try {
                 const response = await fetch(url, {
@@ -87,9 +89,9 @@ export default function DataGridMy() {
                     ));
                 });
                 setData(rows);
+                setDataLoading(false);
             } catch (error) {
                 setFetchError(true);
-
                 console.log("error", error);
             }
         };
@@ -304,7 +306,7 @@ export default function DataGridMy() {
                             rowsPerPageOptions={[10]}
                             onRowClick={handleRowClick}
                             disableSelectionOnClick
-                            loading={data.length === 0}
+                            loading={dataLoading}
                             components={{
                                 // Toolbar: CustomToolbar,
                                 Footer: CustomFooter,
