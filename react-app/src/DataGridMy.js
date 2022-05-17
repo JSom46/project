@@ -6,6 +6,7 @@ import { Dialog, DialogActions, DialogContent, DialogTitle, DialogContentText, C
 import CloseIcon from '@mui/icons-material/Close';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import ImageIcon from '@mui/icons-material/Image';
 import Badge from '@mui/material/Badge';
 import { Stack, Box } from '@mui/material';
 import { Typography } from '@mui/material';
@@ -33,8 +34,9 @@ const StyledDataGrid = styled(DataGrid)(() => ({
         cursor: 'pointer'
     }
 }));
-function createData(id, title, category, type, createDate, notifications_count) {
-    return { id, title, category, type, createDate, notifications_count };
+function createData(id, title, category, type, createDate, im, notifications_count) {
+    let image = process.env.REACT_APP_SERVER_ROOT_URL + "/anons/photo?name=" + im;
+    return { id, title, category, type, createDate, image, notifications_count };
 }
 
 function formatDate(el) {
@@ -83,13 +85,13 @@ export default function DataGridMy() {
                         (element.category === 0 ? "Zaginięcie" : "Znalezienie"),
                         element.type,
                         element.create_date,
+                        element.image,
                         element.notifications_count
                     ));
                 });
                 setData(rows);
             } catch (error) {
                 setFetchError(true);
-
                 console.log("error", error);
             }
         };
@@ -249,6 +251,14 @@ export default function DataGridMy() {
                                 //   width: 10,
                                 // },
                                 {
+                                    field: 'image',
+                                    headerName: <ImageIcon />,
+                                    flex: 0.2,
+                                    editable: false,
+                                    sortable: false,
+                                    renderCell: (params) => (params.value !== process.env.REACT_APP_SERVER_ROOT_URL + "/anons/photo?name=" ? <img src={params.value} style={{ width: "50px", height: "50px", objectFit: "cover" }} /> : ""), // renderCell will render the component
+                                },
+                                {
                                     field: 'title',
                                     headerName: 'Tytuł',
                                     description: 'Tytuł',
@@ -312,7 +322,6 @@ export default function DataGridMy() {
                             disableColumnMenu
                         />
                     )}
-
             </ThemeProvider>
             <AnnouncementDialog
                 isMy={true}

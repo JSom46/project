@@ -8,6 +8,8 @@ import { Snackbar, Alert } from '@mui/material';
 
 import MapIcon from '@mui/icons-material/Map';
 import ChatIcon from '@mui/icons-material/Chat';
+import EditIcon from '@mui/icons-material/Edit';
+import ClearIcon from '@mui/icons-material/Clear';
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 
 //import { Redirect, Link } from 'react-router-dom/cjs/react-router-dom.min';
@@ -35,11 +37,11 @@ function ControlButtons(props) {
         return (
             <DialogActions>
                 <Button onClick={() => (props.setOpen(false))}>Wróć</Button>
-                <Button color='warning' onClick={() => (props.setOpenEditDialog(true))}>Edytuj</Button>
-                <Button color='error' onClick={() => (props.setOpenDeleteDialog(true))}>Usuń</Button>
+                <Button color='warning' onClick={() => (props.setOpenEditDialog(true))} endIcon={<EditIcon />}>Edytuj</Button>
+                <Button color='error' onClick={() => (props.setOpenDeleteDialog(true))} endIcon={<ClearIcon />}>Usuń</Button>
                 <Button onClick={() => (
                     window.location.href = "/dashboard?lat=" + props.announcementData.lat + "&lng=" + props.announcementData.lng
-                )}>Pokaż na mapie</Button>
+                )} endIcon={<MapIcon />}>Pokaż na mapie</Button>
             </DialogActions>
         )
     }
@@ -103,7 +105,7 @@ export default function AnnouncementDialog(props) {
                             <Grid container columns={16}>
                                 <Grid item md={10} xs={16}>
                                     <Typography variant="subtitle1">Zdjęcia</Typography>
-                                    {props.announcementData.images && props.announcementData.images.map((element) => (
+                                    {props.announcementData.images && props.announcementData.images[0] !== "" && props.announcementData.images.map((element) => (
                                         <img style={{ width: "100px", height: "100px", objectFit: "cover", margin: 4, cursor:"pointer" }} src={process.env.REACT_APP_SERVER_ROOT_URL + '/anons/photo?name=' + element}
                                             alt={props.announcementData.title} key={element} onClick={handleImageClick} />
                                     ))}

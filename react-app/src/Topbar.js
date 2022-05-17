@@ -146,7 +146,7 @@ export default function MenuAppBar(props) {
         <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'none', md: 'flex' } }}>
           <Button variant="text" sx={{ textTransform: 'none', color: "white" }} href='/' startIcon={<img src='./logo_white.png' width='48px' height='48px' alt='logo'/>}>
             <Typography variant="h6" noWrap component="div" sx={{ mr: 2, display: "flex" }}>
-              ZwierzoZnajdźca
+              Zwierzoznajdźca
             </Typography>
           </Button>
           <Tooltip title={sessionStorage.getItem('login') === null ? "Dodawanie ogłoszeń jest tylko dla zalogowanych użytkowników" : ""}>
