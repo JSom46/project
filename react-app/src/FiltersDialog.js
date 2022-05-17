@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Dialog, DialogTitle, Button, FormControl, InputLabel, Select, MenuItem, TextField } from '@mui/material';
+import { Dialog, DialogTitle, Button, FormControl, InputLabel, Select, MenuItem, TextField, Autocomplete } from '@mui/material';
 import { Stack } from '@mui/material';
 import Grid from '@mui/material/Grid';
 
@@ -220,7 +220,7 @@ export default function FiltersDialog(props) {
             }
         };
         fetchTypes();
-    }, [0]);
+    }, []);
 
     return (
         <div>
@@ -265,30 +265,49 @@ export default function FiltersDialog(props) {
                             )))}
                         </Select>
                     </FormControl>
+                    <div><br /></div>
                     <Stack justifyContent="space-evenly" direction="row" alignItems="center" spacing={2}>
                         <FormControl variant="standard" style={{ width: '100%' }}>
-                            <InputLabel id="coat">Owłosienie</InputLabel>
+                            {/* <InputLabel id="coat">Owłosienie</InputLabel>
                             <Select value={coat} labelId="coat" id="coat" onChange={handleCoatChange} disabled={coatsData.length === 0}>
                                 {coatsData.map((item) => (
                                     <MenuItem key={item} value={item}>{item}</MenuItem>
                                 ))}
-                            </Select>
+                            </Select> */}
+                            <Autocomplete
+                                disablePortal
+                                disabled={coatsData.length === 0}
+                                options={coatsData}
+                                renderInput={(params) => <TextField {...params} label="Owłosienie" onBlur={handleCoatChange} />}
+                            />
                         </FormControl>
                         <FormControl variant="standard" style={{ width: '100%' }}>
-                            <InputLabel id="colors">Umaszczenie</InputLabel>
+                            {/* <InputLabel id="colors">Umaszczenie</InputLabel>
                             <Select value={color} labelId="colors" id="colors" onChange={handleColorChange} disabled={colorsData.length === 0}>
                                 {colorsData.map((item) => (
                                     <MenuItem key={item} value={item}>{item}</MenuItem>
                                 ))}
-                            </Select>
+                            </Select> */}
+                            <Autocomplete
+                                disablePortal
+                                disabled={colorsData.length === 0}
+                                options={colorsData}
+                                renderInput={(params) => <TextField {...params} label="Umaszczenie" onBlur={handleColorChange} />}
+                            />
                         </FormControl>
                         <FormControl variant="standard" style={{ width: '100%' }}>
-                            <InputLabel id="breeds">Rasa</InputLabel>
+                            {/* <InputLabel id="breeds">Rasa</InputLabel>
                             <Select value={breed} labelId="breeds" id="breeds" onChange={handleBreedChange} disabled={breedsData.length === 0}>
                                 {breedsData.map((item) => (
                                     <MenuItem key={item} value={item}>{item}</MenuItem>
                                 ))}
-                            </Select>
+                            </Select> */}
+                            <Autocomplete
+                                disablePortal
+                                disabled={breedsData.length === 0}
+                                options={breedsData}
+                                renderInput={(params) => <TextField {...params} label="Rasa" onBlur={handleBreedChange} />}
+                            />
                         </FormControl>
                     </Stack>
                     <Stack direction="row" justifyContent="flex-end" spacing={2} sx={{ paddingTop: 2 }}>

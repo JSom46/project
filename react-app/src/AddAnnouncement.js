@@ -320,6 +320,7 @@ export default function AddAnnoucment(props) {
             <Autocomplete
               disablePortal
               options={coats}
+              disabled={coats.length === 0}
               renderInput={(params) => <TextField {...params} label="Owłosienie" onBlur={handleCoatChange}/>}
             />
           </FormControl>
@@ -333,6 +334,7 @@ export default function AddAnnoucment(props) {
             <Autocomplete
               disablePortal
               options={colors}
+              disabled={colors.length === 0}
               renderInput={(params) => <TextField {...params} label="Umaszczenie" onBlur={handleColorChange}/>}
             />
           </FormControl>
@@ -346,6 +348,7 @@ export default function AddAnnoucment(props) {
             <Autocomplete
               disablePortal
               options={breeds}
+              disabled={breeds.length === 0}
               // onChange={handleBreedChange}
               renderInput={(params) => <TextField {...params} label="Rasa" onBlur={handleBreedChange}/>}
             />
