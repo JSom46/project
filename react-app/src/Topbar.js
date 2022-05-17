@@ -144,7 +144,7 @@ export default function MenuAppBar(props) {
     <AppBar position="static" sx={{ maxHeight: '60px', flexGrow: 1 }}>
       <Toolbar>
         <Box sx={{ flexGrow: 1, display: { xs: 'none', sm: 'none', md: 'flex' } }}>
-          <Button variant="text" sx={{ textTransform: 'none', color: "white" }} href='/' startIcon={<img src='./logo_white.png' width='48px' height='48px' />}>
+          <Button variant="text" sx={{ textTransform: 'none', color: "white" }} href='/' startIcon={<img src='./logo_white.png' width='48px' height='48px' alt='logo'/>}>
             <Typography variant="h6" noWrap component="div" sx={{ mr: 2, display: "flex" }}>
               ZwierzoZnajdźca
             </Typography>
@@ -160,9 +160,9 @@ export default function MenuAppBar(props) {
             <span>
               <Button disabled={sessionStorage.getItem('login') === null} sx={{ my: 2, ml: 2, color: "white", display: "flex" }} onClick={() => window.location.href = "/chat"}
                 endIcon={
-                  <Badge badgeContent={messagesCount} color="secondary">
+                  //<Badge badgeContent={messagesCount} color="secondary">
                     <ChatIcon />
-                  </Badge>
+                 // </Badge>
                 }>
 
                 Czat
@@ -173,7 +173,7 @@ export default function MenuAppBar(props) {
         </Box>
         <Box sx={{ flexGrow: 1, display: { xs: 'flex', sm: 'flex', md: 'none' } }}>
           <IconButton href='/'>
-            <img src='./logo_white.png' width='48px' height='48px' />
+            <img src='./logo_white.png' width='48px' height='48px' alt='logo'/>
           </IconButton>
           <Tooltip title={sessionStorage.getItem('login') === null ? "Dodawanie ogłoszeń jest tylko dla zalogowanych użytkowników" : ""}>
             <span>
@@ -227,9 +227,9 @@ export default function MenuAppBar(props) {
               </MenuItem>
               <MenuItem onClick={function (event) { handleAccountClose(); window.location.href = "/account" }}>Moje konto</MenuItem>
               <MenuItem onClick={function (event) { handleAccountClose(); window.location.href = "/chat" }}>
-                <Badge badgeContent={messagesCount} color="secondary" variant="dot">
+                {/* <Badge badgeContent={messagesCount} color="secondary" variant="dot"> */}
                   Czat
-                </Badge>
+                {/* </Badge> */}
               </MenuItem>
               <Divider />
               <MenuItem onClick={function (event) { logout() }}>Wyloguj</MenuItem>

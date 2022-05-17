@@ -5,7 +5,7 @@ import FormControl from '@mui/material/FormControl';
 import FormGroup from '@mui/material/FormGroup';
 import { InputLabel, TextField } from '@mui/material';
 import { Button } from '@mui/material';
-import { Select, MenuItem } from '@mui/material';
+import { Select, MenuItem, Autocomplete } from '@mui/material';
 import Box from '@mui/material/Box';
 import ImageListItem from '@mui/material/ImageListItem';
 import Tooltip from '@mui/material/Tooltip';
@@ -214,13 +214,13 @@ export default function AddAnnoucment(props) {
     }
     if (lat === null || lat === undefined || isNaN(lat) || lat < -90 || lat > 90 ||
       lng === null || lng === undefined || isNaN(lng) || lng < -180 || lng > 180) {
-        setAlertData({
-          open: true,
-          variant: 'filled',
-          severity: 'error',
-          text: 'Wybierz lokację'
-        });
-        return false;
+      setAlertData({
+        open: true,
+        variant: 'filled',
+        severity: 'error',
+        text: 'Wybierz lokację'
+      });
+      return false;
     }
     return true;
   }
@@ -308,30 +308,47 @@ export default function AddAnnoucment(props) {
             ))}
           </Select>
         </FormControl>
+        <div><br /></div>
         <Stack justifyContent="space-evenly" direction="row" alignItems="center" spacing={2}>
           <FormControl variant="standard" style={{ width: '100%' }}>
-            <InputLabel id="coat">Owłosienie</InputLabel>
+            {/* <InputLabel id="coat">Owłosienie</InputLabel>
             <Select value={coat} labelId="coat" id="coat" onChange={handleCoatChange} disabled={coats.length === 0}>
               {coats && coats.map((item) => (
                 <MenuItem key={item} value={item}>{item}</MenuItem>
               ))}
-            </Select>
+            </Select> */}
+            <Autocomplete
+              disablePortal
+              options={coats}
+              renderInput={(params) => <TextField {...params} label="Owłosienie" onBlur={handleCoatChange}/>}
+            />
           </FormControl>
           <FormControl variant="standard" style={{ width: '100%' }}>
-            <InputLabel id="colors">Umaszczenie</InputLabel>
+            {/* <InputLabel id="colors">Umaszczenie</InputLabel>
             <Select value={color} labelId="colors" id="colors" onChange={handleColorChange} disabled={colors.length === 0}>
               {colors && colors.map((item) => (
                 <MenuItem key={item} value={item}>{item}</MenuItem>
               ))}
-            </Select>
+            </Select> */}
+            <Autocomplete
+              disablePortal
+              options={colors}
+              renderInput={(params) => <TextField {...params} label="Umaszczenie" onBlur={handleColorChange}/>}
+            />
           </FormControl>
           <FormControl variant="standard" style={{ width: '100%' }}>
-            <InputLabel id="breeds">Rasa</InputLabel>
+            {/* <InputLabel id="breeds">Rasa</InputLabel>
             <Select value={breed} labelId="breeds" id="breeds" onChange={handleBreedChange} disabled={breeds.length === 0}>
               {breeds && breeds.map((item) => (
                 <MenuItem key={item} value={item}>{item}</MenuItem>
               ))}
-            </Select>
+            </Select> */}
+            <Autocomplete
+              disablePortal
+              options={breeds}
+              // onChange={handleBreedChange}
+              renderInput={(params) => <TextField {...params} label="Rasa" onBlur={handleBreedChange}/>}
+            />
           </FormControl>
         </Stack>
         <div><br /></div>
