@@ -156,6 +156,9 @@ export default function FiltersDialog(props) {
 
     function clearType() {
         setType('');
+        setCoatsData([]);
+        setColorsData([]);
+        setBreedsData([]);
     }
 
     function clearCoat() {
@@ -287,7 +290,8 @@ export default function FiltersDialog(props) {
                             <Autocomplete
 
                                 disabled={coatsData.length === 0}
-                                options={coatsData}
+                                options={(coatsData !== '' && coatsData.length > 0) ? coatsData : []}
+                                value={coat ? coat : null}
                                 renderInput={(params) => <TextField {...params} label="Owłosienie" onBlur={handleCoatChange} />}
                             />
                         </FormControl>
@@ -301,7 +305,8 @@ export default function FiltersDialog(props) {
                             <Autocomplete
 
                                 disabled={colorsData.length === 0}
-                                options={colorsData}
+                                options={(colorsData !== '' && colorsData.length > 0) ? colorsData : []}
+                                value={color ? color : null}
                                 renderInput={(params) => <TextField {...params} label="Umaszczenie" onBlur={handleColorChange} />}
                             />
                         </FormControl>
@@ -315,7 +320,8 @@ export default function FiltersDialog(props) {
                             <Autocomplete
 
                                 disabled={breedsData.length === 0}
-                                options={breedsData}
+                                options={(breedsData !== '' && breedsData.length > 0) ? breedsData : []}
+                                value={breed ? breed : null}
                                 renderInput={(params) => <TextField {...params} label="Rasa" onBlur={handleBreedChange} />}
                             />
                         </FormControl>
