@@ -112,8 +112,8 @@ const styles = StyleSheet.create({
   },
   container2: {
     marginTop: 5,
-    borderWidth: 4,
-    borderRadius: 4,
+    borderWidth: 2,
+    borderRadius: 2,
     width: 365,
     height: 265,
   },

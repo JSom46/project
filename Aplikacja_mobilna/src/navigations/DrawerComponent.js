@@ -41,7 +41,6 @@ const DrawerComponent = ({ navigation, route }) => {
   const [newMessages, setNewMessages] = useState();
   const { userData, setUserData } = React.useContext(userDataContext);
 
-
   React.useEffect(() => {
     const getNewMessages = () => {
       const url = "http://" + serwer + "/anons/messages";
@@ -50,7 +49,7 @@ const DrawerComponent = ({ navigation, route }) => {
         .then((response) => {
           const result = response.data;
           if (response.status == "200") {
-            console.log("nowe wiadomosci: ",result.count);
+            console.log("nowe wiadomosci: ", result.count);
             setNewMessages(result.count);
             // response.json().then(data => {
             //   console.log("nowe wiadomosci: ",data.count);
@@ -60,13 +59,13 @@ const DrawerComponent = ({ navigation, route }) => {
         .catch((error) => {
           console.log(error);
         });
-      };
-      if(userData.user_id != "guestId"){
-        getNewMessages();
-        console.log("Pobrano liczbe nowych wiadomosci na czatach");
-      }
-  },[])
-////////////
+    };
+    if (userData.user_id != "guestId") {
+      getNewMessages();
+      console.log("Pobrano liczbe nowych wiadomosci na czatach");
+    }
+  }, []);
+  ////////////
   const handleLogout = (credentials) => {
     console.log(credentials);
     const url = "http://" + serwer + "/auth/logout";
@@ -87,7 +86,7 @@ const DrawerComponent = ({ navigation, route }) => {
       .catch((error) => {
         console.log(error.JSON());
       });
-    };
+  };
 
   const handleLoggedIn = (credentials) => {
     const url = "http://" + serwer + "/auth/loggedin";
@@ -116,8 +115,11 @@ const DrawerComponent = ({ navigation, route }) => {
         return (
           <DrawerContentScrollView {...props}>
             <View>
-              <Image style={drawerLogo} source={require('../../assets/logo_transparent.png')}/>
-              <Text style={drawerAppName}>ZwierzoZnajdźca</Text>
+              <Image
+                style={drawerLogo}
+                source={require("../../assets/logo_transparent.png")}
+              />
+              <Text style={drawerAppName}>Zwierzoznajdźca</Text>
               <DrawerItemList {...props} />
             </View>
 

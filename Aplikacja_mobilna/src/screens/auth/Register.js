@@ -66,7 +66,7 @@ const Register = ({ navigation }) => {
       <StatusBar style="dark" />
       <InnerContainer>
         <Logo source={require("./../../../assets/logomk2.png")} />
-        <PageTitle>ZwierzoZnajdźca</PageTitle>
+        <PageTitle>Zwierzoznajdźca</PageTitle>
         <SubTitle>Rejestracja</SubTitle>
 
         <Formik

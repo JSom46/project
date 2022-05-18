@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { SafeAreaView, View, FlatList } from "react-native";
+import { SafeAreaView, View, FlatList, Text } from "react-native";
 import {
   stylesHome,
   stylesAnnouncements,
@@ -46,7 +46,7 @@ const NotificationList = ({ navigation, route }) => {
 
   const Notification = ({ image, lat, lng, create_date }) => (
     <View style={stylesNotificationList.NotificationListItem}>
-      <SubTitle>{create_date}</SubTitle>
+      <SubTitle notification={true}>{create_date}</SubTitle>
       <NotificationScreen lat={lat} lng={lng} image={image} />
     </View>
   );
@@ -65,8 +65,7 @@ const NotificationList = ({ navigation, route }) => {
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
-        <ExtraView></ExtraView>
-        <SubTitle>Powiadomienia</SubTitle>
+        <SubTitle notificationTitle={true}>Powiadomienia</SubTitle>
         {isLoading ? (
           <SplashScreen />
         ) : notificationsData != "" ? (
@@ -78,13 +77,11 @@ const NotificationList = ({ navigation, route }) => {
             />
           </SafeAreaView>
         ) : (
-          <SafeAreaView style={{ flex: 1 }}>
-            <View style={{ justifyContent: "center", alignItems: "center" }}>
-              <StyledInputLabel announce={true}>
-                Brak notyfikacji
-              </StyledInputLabel>
-            </View>
-          </SafeAreaView>
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <Text style={{ fontSize: 20 }}>Brak notyfikacji</Text>
+          </View>
         )}
       </View>
     </View>

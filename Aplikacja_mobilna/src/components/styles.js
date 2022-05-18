@@ -122,6 +122,21 @@ export const SubTitle = styled.Text`
   letter-spacing: 1px;
   font-weight: bold;
   color: ${tetriary};
+  ${(props) =>
+    props.notification == true &&
+    `
+    font-size: 16px;
+    margin-bottom: 10px;
+`}
+  ${(props) =>
+    props.notificationTitle == true &&
+    `
+    font-weight: normal;
+  font-size: 32px;
+  text-align: center;
+  color: ${black};
+  margin-bottom: 4px;
+`}
 `;
 
 export const StyledFormArea = styled.View`
@@ -150,6 +165,7 @@ export const StyledTextInputAdd = styled.TextInput`
   ${(props) =>
     props.isDescription == true &&
     `
+    
     textAlign: left;
   height: 160px;
   editable,
@@ -384,6 +400,15 @@ export const ButtonView = styled.View`
     justify-content: center;
     flex-direction: row;
     align-items: center;
+  `}
+  ${(props) =>
+    props.filter == true &&
+    `
+    width: 350px;
+    justify-content: space-evenly;
+    flex-direction: row;
+
+
   `}
 `;
 
