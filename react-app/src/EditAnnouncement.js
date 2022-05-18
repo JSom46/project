@@ -359,7 +359,8 @@ export default function EditAnnoucment(props) {
                             <Autocomplete
                                 disablePortal
                                 disabled={typesData.coats.length === 0}
-                                options={typesData.coats}
+                                options={(typesData.coats !== '' && typesData.coats.length > 0) ? typesData.coats : []}
+                                value={coat}
                                 renderInput={(params) => <TextField {...params} label="Owłosienie" onBlur={handleCoatChange} />}
                             />
                         </FormControl>
@@ -376,7 +377,8 @@ export default function EditAnnoucment(props) {
                             <Autocomplete
                                 disablePortal
                                 disabled={typesData.colors.length === 0}
-                                options={typesData.colors}
+                                options={(typesData.colors !== '' && typesData.colors.length > 0) ? typesData.colors : []}
+                                value={color}
                                 renderInput={(params) => <TextField {...params} label="Umaszczenie" onBlur={handleColorChange} />}
                             />
                         </FormControl>
@@ -393,7 +395,8 @@ export default function EditAnnoucment(props) {
                             <Autocomplete
                                 disablePortal
                                 disabled={typesData.breeds.length === 0}
-                                options={typesData.breeds}
+                                options={(typesData.breeds !== '' && typesData.breeds.length > 0) ? typesData.breeds : []}
+                                value={breed}
                                 renderInput={(params) => <TextField {...params} label="Rasa" onBlur={handleBreedChange} />}
                             />
                         </FormControl>

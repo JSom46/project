@@ -36,7 +36,7 @@ const columns = [
     flex: 0.2,
     editable: false,
     sortable: false,
-    renderCell: (params) => (params.value !== process.env.REACT_APP_SERVER_ROOT_URL + "/anons/photo?name=" ? <img src={params.value} style={{ width: "50px", height: "50px", objectFit: "cover"}}/> : ""), // renderCell will render the component
+    renderCell: (params) => (params.value !== process.env.REACT_APP_SERVER_ROOT_URL + "/anons/photo?name=" ? <img src={params.value} alt="" style={{ width: "50px", height: "50px", objectFit: "cover"}}/> : ""), // renderCell will render the component
   },
   {
     field: 'title',

@@ -102,6 +102,10 @@ export default function Dashboard(props) {
       //apply filters
       let params = 0;
       //console.log(filters);
+      if (filters.anonTitle !== '') {
+        url += addParam("title=" + filters.anonTitle, params);
+        params++;
+      }
       if (filters.category !== -1) {
         url += addParam("category=" + filters.category, params);
         params++;

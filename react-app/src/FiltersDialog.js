@@ -59,6 +59,8 @@ export default function FiltersDialog(props) {
     const [advancedOpen, setAdvancedOpen] = useState(false);
     const [locationOpen, setLocationOpen] = useState(false);
 
+    const [applyFilters, setApplyFilters] = useState(0);
+
     /*
     category
     title
@@ -195,6 +197,7 @@ export default function FiltersDialog(props) {
         //clearRad();
 
         //handleSubmit();
+        setApplyFilters(applyFilters + 1);
     }
 
     useEffect(() => {
@@ -222,6 +225,12 @@ export default function FiltersDialog(props) {
         };
         fetchTypes();
     }, []);
+
+    useEffect(() => {
+        if (applyFilters > 0) {
+            handleSubmit();
+        }        
+    }, [applyFilters]);
 
     return (
         <div>
