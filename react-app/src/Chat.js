@@ -107,6 +107,7 @@ export default function Chat(props) {
                 if (createNewChat !== undefined && createNewChat !== null) {
                     sessionStorage.removeItem('anonsId');
                     socket.emit('new-chat', createNewChat);
+                    setCreateNewChat(null);
                 }
                 socket.on("new-chat-response", (chat_id, message) => {
                     // console.log(chat_id);
@@ -128,7 +129,7 @@ export default function Chat(props) {
                     }
                 });
                 socket.on("user-chats", (count, userChats) => {
-                    // console.log(userChats);
+                    console.log(userChats);
                     setUserChats(userChats);
                 });
                 socket.on("chat-messages", (count, chatMsg) => {
@@ -272,8 +273,8 @@ export default function Chat(props) {
     }
     const handleChatDelete = (chat_id) => {
         if (socket !== null) {
-            // socket.emit("leave-chat", chatId);
-            // socket.emit("delete-chat", chatDeleteId);
+            socket.emit("leave-chat", chat_id);
+            socket.emit("delete-chat", chat_id);
             let index = userChats.findIndex((item => item.chat_id === chat_id));
             console.log(index);
             userChats.splice(index, 1);
